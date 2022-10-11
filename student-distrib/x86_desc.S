@@ -86,6 +86,11 @@ gdt_bottom:
 
     .align 16
     .word 0     # Padding (added) 
+
+gdt_desc:           # (added)
+    .word gdt_bottom - gdt - 1
+    .long gdt
+    
 ldt:
     .rept 4
     .quad 0
@@ -107,7 +112,3 @@ _idt:
     .endr
 
 idt_bottom:
-
-gdt_desc:           # (added)
-    .word gdt_bottom - gdt - 1
-    .long gdt
