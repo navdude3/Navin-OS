@@ -22,6 +22,11 @@
 /* Number of vectors in the interrupt descriptor table (IDT) */
 #define NUM_VEC     256
 
+/* Number of entries in page directory */
+#define NUM_PGE     1024
+/* Number of entries in page table */
+#define NUM_PTE     1024
+
 #ifndef ASM
 
 /* This structure is used to load descriptor base registers
@@ -124,6 +129,8 @@ extern uint32_t tss_size;
 extern seg_desc_t tss_desc_ptr;
 extern tss_t tss;
 
+
+
 /* Sets runtime-settable parameters in the GDT entry for the LDT */
 #define SET_LDT_PARAMS(str, addr, lim)                          \
 do {                                                            \
@@ -166,6 +173,10 @@ typedef union idt_desc_t {
 extern idt_desc_t idt[NUM_VEC];
 /* The descriptor used to load the IDTR */
 extern x86_desc_t idt_desc_ptr;
+
+
+/* Paging descriptor */
+extern x86_desc_t pd_desc; // PDBR
 
 /* Sets runtime parameters for an IDT entry */
 #define SET_IDT_ENTRY(str, handler)                              \

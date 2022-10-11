@@ -11,6 +11,7 @@
 .globl tss, tss_desc_ptr, ldt, ldt_desc_ptr
 .globl gdt_ptr
 .globl idt_desc_ptr, idt
+.globl cr3_desc
 
 .align 4
 
@@ -112,3 +113,9 @@ _idt:
     .endr
 
 idt_bottom:
+
+.align 4
+    
+cr3_desc:
+    .word 0
+    
