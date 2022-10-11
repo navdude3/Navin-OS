@@ -85,6 +85,7 @@ ldt_desc_ptr:
 gdt_bottom:
 
     .align 16
+    .word 0     # Padding (added) 
 ldt:
     .rept 4
     .quad 0
@@ -92,7 +93,7 @@ ldt:
 ldt_bottom:
 
 .align 4
-    .word 0 # Padding
+    .word 0     # Padding
 idt_desc_ptr:
     .word idt_bottom - idt - 1
     .long idt
@@ -106,3 +107,7 @@ _idt:
     .endr
 
 idt_bottom:
+
+gdt_desc:           # (added)
+    .word gdt_bottom - gdt - 1
+    .long gdt
