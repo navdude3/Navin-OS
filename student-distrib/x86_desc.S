@@ -12,6 +12,8 @@
 .globl gdt_ptr
 .globl idt_desc_ptr, idt
 .globl cr3_desc
+.globl p_dir
+.globl first_4_pte
 
 .align 4
 
@@ -115,7 +117,22 @@ _idt:
 idt_bottom:
 
 .align 4
-    
+
+p_dir:
+    .word 0 # TODO: define page table descriptor entry for 0-4mb
+    .word 0x00400183 # Kernel page entry for 4-8mb
+    .rept NUM_PGE - 2 # minus 2 cuz first two entries defined
+    .word 0 # initialize to zero which sets 0th bit to 0 (not present)
+    .endr
+
+  
+
+p_dir_bottom:
+
+.align 4
+    .word 0   # Padding
 cr3_desc:
-    .word 0
+    .word p_dir_bottom - p_dir -1
+    .word p_dir
+    
     
