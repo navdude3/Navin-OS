@@ -174,23 +174,41 @@ extern idt_desc_t idt[NUM_VEC];
 /* The descriptor used to load the IDTR */
 extern x86_desc_t idt_desc_ptr;
 
-typedf union pde_desc{
-    uint32_t pde_p : 1;
-    uint32_t pde_rw : 1;
-    uint32_t pde_us : 1;
-    uint32_t pde_pwt : 1;
-    uint32_t pde_pcd : 1;
-    uint32_t pde_a : 1;
-    uint32_t pde_d : 1;
-    uint32_t pde_ps : 1;
-    uint32_t pde_g : 1;
-    uint32_t pde_avail : 3;
-    uint32_t pde_pat : 1;
-    uint32_t pde_reserved : 9;
-    uint32_t pde_pba : 10;
+typedef struct pde_desc{
+    union{
+        struct{ // Page Entry (4mb)
+            uint32_t pde_p : 1;
+            uint32_t pde_rw : 1;
+            uint32_t pde_us : 1;
+            uint32_t pde_pwt : 1;
+            uint32_t pde_pcd : 1;
+            uint32_t pde_a : 1;
+            uint32_t pde_d : 1;
+            uint32_t pde_ps : 1;
+            uint32_t pde_g : 1;
+            uint32_t pde_avail : 3;
+            uint32_t pde_pat : 1;
+            uint32_t pde_reserved : 9;
+            uint32_t pde_pba : 10;
+        };
+        struct{ // Page Table Entry (4kb)
+            uint32_t pde_p : 1;
+            uint32_t pde_rw : 1;
+            uint32_t pde_us : 1;
+            uint32_t pde_pwt : 1;
+            uint32_t pde_pcd : 1;
+            uint32_t pde_a : 1;
+            uint32_t pde_d : 1;
+            uint32_t pde_ps : 1;
+            uint32_t pde_g : 1;
+            uint32_t pde_avail : 3;
+            uint32_t pde_ptba : 20;
+        };
+    }
+    
 } pde_desc_t;
 
-typedf struct pte_desc{
+typedef struct pte_desc{
     uint32_t pte_p : 1;
     uint32_t pte_rw : 1;
     uint32_t pte_us : 1;
