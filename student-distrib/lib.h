@@ -82,6 +82,17 @@ do {                                    \
     );                                  \
 } while (0)
 
+#define outb_p(data, port)              \
+do {                                    \
+    asm volatile ("outb %b1, (%w0)    \n\
+            PAUSE                     \n\
+            "
+            :                           \
+            : "d"(port), "a"(data)      \
+            : "memory", "cc"            \
+    );                                  \
+} while (0)
+
 /* Writes two bytes to two consecutive ports */
 #define outw(data, port)                \
 do {                                    \
