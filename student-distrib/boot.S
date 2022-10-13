@@ -25,13 +25,17 @@ _start:
 
 continue:
     # Load the GDT
-    lgdt gdt_desc
+    lgdt gdt_desc       # (added)
+
     # Load CS with the new descriptor value
     ljmp    $KERNEL_CS, $keep_going
 
 keep_going:
     # Set up ESP so we can have an initial stack
     movl    $0x800000, %esp
+
+    # Load the IDT (added)
+    lidt idt_desc_ptr
 
     # Set up the rest of the segment selector registers
     movw    $KERNEL_DS, %cx
