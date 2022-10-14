@@ -8,6 +8,13 @@ void divide_error(void){
     }
 }
 
+void RESERVED_1(void){
+    printf("reserved 1 hi");
+    while(1){
+        continue;
+    }
+}
+
 void nmi_int(void){
     printf("nmi error :(");
     while(1){
