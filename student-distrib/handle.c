@@ -128,4 +128,14 @@ void simd_floating_point_exception(void){
 
 void keyboard_link_handler(){
     int key = inb(0x60);
+    int i;
+    char output = 64;
+    for(i = 0; i < OPTION_SIZE; i++) {
+        if(key == scancode_pressed[i]) {
+            output = let_num[i];
+        }
+    }
+    if(output != 64) putc(output);
+    else return;
 }
+
