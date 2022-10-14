@@ -2,9 +2,11 @@
 #include "lib.h"
 
 void divide_error(void){
+    clear();
+    printf("\n\n\n\n\nd");
     printf("divide error :(");
     while(1){
-        continue;
+        
     }
 }
 
