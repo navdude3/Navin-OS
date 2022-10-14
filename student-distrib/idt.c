@@ -4,19 +4,42 @@ void idt_init(){
     int i;
     for(i = 0; i < 20; i++){
 
-        if(i == 1 || i == 15){
+        if(i == 15){
             idt[i].present = 0;
         }
         else{
             idt[i].present = 1;
+            idt[i].reserved4 = 0;
+            idt[i].reserved3 = 1;
+            idt[i].reserved2 = 1;
+            idt[i].reserved1 = 1;
+            idt[i].reserved0 = 0;
+            idt[i].size = 1;
+            idt[i].seg_selector = KERNEL_CS;
         }
     }
 
 
+
+// typedef union idt_desc_t {
+//     uint32_t val[2];
+//     struct {
+//         uint16_t offset_15_00;
+//         uint16_t seg_selector;
+//         uint8_t  reserved4;
+//         uint32_t reserved3 : 1;
+//         uint32_t reserved2 : 1;
+//         uint32_t reserved1 : 1;
+//         uint32_t size      : 1;
+//         uint32_t reserved0 : 1;
+//         uint32_t dpl       : 2;
+//         uint32_t present   : 1;
+//         uint16_t offset_31_16;
+
     //x21 is keyboard port
     
     SET_IDT_ENTRY(idt[0], divide_error);
-    //SET_IDT_ENTRY(idt[1], RESERVED_1);
+    SET_IDT_ENTRY(idt[1], RESERVED_1);
     SET_IDT_ENTRY(idt[2], nmi_int);
     SET_IDT_ENTRY(idt[3], breakpoint);
     SET_IDT_ENTRY(idt[4], overflow);
