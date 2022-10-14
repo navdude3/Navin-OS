@@ -23,7 +23,7 @@
 #define NUM_VEC     256
 
 /* Number of entries in page directory */
-#define NUM_PGE     1024
+#define NUM_PDE     1024
 /* Number of entries in page table */
 #define NUM_PTE     1024
 
@@ -174,7 +174,7 @@ extern idt_desc_t idt[NUM_VEC];                //array of descriptors
 /* The descriptor used to load the IDTR */
 extern x86_desc_t idt_desc_ptr;
 
-typedef struct pde_desc{
+typedef struct pde_desc {
     union{
         struct{ // Page Entry (4mb)
             uint32_t pde_p : 1;
@@ -204,7 +204,7 @@ typedef struct pde_desc{
             uint32_t pde_avail : 3;
             uint32_t pde_ptba : 20;
         };
-    }
+    };
     
 } pde_desc_t;
 
@@ -222,8 +222,33 @@ typedef struct pte_desc{
     uint32_t pte_pba : 20;
 } pte_desc_t;
 
-/* Paging descriptor */
-extern x86_desc_t pd_desc; // PDBR
+/* Paging Related declarations */
+extern x86_desc_t cr3_desc; // PDBR
+extern x86_desc_t first_4_desc; // Page table descriptor for first 4Mb
+
+#define init_first_page_table(first_table_desc)  \
+do{ \
+    *(uint32_t *)(first_table_desc.addr + 0xB8000) |= 0x1;  \ 
+} while(0)
+
+#define init_page_directory(dir_desc, first_table_desc) \
+do{                                                     \
+    *(uint32_t *)(dir_desc.addr) = (first_table_desc.addr & 0xFFFFF000) | 0x003; \
+    *(uint32_t *) (dir_desc.addr + 4) = 0x00400083;  \
+}while(0)
+
+static inline void INIT_PAGING_REGISTERS(x86_desc_t dir_desc){
+asm volatile("                         \n\
+        movl $0x80000000, %%eax \n\
+        or %%eax, %%cr0         \n\
+        mov %0, %%cr3           \n\
+        "                        
+        :                        \
+        : "m"(dir_desc.addr)     \
+        : "memory"               \
+    );
+}
+
 
 /* Sets runtime parameters for an IDT entry */
 #define SET_IDT_ENTRY(str, handler)                              \

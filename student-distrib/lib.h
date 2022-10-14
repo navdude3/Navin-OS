@@ -72,6 +72,17 @@ static inline uint32_t inl(port) {
     return val;
 }
 
+static inline void outb_p(data, port){
+    asm volatile("                      \n\
+            outb %b1, (%w0)             \n\
+            PAUSE                       \n\
+            "
+            :                             \
+            : "d"(port), "a"(data)        \
+            : "memory", "cc"              \
+    );
+}
+
 /* Writes a byte to a port */
 #define outb(data, port)                \
 do {                                    \
@@ -82,16 +93,8 @@ do {                                    \
     );                                  \
 } while (0)
 
-#define outb_p(data, port)              \
-do {                                    \
-    asm volatile ("outb %b1, (%w0)    \n\
-            PAUSE                     \n\
-            "
-            :                           \
-            : "d"(port), "a"(data)      \
-            : "memory", "cc"            \
-    );                                  \
-} while (0)
+
+
 
 /* Writes two bytes to two consecutive ports */
 #define outw(data, port)                \
