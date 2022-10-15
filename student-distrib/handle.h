@@ -10,7 +10,7 @@ extern void bound_range();
 extern void invalid_opcode();
 extern void device_not_available();
 extern void double_fault();
-exter void segment_overrun();
+extern void segment_overrun();
 extern void invalid_tss();
 extern void seg_not_present(); 
 extern void seg_fault();
