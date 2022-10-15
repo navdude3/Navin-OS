@@ -40,4 +40,8 @@ void disable_irq(uint32_t irq_num);
 /* Send end-of-interrupt signal for the specified IRQ */
 void send_eoi(uint32_t irq_num);
 
+void set_all_irq();
+
+void disable_all_irq();
+
 #endif /* _I8259_H */

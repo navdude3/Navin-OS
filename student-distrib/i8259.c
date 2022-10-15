@@ -75,3 +75,18 @@ void send_eoi(uint32_t irq_num) {
  
 	outb((EOI | irq_num), SLAVE_8259_PORT);
 }
+
+
+void set_all_irq(){
+    int i;
+    for(i = 0; i < 8; i++){
+        enable_irq(i);
+    }
+}
+
+void disable_all_irq(){
+    int i;
+    for(i = 0; i < 8; i++){
+        disable_irq(i);
+    }
+}
