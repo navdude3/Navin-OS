@@ -15,10 +15,19 @@ void idt_init(){
             idt[i].reserved1 = 1;
             idt[i].reserved0 = 0;
             idt[i].size = 1;
+            idt[i].dpl = 0;
             idt[i].seg_selector = KERNEL_CS;
         }
     }
-
+    idt[33].present = 1;
+    idt[33].reserved4 = 
+    idt[33].reserved3 = 0;
+    idt[33].reserved2 = 
+    idt[33].reserved1 = 
+    idt[33].reserved0 = 
+    idt[33].size = 1;
+    idt[33].dpl = 0x03;
+    idt[33].seg_selector = KERNEL_CS;
 
 
 // typedef union idt_desc_t {

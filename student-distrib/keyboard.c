@@ -2,5 +2,5 @@
 
 
 void keyboard_init() {
-    enable_irq(2);
+    enable_irq(1);
 }
