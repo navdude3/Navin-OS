@@ -2,7 +2,16 @@
 #include "lib.h"
 
 void divide_error(void){
+    clear();
+    printf("\n\n\n\n\nd");
     printf("divide error :(");
+    while(1){
+        
+    }
+}
+
+void RESERVED_1(void){
+    printf("reserved 1 hi");
     while(1){
         continue;
     }
