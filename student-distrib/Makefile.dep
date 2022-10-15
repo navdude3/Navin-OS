@@ -1,0 +1,11 @@
+boot.o: boot.S multiboot.h x86_desc.h types.h
+init_helpers.o: init_helpers.S
+intr_link.o: intr_link.S
+x86_desc.o: x86_desc.S x86_desc.h types.h
+handle.o: handle.c handle.h lib.h types.h
+i8259.o: i8259.c i8259.h types.h lib.h
+idt.o: idt.c idt.h x86_desc.h types.h handle.h intr_link.h
+kernel.o: kernel.c multiboot.h types.h x86_desc.h lib.h i8259.h debug.h \
+  tests.h init_helpers.h
+lib.o: lib.c lib.h types.h
+tests.o: tests.c tests.h x86_desc.h types.h lib.h
