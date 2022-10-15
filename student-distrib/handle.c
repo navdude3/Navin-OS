@@ -3,132 +3,149 @@
 
 void divide_error(void){
     clear();
-    printf("\n\n\n\n\nd");
-    printf("divide error :(");
+    printf(" divide error :(");
     while(1){
         
     }
 }
 
 void RESERVED_1(void){
-    printf("reserved 1 hi");
+    clear();
+    printf(" reserved 1 :(");
     while(1){
         continue;
     }
 }
 
 void nmi_int(void){
-    printf("nmi error :(");
+    clear();
+    printf(" nmi error :(");
     while(1){
         continue;
     }
 }
 
 void breakpoint(void){
-    printf("breakpoint error:(");
+    clear();
+    printf(" breakpoint error:(");
     while(1){
         continue;
     }
 }
 
 void overflow(void){
-    printf("overflow error:(");
+    clear();
+    printf(" overflow error:(");
     while(1){
         continue;
     }
 }
 
 void bound_range(void){
-    printf("bound_range error :(");
+    clear();
+    printf(" bound_range error :(");
     while(1){
         continue;
     }
 }
 
 void invalid_opcode(void){
-    printf("invalid_opcode error :(");
+    clear();
+    printf(" invalid_opcode error :(");
     while(1){
         continue;
     }
 }
 
 void device_not_available(void){
-    printf("device_not_available error :(");
+    clear();
+    printf(" device_not_available error :(");
     while(1){
         continue;
     }
 }
 
 void double_fault(void){
-    printf("double_fault error :(");
+    clear();
+    printf(" double_fault error :(");
     while(1){
         continue;
     }
 }
 
 void segment_overrun(void){
-    printf("segment_overrun error :(");
+    clear();
+    printf(" segment_overrun error :(");
     while(1){
         continue;
     }
 }
 
 void invalid_tss(void){
-    printf("invalid_tss error :(");
+    clear();
+    printf(" invalid_tss error :(");
     while(1){
         continue;
     }
 }
 
 void seg_not_present(void){
-    printf("seg_not_present error :(");
+    clear();
+    printf(" seg_not_present error :(");
     while(1){
         continue;
     }
 }
 
 void seg_fault(void){
-    printf("seg_fault error :(");
+    clear();
+    printf(" seg_fault error :(");
     while(1){
         continue;
     }
 }
 
 void general_protection(void){
-    printf("general_protection error :(");
+    clear();
+    printf(" general_protection error :(");
     while(1){
         continue;
     }
 }
 void page_fault(void){
-    printf("page_fault error :(");
+    clear();
+    printf(" page_fault error :(");
     while(1){
         continue;
     }
 }
 
 void floating_point_error(void){
-    printf("floating_point_error error :(");
+    clear();
+    printf(" floating_point_error error :(");
     while(1){
         continue;
     }
 }
 
 void alignment_check(void){
-    printf("alignment_check error :(");
+    clear();
+    printf(" alignment_check error :(");
     while(1){
         continue;
     }
 }
 
 void machine_check(void){
-    printf("machine_check error :(");
+    clear();
+    printf(" machine_check error :(");
     while(1){
         continue;
     }
 }
 void simd_floating_point_exception(void){
-    printf("simd_floating_point_exception error :(");
+    clear();
+    printf(" simd_floating_point_exception error :(");
     while(1){
         continue;
     }

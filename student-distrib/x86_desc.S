@@ -11,6 +11,9 @@
 .globl tss, tss_desc_ptr, ldt, ldt_desc_ptr
 .globl gdt_ptr
 .globl idt_desc_ptr, idt
+.globl cr3_desc
+.globl first_4_desc
+.globl set_paging_params
 
 .align 4
 
@@ -112,3 +115,41 @@ _idt:
     .endr
 
 idt_bottom:
+/* Page Table for first 4 MB */
+
+
+
+/* Define page table for first 4 mb */
+.align 4096
+first_4_pt:
+    .rept 1024
+    .quad 0
+    .endr
+first_4_pt_bottom:
+
+.align 4
+    
+first_4_desc:
+    .word 0
+    .word first_4_pt_bottom - first_4_pt - 1
+    .long first_4_pt
+
+.align 4096
+
+p_dir:
+
+    .rept 1024
+    .quad 2 # initialize to 0x2 which sets write bit
+    .endr
+
+  
+
+p_dir_bottom:
+
+.align 4
+    
+cr3_desc:
+    .word 0   # Padding
+    .word p_dir_bottom - p_dir -1
+    .long p_dir
+

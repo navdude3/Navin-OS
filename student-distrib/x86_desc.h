@@ -22,6 +22,11 @@
 /* Number of vectors in the interrupt descriptor table (IDT) */
 #define NUM_VEC     256
 
+/* Number of entries in page directory */
+#define NUM_PDE     1024
+/* Number of entries in page table */
+#define NUM_PTE     1024
+
 #ifndef ASM
 
 /* This structure is used to load descriptor base registers
@@ -124,6 +129,8 @@ extern uint32_t tss_size;
 extern seg_desc_t tss_desc_ptr;
 extern tss_t tss;
 
+
+
 /* Sets runtime-settable parameters in the GDT entry for the LDT */
 #define SET_LDT_PARAMS(str, addr, lim)                          \
 do {                                                            \
@@ -166,6 +173,75 @@ typedef union idt_desc_t {
 extern idt_desc_t idt[NUM_VEC];                //array of descriptors
 /* The descriptor used to load the IDTR */
 extern x86_desc_t idt_desc_ptr;
+
+typedef struct pde_desc {
+    union{
+        struct{ // Page Entry (4mb)
+            uint32_t pde_p : 1;
+            uint32_t pde_rw : 1;
+            uint32_t pde_us : 1;
+            uint32_t pde_pwt : 1;
+            uint32_t pde_pcd : 1;
+            uint32_t pde_a : 1;
+            uint32_t pde_d : 1;
+            uint32_t pde_ps : 1;
+            uint32_t pde_g : 1;
+            uint32_t pde_avail : 3;
+            uint32_t pde_pat : 1;
+            uint32_t pde_reserved : 9;
+            uint32_t pde_pba : 10;
+        };
+        struct{ // Page Table Entry (4kb)
+            uint32_t pde_p : 1;
+            uint32_t pde_rw : 1;
+            uint32_t pde_us : 1;
+            uint32_t pde_pwt : 1;
+            uint32_t pde_pcd : 1;
+            uint32_t pde_a : 1;
+            uint32_t pde_d : 1;
+            uint32_t pde_ps : 1;
+            uint32_t pde_g : 1;
+            uint32_t pde_avail : 3;
+            uint32_t pde_ptba : 20;
+        };
+    };
+    
+} pde_desc_t;
+
+typedef struct pte_desc{
+    uint32_t pte_p : 1;
+    uint32_t pte_rw : 1;
+    uint32_t pte_us : 1;
+    uint32_t pte_pwt : 1;
+    uint32_t pte_pcd : 1;
+    uint32_t pte_a : 1;
+    uint32_t pte_d : 1;
+    uint32_t pte_pat : 1;
+    uint32_t pte_g : 1;
+    uint32_t pte_avail : 3;
+    uint32_t pte_pba : 20;
+} pte_desc_t;
+
+/* Paging Related declarations */
+extern x86_desc_t cr3_desc; // PDBR
+extern x86_desc_t first_4_desc; // Page table descriptor for first 4Mb
+
+#define init_first_page_table(first_table_desc)  \
+do{ \
+    unsigned i; \
+    for (i = 0; i < NUM_PTE; ++i) {\
+        *(uint32_t *)(first_table_desc.addr + (i << 2)) = (i<<12);\
+    }\
+    *(uint32_t *)(first_table_desc.addr + (0xB8 << 2)) = (0xB8000 |0x7);  \ 
+} while(0)
+
+#define init_page_directory(dir_desc, first_table_desc) \
+do{                                                     \
+    *(uint32_t *)(dir_desc.addr) = (first_table_desc.addr & 0xFFFFF000) | 0x007; \
+    *(uint32_t *) (dir_desc.addr + 4) = 0x00400087;  \
+}while(0)
+
+
 
 /* Sets runtime parameters for an IDT entry */
 #define SET_IDT_ENTRY(str, handler)                              \
