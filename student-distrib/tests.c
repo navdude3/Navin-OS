@@ -61,7 +61,7 @@ int invalid_address_test(){
 	TEST_HEADER;
 
 	int result = PASS;
-	uint32_t* ptr = (uint32_t * )0x500000;
+	uint32_t* ptr = (uint32_t * )0x900000;
 	uint32_t a = *ptr;
 	result = FAIL;
 	
