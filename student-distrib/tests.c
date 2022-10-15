@@ -41,6 +41,7 @@ int idt_test(){
 			result = FAIL;
 		}
 	}
+	clear();
 
 	return result;
 }
@@ -50,9 +51,25 @@ int div_0_test(){
 
 	int result = PASS;
 	int a = 12/0;
+	// assertion_failure();
 	result = FAIL;
-
+	
 	return result;
+}
+
+int page_fault_test(){
+	TEST_HEADER;
+
+	int result = PASS;
+	// int a = 12.0/0.0;
+	uint32_t* ptr = (uint32_t * )0x500000;
+	uint32_t a = *ptr;
+	++a;
+	// assertion_failure();
+	result = FAIL;
+	
+	return result;
+
 }
 
 // add more tests here
@@ -66,6 +83,7 @@ int div_0_test(){
 /* Test suite entry point */
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
-	TEST_OUTPUT("div_0_test", div_0_test());
+	// TEST_OUTPUT("div_0_test", div_0_test());
+	TEST_OUTPUT("page_fault_test", page_fault_test());
 	// launch your tests here
 }

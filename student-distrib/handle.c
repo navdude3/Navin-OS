@@ -3,8 +3,8 @@
 
 void divide_error(void){
     clear();
-    printf("\n\n\n\n\nd");
-    printf("divide error :(");
+    // printf("\n\n\n\n\nd");
+    printf(" divide error :(");
     while(1){
         
     }
@@ -101,6 +101,7 @@ void general_protection(void){
     }
 }
 void page_fault(void){
+    clear();
     printf("page_fault error :(");
     while(1){
         continue;
@@ -108,6 +109,7 @@ void page_fault(void){
 }
 
 void floating_point_error(void){
+    clear();
     printf("floating_point_error error :(");
     while(1){
         continue;
