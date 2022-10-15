@@ -5,7 +5,7 @@ set_paging_params:
     push %ebp
     movl %esp, %ebp
     mov %cr4, %eax
-    or $0x8, %eax
+    or $0x10, %eax
     mov %eax, %cr4
     mov 8(%ebp), %eax
     mov %eax, %cr3

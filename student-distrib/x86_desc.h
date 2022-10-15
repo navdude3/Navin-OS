@@ -228,26 +228,19 @@ extern x86_desc_t first_4_desc; // Page table descriptor for first 4Mb
 
 #define init_first_page_table(first_table_desc)  \
 do{ \
-    *(uint32_t *)(first_table_desc.addr + 0xB8000) |= 0x1;  \ 
+    unsigned i; \
+    for (i = 0; i < NUM_PTE; ++i) {\
+        *(uint32_t *)(first_table_desc.addr + (i << 2)) = (i<<12);\
+    }\
+    *(uint32_t *)(first_table_desc.addr + (0xB8 << 2)) = (0xB8000 |0x7);  \ 
 } while(0)
 
 #define init_page_directory(dir_desc, first_table_desc) \
 do{                                                     \
-    *(uint32_t *)(dir_desc.addr) = (first_table_desc.addr & 0xFFFFF000) | 0x003; \
-    *(uint32_t *) (dir_desc.addr + 4) = 0x00400083;  \
+    *(uint32_t *)(dir_desc.addr) = (first_table_desc.addr & 0xFFFFF000) | 0x007; \
+    *(uint32_t *) (dir_desc.addr + 4) = 0x00400087;  \
 }while(0)
 
-static inline void INIT_PAGING_REGISTERS(x86_desc_t dir_desc){
-asm volatile("                         \n\
-        movl $0x80000000, %%eax \n\
-        or %%eax, %%cr0         \n\
-        mov %0, %%cr3           \n\
-        "                        
-        :                        \
-        : "m"(dir_desc.addr)     \
-        : "memory"               \
-    );
-}
 
 
 /* Sets runtime parameters for an IDT entry */
