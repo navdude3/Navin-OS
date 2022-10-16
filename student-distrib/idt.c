@@ -19,15 +19,29 @@ void idt_init(){
             idt[i].seg_selector = KERNEL_CS;
         }
     }
-    idt[33].present = 1;
-    idt[33].reserved4 = 
-    idt[33].reserved3 = 0;
-    idt[33].reserved2 = 
-    idt[33].reserved1 = 
-    idt[33].reserved0 = 
-    idt[33].size = 1;
-    idt[33].dpl = 0x03;
-    idt[33].seg_selector = KERNEL_CS;
+    for(i = 20; i < 47; i++){
+            idt[i].present = 1;
+            idt[i].reserved4 = 0;
+            idt[i].reserved3 = 0;
+            idt[i].reserved2 = 1;
+            idt[i].reserved1 = 1;
+            idt[i].reserved0 = 0;
+            idt[i].size = 1;
+            idt[i].seg_selector = KERNEL_CS;
+            idt[i].dpl = 0;
+    }
+    for(i = 47; i < NUM_VEC; i++){
+        idt[i].present = 1;
+        idt[i].reserved4 = 0;
+        idt[i].reserved3 = 0;
+        idt[i].reserved2 = 1;
+        idt[i].reserved1 = 1;
+        idt[i].reserved0 = 0;
+        idt[i].size = 1;
+        idt[i].seg_selector = KERNEL_CS;
+        idt[i].dpl = 0;     
+    }
+
 
 
 // typedef union idt_desc_t {
