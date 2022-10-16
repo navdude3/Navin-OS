@@ -50,7 +50,7 @@ int div_0_test(){
 	TEST_HEADER;
 
 	int result = PASS;
-	int a = 12/0;
+	//int a = 12/0;
 	// assertion_failure();
 	result = FAIL;
 	
@@ -63,6 +63,7 @@ int invalid_address_test(){
 	int result = PASS;
 	uint32_t* ptr = (uint32_t * )0x900000;
 	uint32_t a = *ptr;
+	a = a+1;
 	result = FAIL;
 	
 	return result;
@@ -75,6 +76,7 @@ int deref_null_test(){
 	int result = PASS;
 	uint32_t* ptr = (uint32_t * )0x0;
 	uint32_t a = *ptr;
+	a = a+1;
 	result = FAIL;
 	
 	return result;
