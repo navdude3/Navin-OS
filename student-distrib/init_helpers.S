@@ -14,3 +14,6 @@ set_paging_params:
     mov %eax, %cr0
     leave
     ret
+
+
+    

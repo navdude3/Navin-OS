@@ -9,6 +9,8 @@
 #include "debug.h"
 #include "tests.h"
 #include "init_helpers.h"
+#include "idt.h"
+#include "keyboard.h"
 
 #define RUN_TESTS
 
