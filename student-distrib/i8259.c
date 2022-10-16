@@ -11,28 +11,37 @@ uint8_t slave_mask = 0xFF;  /* IRQs 8-15 */
 
 /* Initialize the 8259 PIC */
 void i8259_init(void) {
-    unsigned char a, b;
 
-    a = inb(MASTER_8259_DATA);
-    b = inb(SLAVE_8259_DATA);
+    int a;
 
     outb(master_mask, MASTER_8259_DATA);
     outb(slave_mask, SLAVE_8259_DATA);
 
-    outb_p(ICW1, MASTER_8259_PORT);
-    outb_p(ICW2_MASTER, MASTER_8259_DATA);
-    outb_p(ICW3_MASTER, MASTER_8259_DATA);
-    outb_p(ICW4, MASTER_8259_DATA);
+    outb(ICW1, MASTER_8259_PORT);
+    outb(ICW1, SLAVE_8259_PORT);
 
-    outb_p(ICW1, SLAVE_8259_PORT);
-    outb_p(ICW2_SLAVE, SLAVE_8259_DATA);
-    outb_p(ICW3_SLAVE, SLAVE_8259_DATA);
-    outb_p(ICW4, SLAVE_8259_DATA);
+    outb(ICW2_MASTER, MASTER_8259_DATA);
+    outb(ICW2_SLAVE, SLAVE_8259_DATA);
+
+
+    outb(ICW3_MASTER, MASTER_8259_DATA);
+    outb(ICW3_SLAVE, SLAVE_8259_DATA);
+
+    outb(ICW4, MASTER_8259_DATA);
+    outb(ICW4, SLAVE_8259_DATA);
+
+
+    outb(master_mask, MASTER_8259_DATA);
+    outb(slave_mask, SLAVE_8259_DATA);
+    // d = inb(SLAVE_8259_DATA);
 
     // udelay(100);
+    // clear();
+    // printf("%x", c);
+    // clear();
 
-    outb(a, MASTER_8259_DATA);
-    outb(b, SLAVE_8259_DATA);
+    //outb(a, MASTER_8259_DATA);
+    //outb(b, SLAVE_8259_DATA);
 }
 
 /* Enable (unmask) the specified IRQ */
@@ -48,6 +57,8 @@ void enable_irq(uint32_t irq_num) {
     }
 
     value = inb(port) & ~(1 << irq_num);
+    clear();
+   // printf("%x", value);
     outb(value, port);
 }
 
