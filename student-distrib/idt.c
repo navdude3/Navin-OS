@@ -41,6 +41,8 @@ void idt_init(){
         idt[i].seg_selector = KERNEL_CS;
         idt[i].dpl = 0;     
     }
+    idt[33].reserved3 = 1;
+
 
 
 
