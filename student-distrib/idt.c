@@ -16,7 +16,31 @@ void idt_init(){
             idt[i].reserved0 = 0;
             idt[i].size = 1;
             idt[i].seg_selector = KERNEL_CS;
+            idt[i].dpl = 0;
         }
+    }
+
+    for(i = 20; i < 47; i++){
+            idt[i].present = 1;
+            idt[i].reserved4 = 0;
+            idt[i].reserved3 = 0;
+            idt[i].reserved2 = 1;
+            idt[i].reserved1 = 1;
+            idt[i].reserved0 = 0;
+            idt[i].size = 1;
+            idt[i].seg_selector = KERNEL_CS;
+            idt[i].dpl = 0;
+    }
+    for(i = 47; i < NUM_VEC; i++){
+        idt[i].present = 1;
+        idt[i].reserved4 = 0;
+        idt[i].reserved3 = 0;
+        idt[i].reserved2 = 1;
+        idt[i].reserved1 = 1;
+        idt[i].reserved0 = 0;
+        idt[i].size = 1;
+        idt[i].seg_selector = KERNEL_CS;
+        idt[i].dpl = 0;     
     }
 
 

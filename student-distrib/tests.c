@@ -73,7 +73,7 @@ int deref_null_test(){
 	TEST_HEADER;
 
 	int result = PASS;
-	uint32_t* ptr = (uint32_t * )0x0;
+	uint32_t* ptr = NULL;
 	uint32_t a = *ptr;
 	result = FAIL;
 	
@@ -93,6 +93,7 @@ int deref_null_test(){
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	// TEST_OUTPUT("div_0_test", div_0_test());
-	TEST_OUTPUT("invalid_address_test", invalid_address_test());
+	//TEST_OUTPUT("invalid_address_test", invalid_address_test());
+	//TEST_OUTPUT("deref_null", deref_null_test());
 	// launch your tests here
 }
