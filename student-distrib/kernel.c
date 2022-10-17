@@ -9,6 +9,8 @@
 #include "debug.h"
 #include "tests.h"
 #include "init_helpers.h"
+#include "idt.h"
+#include "keyboard.h"
 
 #define RUN_TESTS
 
@@ -142,6 +144,8 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Init the PIC */
     i8259_init();
 
+    keyboard_init();
+
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
     /* Initialize Paging */
@@ -150,12 +154,15 @@ void entry(unsigned long magic, unsigned long addr) {
     set_paging_params(cr3_desc.addr);
     
 
+    sti();
+
+    
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
-    printf("Enabling Interrupts\n");
-    sti();
+    /*printf("Enabling Interrupts\n");
+    sti();*/
 
 #ifdef RUN_TESTS
     /* Run tests */
@@ -164,6 +171,5 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Execute the first program ("shell") ... */
 
     /* Spin (nicely, so we don't chew up cycles) */
-    clear();
     asm volatile (".1: hlt; jmp .1;");
 }

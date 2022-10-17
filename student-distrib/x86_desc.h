@@ -232,7 +232,7 @@ do{ \
     for (i = 0; i < NUM_PTE; ++i) {\
         *(uint32_t *)(first_table_desc.addr + (i << 2)) = (i<<12);\
     }\
-    *(uint32_t *)(first_table_desc.addr + (0xB8 << 2)) = (0xB8000 |0x7);  \ 
+    *(uint32_t *)(first_table_desc.addr + (0xB8 << 2)) = (0xB8000 |0x7);\
 } while(0)
 
 #define init_page_directory(dir_desc, first_table_desc) \

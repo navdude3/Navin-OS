@@ -15,11 +15,10 @@ void idt_init(){
             idt[i].reserved1 = 1;
             idt[i].reserved0 = 0;
             idt[i].size = 1;
-            idt[i].seg_selector = KERNEL_CS;
             idt[i].dpl = 0;
+            idt[i].seg_selector = KERNEL_CS;
         }
     }
-
     for(i = 20; i < 47; i++){
             idt[i].present = 1;
             idt[i].reserved4 = 0;
@@ -42,6 +41,8 @@ void idt_init(){
         idt[i].seg_selector = KERNEL_CS;
         idt[i].dpl = 0;     
     }
+    idt[33].reserved3 = 1;
+
 
 
 
