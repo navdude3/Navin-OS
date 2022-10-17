@@ -27,15 +27,3 @@ Difficulty finding bug (time and changes made): flag in rtc handler not set prop
 Type of Error: semantic
 Symptom that drew attention: printf causing a page fault
 Difficulty finding bug (time and changes made): simply got rid of it, one line change took about 10 minutes
-
-Type of Error:
-Symptom that drew attention: 
-Difficulty finding bug (time and changes made):
-
-Type of Error:
-Symptom that drew attention: 
-Difficulty finding bug (time and changes made):
-
-Type of Error:
-Symptom that drew attention: 
-Difficulty finding bug (time and changes made):
