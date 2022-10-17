@@ -10,5 +10,8 @@
 /* RTC is on IRQ 8 -> IRQ 0 on secondary PIC */
 #define RTC_IRQ     8
 
+
+//used to measure tics since start of cycle
+volatile int rtc_count;
 /* Initializes the RTC */
 extern void rtc_init();

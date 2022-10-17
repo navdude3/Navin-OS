@@ -1,6 +1,7 @@
 #include "handle.h"
 #include "lib.h"
 #include "i8259.h"
+#include "rtc.h"
 
 //done
 
@@ -11,10 +12,7 @@ static char let_num [OPTION_SIZE] = {'0', '1', '2', '3', '4', '5', '6', '7', '8'
 static char scancode_pressed[OPTION_SIZE] = {0x0B, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x1E, 0x30, 0x2E, 0x20, 0x12, 0x21, 0x22, 0x23, 0x17, 0x24, 0x25, 0x26, 0x32, 0x31, 0x18, 0x19, 0x10, 0x13, 0x1F, 0x14, 0x16, 0x2F, 0x11, 0x2D, 0x15, 0x2C};
 
 
-//used as an alternating flag to show which value should be displayed next
-static int rtc_alt = 0;
-//used as a counter to 1024 for every rtc interrupt
-static int rtc_count = 0;
+
 
 
 /* 
@@ -362,16 +360,18 @@ void keyboard_link_handler(){
 */
 void rtc_link_handler(){
     cli();
-
+    //used as an alternating flag to show which value should be displayed next
+    static int rtc_alt = 0;
+    // test_interrupts();
     rtc_count = rtc_count + 1;              //count to static variable every interrupt call
-    if(rtc_count == 1024 && rtc_alt == 0){  //cond to print 1
+    if(rtc_count % 1024 == 0 && rtc_alt == 0){  //cond to print 1
         printf("1");
-        rtc_count = 0;
+        
         rtc_alt = 1;
     }
-    else if(rtc_count == 1024 && rtc_alt == 1){ //cond to print 2
+    else if(rtc_count % 1024 == 0 && rtc_alt == 1){ //cond to print 2
         printf("2");
-        rtc_count = 0;
+
         rtc_alt = 0;
     }
     

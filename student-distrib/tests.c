@@ -1,6 +1,8 @@
 #include "tests.h"
 #include "x86_desc.h"
 #include "lib.h"
+#include "rtc.h"
+#include "handle.h"
 
 #define PASS 1
 #define FAIL 0
@@ -34,14 +36,41 @@ int idt_test(){
 
 	int i;
 	int result = PASS;
-	for (i = 0; i < 10; ++i){
+	for (i = 0; i < 14; ++i){
 		if ((idt[i].offset_15_00 == NULL) && 
 			(idt[i].offset_31_16 == NULL)){
 			assertion_failure();
 			result = FAIL;
 		}
 	}
-	clear();
+	for (i = 16; i < 20; ++i){
+		if ((idt[i].offset_15_00 == NULL) && 
+			(idt[i].offset_31_16 == NULL)){
+			assertion_failure();
+			result = FAIL;
+		}
+	}
+	// Keyboard test
+	if ((idt[33].offset_15_00 == NULL) && 
+			(idt[33].offset_31_16 == NULL)){
+			assertion_failure();
+			result = FAIL;
+	}
+
+	// RTC
+	if ((idt[40].offset_15_00 == NULL) && 
+		(idt[40].offset_31_16 == NULL)){
+		assertion_failure();
+		result = FAIL;
+	}
+
+
+	// Check correct setting of divide zero handler
+	uint32_t idt_0_handler = (idt[0].offset_15_00) | (idt[0].offset_31_16 << 16);
+	if(idt_0_handler != (uint32_t) divide_error){
+		assertion_failure();
+		result = FAIL;
+	}
 
 	return result;
 }
@@ -103,6 +132,22 @@ int deref_null_test(){
 
 }
 
+int rtc_test(){
+	TEST_HEADER;
+
+	int result = PASS;
+	clear();
+	char* video_mem = (char *) 0xB8000;
+	while (rtc_count < 4096);
+	char check_char = video_mem[1 << 2];
+	if (check_char != '1' && check_char != '2'){ //as per alternating character loop in rtc handler
+		assertion_failure();
+		result = FAIL;
+	}
+	return result;
+	
+
+}
 // add more tests here
 
 /* Checkpoint 2 tests */
@@ -113,9 +158,10 @@ int deref_null_test(){
 
 /* Test suite entry point */
 void launch_tests(){
-	TEST_OUTPUT("idt_test", idt_test());
-	TEST_OUTPUT("div_0_test", div_0_test());
-	//TEST_OUTPUT("invalid_address_test", invalid_address_test());
-	//TEST_OUTPUT("deref null", deref_null_test());
+	// TEST_OUTPUT("idt_test", idt_test());
+	// TEST_OUTPUT("div_0_test", div_0_test());
+	// TEST_OUTPUT("invalid_address_test", invalid_address_test());
+	// TEST_OUTPUT("deref null", deref_null_test());
+	TEST_OUTPUT("rtc test", rtc_test());
 	// launch your tests here
 }
