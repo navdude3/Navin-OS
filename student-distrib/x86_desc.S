@@ -88,12 +88,13 @@ ldt_desc_ptr:
 gdt_bottom:
 
     .align 16
-    .word 0     # Padding (added) 
+    .word 0     # Padding 
 
-gdt_desc:           # (added)
-    .word gdt_bottom - gdt - 1
-    .long gdt
-    
+# Pointer that is loaded in boot.S
+gdt_desc:           
+    .word gdt_bottom - gdt - 1  # Contains the size of the GDT - 1
+    .long gdt                   # Stores beginning of GDT
+
 ldt:
     .rept 4
     .quad 0

@@ -1,13 +1,23 @@
 #include "idt.h"
+// DONE
 
+/* 
+ * init_idt
+ *   DESCRIPTION: initializes the entries of the IDT, sets the first 20 exceptions as trap gates, sets the handler address to the proper handler
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+*/
 void idt_init(){
     int i;
+    /* First 20 entries are the exceptions */
     for(i = 0; i < 20; i++){
 
         if(i == 15){
             idt[i].present = 0;
         }
         else{
+            /* Reserved set to 01110 to enable trap gate - INTEL pg 156 */
             idt[i].present = 1;
             idt[i].reserved4 = 0;
             idt[i].reserved3 = 1;
@@ -15,11 +25,12 @@ void idt_init(){
             idt[i].reserved1 = 1;
             idt[i].reserved0 = 0;
             idt[i].size = 1;
-            idt[i].dpl = 0;
-            idt[i].seg_selector = KERNEL_CS;
+            idt[i].dpl = 0;                     /* Kernel has descriptor level priviledge */
+            idt[i].seg_selector = KERNEL_CS;    /* Enables kernel code segment */
         }
     }
-    for(i = 20; i < 47; i++){
+    for(i = 20; i < NUM_VEC; i++){
+            /* Reserved set to 00110 to enable interrupt gate - INTEL pg 156 */
             idt[i].present = 1;
             idt[i].reserved4 = 0;
             idt[i].reserved3 = 0;
@@ -27,42 +38,15 @@ void idt_init(){
             idt[i].reserved1 = 1;
             idt[i].reserved0 = 0;
             idt[i].size = 1;
-            idt[i].seg_selector = KERNEL_CS;
-            idt[i].dpl = 0;
+            idt[i].seg_selector = KERNEL_CS;    /* Enables kernel code segment */
+            idt[i].dpl = 0;                     /* Kernel has descriptor level priviledge */
     }
-    for(i = 47; i < NUM_VEC; i++){
-        idt[i].present = 1;
-        idt[i].reserved4 = 0;
-        idt[i].reserved3 = 0;
-        idt[i].reserved2 = 1;
-        idt[i].reserved1 = 1;
-        idt[i].reserved0 = 0;
-        idt[i].size = 1;
-        idt[i].seg_selector = KERNEL_CS;
-        idt[i].dpl = 0;     
-    }
-    idt[33].reserved3 = 1;
+    
+    idt[33].reserved3 = 1;                      /* Enabling trap gate for keyboard */
 
-
-
-
-// typedef union idt_desc_t {
-//     uint32_t val[2];
-//     struct {
-//         uint16_t offset_15_00;
-//         uint16_t seg_selector;
-//         uint8_t  reserved4;
-//         uint32_t reserved3 : 1;
-//         uint32_t reserved2 : 1;
-//         uint32_t reserved1 : 1;
-//         uint32_t size      : 1;
-//         uint32_t reserved0 : 1;
-//         uint32_t dpl       : 2;
-//         uint32_t present   : 1;
-//         uint16_t offset_31_16;
 
     //x21 is keyboard port
-    
+    /* Setting the corresponding IDT entry with the appropriate exception */
     SET_IDT_ENTRY(idt[0], divide_error);
     SET_IDT_ENTRY(idt[1], RESERVED_1);
     SET_IDT_ENTRY(idt[2], nmi_int);
@@ -78,20 +62,15 @@ void idt_init(){
     SET_IDT_ENTRY(idt[12], seg_fault);
     SET_IDT_ENTRY(idt[13], general_protection);
     SET_IDT_ENTRY(idt[14], page_fault);
-    //SET_IDT_ENTRY(idt[15], RESERVED_15);
     SET_IDT_ENTRY(idt[16], floating_point_error);
     SET_IDT_ENTRY(idt[17], alignment_check);
     SET_IDT_ENTRY(idt[18], machine_check);
     SET_IDT_ENTRY(idt[19], simd_floating_point_exception);
 
 
-
+    /* Setting the corresponding IDT entry with the linkage for devices */
     SET_IDT_ENTRY(idt[33], keyboard_linkage);
     SET_IDT_ENTRY(idt[40], rtc_linkage);
-
-
-
-
     lidt(idt_desc_ptr);
 }
 
