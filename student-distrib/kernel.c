@@ -1,7 +1,7 @@
 /* kernel.c - the C part of the kernel
  * vim:ts=4 noexpandtab
  */
-
+// DONE
 #include "multiboot.h"
 #include "x86_desc.h"
 #include "lib.h"
@@ -11,6 +11,7 @@
 #include "init_helpers.h"
 #include "idt.h"
 #include "keyboard.h"
+#include "rtc.h"
 
 #define RUN_TESTS
 
@@ -139,30 +140,29 @@ void entry(unsigned long magic, unsigned long addr) {
         ltr(KERNEL_TSS);
     }
 
-    //clear();
+    /* Init the IDT */
     idt_init();
     /* Init the PIC */
     i8259_init();
-
+    /* Init the Keyboard */
     keyboard_init();
+    /* Init the RTC */
+    rtc_init();
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
-    /* Initialize Paging */
+
+    /* Init the Paging */
     init_first_page_table(first_4_desc);
     init_page_directory(cr3_desc, first_4_desc);
     set_paging_params(cr3_desc.addr);
-    
-
-    sti();
-
     
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
-    /*printf("Enabling Interrupts\n");
-    sti();*/
+    /*printf("Enabling Interrupts\n");*/
+    sti();
 
 #ifdef RUN_TESTS
     /* Run tests */

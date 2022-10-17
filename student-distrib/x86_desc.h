@@ -209,6 +209,7 @@ typedef struct pde_desc {
 } pde_desc_t;
 
 typedef struct pte_desc{
+    // Page Entry (4mb)
     uint32_t pte_p : 1;
     uint32_t pte_rw : 1;
     uint32_t pte_us : 1;

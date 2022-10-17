@@ -46,20 +46,33 @@ int idt_test(){
 	return result;
 }
 
+/* div_0_test
+ * 
+ * Checks if division by 0 causes division by 0 exception
+ * Inputs: None
+ * Outputs: PASS/FAIL
+ * Side Effects: None
+ */
 int div_0_test(){
 	TEST_HEADER;
-
 	int result = PASS;
-	//int a = 12/0;
-	// assertion_failure();
+	int a = 12/0;
+	a++;
 	result = FAIL;
 	
 	return result;
 }
 
+
+/* 
+ * invalid_address_test
+ *   DESCRIPTION: causes exception to test an address out of range
+ *   INPUTS: none
+ *   OUTPUTS: PASS/FAIL
+ *   RETURN VALUE: none
+*/
 int invalid_address_test(){
 	TEST_HEADER;
-
 	int result = PASS;
 	uint32_t* ptr = (uint32_t * )0x900000;
 	uint32_t a = *ptr;
@@ -70,6 +83,13 @@ int invalid_address_test(){
 
 }
 
+/* 
+ * deref_null_test
+ *   DESCRIPTION: causes exception to test dereferencing null
+ *   INPUTS: none
+ *   OUTPUTS: PASS/FAIL
+ *   RETURN VALUE: none
+*/
 int deref_null_test(){
 	TEST_HEADER;
 
@@ -94,7 +114,7 @@ int deref_null_test(){
 /* Test suite entry point */
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
-	// TEST_OUTPUT("div_0_test", div_0_test());
+	TEST_OUTPUT("div_0_test", div_0_test());
 	//TEST_OUTPUT("invalid_address_test", invalid_address_test());
 	//TEST_OUTPUT("deref null", deref_null_test());
 	// launch your tests here
