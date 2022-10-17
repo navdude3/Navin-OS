@@ -174,6 +174,7 @@ extern idt_desc_t idt[NUM_VEC];                //array of descriptors
 /* The descriptor used to load the IDTR */
 extern x86_desc_t idt_desc_ptr;
 
+/* Page directory entry descriptor*/
 typedef struct pde_desc {
     union{
         struct{ // Page Entry (4mb)
@@ -208,6 +209,7 @@ typedef struct pde_desc {
     
 } pde_desc_t;
 
+/* Page Table entry descriptor */
 typedef struct pte_desc{
     // Page Entry (4mb)
     uint32_t pte_p : 1;
@@ -227,6 +229,7 @@ typedef struct pte_desc{
 extern x86_desc_t cr3_desc; // PDBR
 extern x86_desc_t first_4_desc; // Page table descriptor for first 4Mb
 
+/* Initializes page table for 0-4mb. Sets video memory to present*/
 #define init_first_page_table(first_table_desc)  \
 do{ \
     unsigned i; \
@@ -236,6 +239,7 @@ do{ \
     *(uint32_t *)(first_table_desc.addr + (0xB8 << 2)) = (0xB8000 |0x7);\
 } while(0)
 
+/* Initializes page directory, only first two entries are defined and present for CP1.*/
 #define init_page_directory(dir_desc, first_table_desc) \
 do{                                                     \
     *(uint32_t *)(dir_desc.addr) = (first_table_desc.addr & 0xFFFFF000) | 0x007; \

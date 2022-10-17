@@ -132,6 +132,13 @@ int deref_null_test(){
 
 }
 
+/* 
+ * rtc_test
+ *   DESCRIPTION: checks if "12" alternating interrupt is working. MUST have it enabled in handler
+ *   INPUTS: none
+ *   OUTPUTS: PASS/FAIL
+ *   RETURN VALUE: none
+*/
 int rtc_test(){
 	TEST_HEADER;
 
@@ -148,7 +155,13 @@ int rtc_test(){
 	
 
 }
-
+/* 
+ * keyboard test
+ *   DESCRIPTION: receives test input from user to check for signal handling. Second line in screen must not be interfered with (e.g., by rtc "12" printing)
+ *   INPUTS: none
+ *   OUTPUTS: PASS/FAIL
+ *   RETURN VALUE: none
+*/
 int keyboard_test(){
 	TEST_HEADER;
 
