@@ -139,7 +139,7 @@ int rtc_test(){
 	clear();
 	char* video_mem = (char *) 0xB8000;
 	while (rtc_count < 4096);
-	char check_char = video_mem[1 << 2];
+	char check_char = video_mem[1 << 1];
 	if (check_char != '1' && check_char != '2'){ //as per alternating character loop in rtc handler
 		assertion_failure();
 		result = FAIL;
@@ -147,6 +147,26 @@ int rtc_test(){
 	return result;
 	
 
+}
+
+int keyboard_test(){
+	TEST_HEADER;
+
+	int result = PASS;
+	clear();
+	printf("Type the following within 5 seconds: asdfg\n");
+	char test_char [5] = {'a','s','d','f','g'};
+	char* video_mem = (char *) 0xB8000;
+	while(rtc_count < 5120);
+	int i;
+	for(i = 0; i < 5; ++i){
+		char check_char = video_mem[(80 + i) << 1];
+		if(check_char != test_char[i]){
+			assertion_failure();
+			result = FAIL;
+		}
+	}
+	return result;
 }
 // add more tests here
 
@@ -163,5 +183,6 @@ void launch_tests(){
 	// TEST_OUTPUT("invalid_address_test", invalid_address_test());
 	// TEST_OUTPUT("deref null", deref_null_test());
 	TEST_OUTPUT("rtc test", rtc_test());
+	// TEST_OUTPUT("Keyboard test", keyboard_test());
 	// launch your tests here
 }
