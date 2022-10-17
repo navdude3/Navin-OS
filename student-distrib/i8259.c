@@ -42,6 +42,7 @@ void i8259_init(void) {
 
     //outb(a, MASTER_8259_DATA);
     //outb(b, SLAVE_8259_DATA);
+    enable_irq(2);
 }
 
 /* Enable (unmask) the specified IRQ */
@@ -58,7 +59,7 @@ void enable_irq(uint32_t irq_num) {
 
     value = inb(port) & ~(1 << irq_num);
     clear();
-   // printf("%x", value);
+   //printf("%x", value);
     outb(value, port);
 }
 
@@ -82,7 +83,7 @@ void disable_irq(uint32_t irq_num) {
 void send_eoi(uint32_t irq_num) {
 
     if(irq_num >= 8){
-        outb((EOI | irq_num), SLAVE_8259_PORT);
+        outb((EOI | (irq_num-8)), SLAVE_8259_PORT);
         outb((EOI | 0x2), MASTER_8259_PORT); //clear on primary as well
     } else {
         outb((EOI | irq_num), MASTER_8259_PORT);

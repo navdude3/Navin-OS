@@ -87,7 +87,7 @@ void idt_init(){
 
 
     SET_IDT_ENTRY(idt[33], keyboard_linkage);
-
+    SET_IDT_ENTRY(idt[40], rtc_linkage);
 
 
 

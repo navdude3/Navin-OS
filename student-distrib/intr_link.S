@@ -1,6 +1,6 @@
 #define ASM     1
 
-.global keyboard_linkage
+.global keyboard_linkage, rtc_linkage
 
 keyboard_linkage:
     pushal
@@ -9,5 +9,16 @@ keyboard_linkage:
     popfl
     popal
     iret
+
+
+rtc_linkage:
+    pushal
+    pushfl
+    call rtc_link_handler
+    popfl
+    popal
+    iret
+
+
 
 

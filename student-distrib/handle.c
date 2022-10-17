@@ -171,3 +171,13 @@ void keyboard_link_handler(){
     else return;
 }
 
+
+void rtc_link_handler(){
+    cli();
+    printf("U R M O M    ");
+    outb(0x8C, 0x70);	// select register C
+    inb(0x71);		    // just throw away contents
+    send_eoi(8);
+    sti();
+}
+
