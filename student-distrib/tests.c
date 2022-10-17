@@ -83,15 +83,15 @@ int idt_test(){
  * Outputs: PASS/FAIL
  * Side Effects: None
  */
-int div_0_test(){
-	TEST_HEADER;
-	int result = PASS;
-	int a = 12/0;
-	a++;
-	result = FAIL;
+// int div_0_test(){
+// 	TEST_HEADER;
+// 	int result = PASS;
+// 	int a = 12/0;
+// 	a++;
+// 	result = FAIL;
 	
-	return result;
-}
+// 	return result;
+// }
 
 
 /* 
@@ -148,7 +148,7 @@ int rtc_test(){
 	char* video_mem = (char *) 0xB8000;
 	// print alternating characters with flag
 	int rtc_alt = 0;
-	while (rtc_count < 4096){
+	while (rtc_count < 20480){
 			if(rtc_count % 1024 == 0 && rtc_alt == 0){  //cond to print 1
 			printf("1");
 			while(rtc_count % 1024 == 0); // trap to prevent repeats
@@ -182,7 +182,7 @@ int keyboard_test(){
 
 	int result = PASS;
 	clear();
-	printf("Type the following within 5 seconds: asdfg\n");
+	printf("Type the following within 10 seconds: asdfg\n");
 	char test_char [5] = {'a','s','d','f','g'};
 	char* video_mem = (char *) 0xB8000;
 	while(rtc_count < 5120);
