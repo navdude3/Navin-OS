@@ -360,20 +360,9 @@ void keyboard_link_handler(){
 */
 void rtc_link_handler(){
     cli();
-    //used as an alternating flag to show which value should be displayed next
-    static int rtc_alt = 0;
     // test_interrupts();
     rtc_count = rtc_count + 1;              //count to static variable every interrupt call
-    if(rtc_count % 1024 == 0 && rtc_alt == 0){  //cond to print 1
-        printf("1");
-        
-        rtc_alt = 1;
-    }
-    else if(rtc_count % 1024 == 0 && rtc_alt == 1){ //cond to print 2
-        printf("2");
-
-        rtc_alt = 0;
-    }
+    
     
     outb(0x8C, 0x70);	// choose register C
     inb(0x71);		    // remove contents

@@ -3,6 +3,7 @@
 #include "lib.h"
 #include "rtc.h"
 #include "handle.h"
+#include "i8259.h"
 
 #define PASS 1
 #define FAIL 0
@@ -145,7 +146,21 @@ int rtc_test(){
 	int result = PASS;
 	clear();
 	char* video_mem = (char *) 0xB8000;
-	while (rtc_count < 4096);
+	// print alternating characters with flag
+	int rtc_alt = 0;
+	while (rtc_count < 4096){
+			if(rtc_count % 1024 == 0 && rtc_alt == 0){  //cond to print 1
+			printf("1");
+			while(rtc_count % 1024 == 0); // trap to prevent repeats
+			
+			rtc_alt = 1;
+		}
+		else if(rtc_count % 1024 == 0 && rtc_alt == 1){ //cond to print 2
+			printf("2");
+			while(rtc_count % 1024 == 0); // trap to prevent repeats
+			rtc_alt = 0;
+		}
+	}
 	char check_char = video_mem[1 << 1];
 	if (check_char != '1' && check_char != '2'){ //as per alternating character loop in rtc handler
 		assertion_failure();
@@ -191,11 +206,11 @@ int keyboard_test(){
 
 /* Test suite entry point */
 void launch_tests(){
-	// TEST_OUTPUT("idt_test", idt_test());
+	TEST_OUTPUT("idt_test", idt_test());
 	// TEST_OUTPUT("div_0_test", div_0_test());
 	// TEST_OUTPUT("invalid_address_test", invalid_address_test());
 	// TEST_OUTPUT("deref null", deref_null_test());
-	TEST_OUTPUT("rtc test", rtc_test());
+	// TEST_OUTPUT("rtc test", rtc_test());
 	// TEST_OUTPUT("Keyboard test", keyboard_test());
 	// launch your tests here
 }
