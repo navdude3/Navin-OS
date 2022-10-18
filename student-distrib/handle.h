@@ -1,7 +1,3 @@
-#define OPTION_SIZE 36  //number of keyboard options for checkpoint 1
-
-//done
-
 // First 20 entries of IDT - exceptions, #15 not covered since reserved by intel
 extern void divide_error();
 extern void RESERVED_1();
@@ -25,8 +21,7 @@ extern void machine_check();
 extern void simd_floating_point_exception();
 
 
-// handlers for specific interactions
-extern void keyboard_link_handler();
+// handler for specific interactions
 extern void rtc_link_handler();
 
 
