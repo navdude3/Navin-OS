@@ -1,8 +1,12 @@
 #include "lib.h"
 #include "i8259.h"
-#define OPTION_SIZE 36  //number of keyboard options for checkpoint 1
-
-
+#define OPTION_SIZE         36         // Number of keyboard options for checkpoint 1
+#define CAPS_PRESSED       0x3A        // Caps lock pressed
+#define CAPS_RELEASED      0xBA        // Caps lock released
+#define LSHIFT_PRESS       0x2A        // Left shift pressed
+#define RSHIFT_PRESS       0x36        // Right shift pressed  
+#define LSHIFT_RELEASE     0xAA        // Left shift released      
+#define RSHIFT_RELEASE     0xB6        // Right shift released 
 /* initialization function */
 extern void keyboard_init();
 /* Keyboard handler function */
