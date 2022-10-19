@@ -216,16 +216,15 @@ void putc(uint8_t c) {
         }
     }
     else if(c == '\t'){ //use the attrib to check if its a tab
-    if(screen_x < changeme){ //use tab to finish  a block of 4, only on end of line, make new line w new tabbed block
-        screen_x = 0;
-        screen_y++;
-    }
         for(i = 0; i < 4; i++){
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x + 3) << 1)) = ' ';
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x + 3) << 1) + 1) = 0x1;
+            screen_x += 1;
+            if(screen_x > 79){
+                screen_x = 0;
+                screen_y++;
+            }
         }
-            screen_x += 4;
-        
     }
     else {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
