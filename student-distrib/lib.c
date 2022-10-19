@@ -185,11 +185,35 @@ int32_t puts(int8_t* s) {
 
 void putc(uint8_t c) {
     int i;
-    if(c == '\n' || c == '\r') {
-        screen_y = (screen_y + 1) % NUM_ROWS;
+    int j;
+    if(c == '\n' || c == '\r' || c == '\e') {
+        if(screen_y == (NUM_ROWS - 1)){
+            for(j = 1; j < NUM_ROWS; j++){
+                for(i = 0; i < NUM_COLS; i++){
+                    *(uint8_t *)(video_mem + ((NUM_COLS * (j - 1)+ i) << 1)) = *(uint8_t *)(video_mem + ((NUM_COLS * j + i) << 1));
+                    *(uint8_t *)(video_mem + ((NUM_COLS * (j - 1)+ i) << 1) + 1) = *(uint8_t *)(video_mem + ((NUM_COLS * j+ i) << 1) + 1);
+                }
+            }
+
+        }
+        if(screen_y == NUM_ROWS - 1){
+            screen_y = 24;
+            for(i = 0; i < NUM_COLS; i++){
+                *(uint8_t *)(video_mem + ((NUM_COLS * (screen_y) + i - 1) << 1)) = ' ';
+                *(uint8_t *)(video_mem + ((NUM_COLS * (screen_y) + i - 1) << 1) + 1) = ATTRIB;
+            }
+        }
+        else{
+            screen_y = (screen_y + 1) % NUM_ROWS;
+        }
         screen_x = 0;
     } 
-    else if(c == '\b'){
+    else if(c == '\b'){ //fix page fault error
+    if(screen_x == 0 && screen_y == 0){
+        screen_x = 0;
+        screen_y = 0;  
+    }
+    else{
         if((*(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1) + 1)) == 0x1){ //do it 4 times for a tab
             for(i = 0; i < 4; i++){
                 *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1)) = ' ';
@@ -204,14 +228,18 @@ void putc(uint8_t c) {
             }
         }
         else{ //otherwise do it once
-            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1)) = ' ';
-            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1) + 1) = ATTRIB;
-            if(screen_x == 0){
-                screen_y--;
-                screen_x = 79;
-            }
-            else{
-                screen_x--;
+                *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1)) = ' ';
+                *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1) + 1) = ATTRIB;
+                if(screen_x == 0 && screen_y == 0){
+                    
+                }
+                else if(screen_x == 0){
+                    screen_x = 79;
+                    screen_y--;
+                }
+                else{
+                    screen_x--;
+                }
             }
         }
     }
