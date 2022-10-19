@@ -10,10 +10,10 @@ LDFLAGS+=-nostdlib -static
 CC=gcc
 
 #If you have any .h files in another directory, add -I<dir> to this line
-CPPFLAGS+=-nostdinc -g
+CPPFLAGS+=-nostdinc -g  -Iincludes -Iincludes/drivers
 
 # This generates the list of source files
-SRC=$(wildcard *.S) $(wildcard *.c) $(wildcard */*.S) $(wildcard */*.c)
+SRC=$(wildcard *.S) $(wildcard *.c) $(wildcard */*.S) $(wildcard */*.c) $(wildcard src/*/*.c) $(wildcard src/*/*.S)
 
 # This generates the list of .o files. The order matters, boot.o must be first
 OBJS=boot.o
@@ -32,7 +32,7 @@ Makefile.dep: $(SRC)
 
 .PHONY: clean
 clean:
-	rm -f *.o */*.o Makefile.dep
+	rm -f *.o */*.o */*/*.o Makefile.dep
 
 ifneq ($(MAKECMDGOALS),dep)
 ifneq ($(MAKECMDGOALS),clean)
