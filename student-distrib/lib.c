@@ -168,18 +168,78 @@ int32_t puts(int8_t* s) {
  * Inputs: uint_8* c = character to print
  * Return Value: void
  *  Function: Output a character to the console */
+// void putc(uint8_t c) {
+//     if(c == '\n' || c == '\r') {
+//         screen_y = (screen_y + 1) % NUM_ROWS;
+//         screen_x = 0;
+//     } else {
+//         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
+//         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+//         screen_x++;
+//         screen_x %= NUM_COLS;
+//         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+//     }
+// }
+
+
+
 void putc(uint8_t c) {
+    int i;
     if(c == '\n' || c == '\r') {
         screen_y = (screen_y + 1) % NUM_ROWS;
         screen_x = 0;
-    } else {
+    } 
+    else if(c == '\b'){
+        if((*(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1) + 1)) == 0x1){ //do it 4 times for a tab
+            for(i = 0; i < 4; i++){
+                *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1)) = ' ';
+                *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1) + 1) = ATTRIB;
+                if(screen_x == 0){
+                    screen_y--;
+                    screen_x = 79;
+                }
+                else{
+                    screen_x--;
+                }
+            }
+        }
+        else{ //otherwise do it once
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1)) = ' ';
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1) + 1) = ATTRIB;
+            if(screen_x == 0){
+                screen_y--;
+                screen_x = 79;
+            }
+            else{
+                screen_x--;
+            }
+        }
+    }
+    else if(c == '\t'){ //use the attrib to check if its a tab
+    if(screen_x < changeme){ //use tab to finish  a block of 4, only on end of line, make new line w new tabbed block
+        screen_x = 0;
+        screen_y++;
+    }
+        for(i = 0; i < 4; i++){
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x + 3) << 1)) = ' ';
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x + 3) << 1) + 1) = 0x1;
+        }
+            screen_x += 4;
+        
+    }
+    else {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
-        screen_x %= NUM_COLS;
+        if(screen_x >= NUM_COLS){
+            screen_y++;
+            screen_x = 0;
+        }
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
 }
+
+
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
  * Inputs: uint32_t value = number to convert
