@@ -3,10 +3,10 @@
 #include "types.h"
 
 typedef file_ops_struct_t {
-    int (*open)     (void);
+    int (*open)     (const uint8_t* fname);
     int (*close)    (void);
-    int (*read)     (void* buf, int32_t nbytes);
-    int (*write)    (void* buf, int32_t nbytes);
+    int (*read)     (uint8_t* buf, uint32_t length);
+    int (*write)    (uint8_t* buf, uint32_t length);
 } file_ops;
 
 #endif // MACRO

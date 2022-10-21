@@ -4,6 +4,7 @@
 #include "rtc.h"
 #include "handle.h"
 #include "i8259.h"
+#include "mp3fs.h"
 
 #define PASS 1
 #define FAIL 0
@@ -199,6 +200,61 @@ int keyboard_test(){
 // add more tests here
 
 /* Checkpoint 2 tests */
+
+int dir_read_test(){
+	TEST_HEADER;
+
+	int result = PASS;
+	clear();
+	char buf[80];
+	int32_t cnt;
+
+	if (d_open((uint8_t *)".") < 0){
+		printf("Dir open failed!\n");
+		result = FAIL;
+		return result;
+	}
+	while (0 != (cnt = d_read((uint8_t *) buf, 79))){
+		if (-1 == cnt){
+			printf("Dir entry read failed!\n");
+			result = FAIL;
+			return result;
+		}
+		buf[cnt] = '\n';
+		buf[cnt+1] = '\0';
+		printf("%s", buf);
+	}
+
+	d_close();
+	return result;
+}
+
+int file_read_test(){
+	TEST_HEADER;
+
+	int result = PASS;
+	clear();
+	char buf;
+	int32_t cnt;
+
+	char * filename = "frame0.txt";
+	if(f_open((uint8_t *)filename) < 0){
+		printf("File open failed!\n");
+		result = FAIL;
+		return result;
+	}
+	while (0 != (cnt = f_read((uint8_t *) &buf, 1))){
+		if(-1 == cnt){
+			printf("File read failed!\n");
+			result = FAIL;
+			return result;
+		}
+		putc(buf);
+	}
+	putc('\n');
+	return result;
+
+}
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -206,11 +262,16 @@ int keyboard_test(){
 
 /* Test suite entry point */
 void launch_tests(){
-	TEST_OUTPUT("idt_test", idt_test());
+	/* CP1 Tests */
+	// TEST_OUTPUT("idt_test", idt_test());
 	// TEST_OUTPUT("div_0_test", div_0_test());
 	// TEST_OUTPUT("invalid_address_test", invalid_address_test());
 	// TEST_OUTPUT("deref null", deref_null_test());
 	// TEST_OUTPUT("rtc test", rtc_test());
 	// TEST_OUTPUT("Keyboard test", keyboard_test());
+
+	/* CP2 Tests*/
+	// TEST_OUTPUT("directory read test", dir_read_test());
+	TEST_OUTPUT("file read test", file_read_test());
 	// launch your tests here
 }

@@ -12,6 +12,7 @@
 #include "idt.h"
 #include "keyboard.h"
 #include "rtc.h"
+#include "mp3fs.h"
 
 #define RUN_TESTS
 
@@ -56,6 +57,7 @@ void entry(unsigned long magic, unsigned long addr) {
         int mod_count = 0;
         int i;
         module_t* mod = (module_t*)mbi->mods_addr;
+        mp3fs_init(mod);
         while (mod_count < mbi->mods_count) {
             printf("Module %d loaded at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_start);
             printf("Module %d ends at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_end);
@@ -64,9 +66,17 @@ void entry(unsigned long magic, unsigned long addr) {
                 printf("0x%x ", *((char*)(mod->mod_start+i)));
             }
             printf("\n");
+            // printf("file name:\n");
+            // printf("%s\n", ((char*)(mod->mod_start+(12*64))));
+            // for (i = 0; i < 32; ++i){
+            //     if(i == 16) printf("\n");
+            //     printf("0x%x ", *((char*)(mod->mod_start+(2*64+i))));
+            // }
+            // printf("\n");
             mod_count++;
             mod++;
         }
+        
     }
     /* Bits 4 and 5 are mutually exclusive! */
     if (CHECK_FLAG(mbi->flags, 4) && CHECK_FLAG(mbi->flags, 5)) {
