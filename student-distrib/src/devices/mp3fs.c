@@ -93,7 +93,7 @@ int32_t f_open              (const uint8_t* fname){
     fd_entry_t* entry = &fd_array[fd];
     entry->j_tbl = &file_ops;
     entry->inode_idx = f_dentry.inode_idx;
-    entry->flags.type = 1;
+    entry->flags.type = 2;
     entry->file_position = 0;
     return fd;
 }
