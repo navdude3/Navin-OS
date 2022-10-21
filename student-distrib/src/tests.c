@@ -243,8 +243,9 @@ int file_read_test(){
 	int result = PASS;
 	clear();
 	char buf;
-	int32_t cnt;
+	int32_t res, x_cnt;
 	uint32_t fd;
+	x_cnt = 0;
 
 	char * filename = "frame0.txt";
 	if((fd = f_open((uint8_t *)filename)) < 0){
@@ -252,12 +253,19 @@ int file_read_test(){
 		result = FAIL;
 		return result;
 	}
-	while (0 != (cnt = f_read(fd, (uint8_t *) &buf, 1))){
-		if(-1 == cnt){
+	while (0 != (res = f_read(fd, (uint8_t *) &buf, 1))){
+		if(-1 == res){
 			printf("File read failed!\n");
 			result = FAIL;
 			return result;
+		}		
+		if(x_cnt == 79){
+			x_cnt = 0;
+			putc('\n');
 		}
+		if(buf == '\n') x_cnt = 0;
+		
+		++x_cnt;
 		putc(buf);
 	}
 	putc('\n');
