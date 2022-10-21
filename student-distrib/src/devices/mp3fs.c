@@ -86,9 +86,10 @@ int32_t read_dentry_of_type(const uint8_t* fname, dentry_t* dentry, uint32_t typ
 
 int32_t f_open              (const uint8_t* fname){
     dentry_t f_dentry;
-    int res = read_dentry_of_type(fname, &f_dentry, REG_FILE_TYPE);
-    if (res == -1) return res;
-    FD fd = get_free_fd_idx();
+    if ( -1 == read_dentry_of_type(fname, &f_dentry, REG_FILE_TYPE)){
+        return -1;
+    } 
+    uint32_t fd = get_free_fd_entry_idx();
     if(fd < 0) return fd;
     fd_entry_t* entry = &fd_array[fd];
     entry->j_tbl = &file_ops;
@@ -98,79 +99,44 @@ int32_t f_open              (const uint8_t* fname){
     return fd;
 }
 
-int32_t f_close             (FD fd){
+int32_t f_close             (uint32_t fd){
     free_fd_entry(fd);
     return 0;
 }
 
-int32_t f_read              (FD fd, uint8_t* buf, uint32_t length){
+int32_t f_read              (uint32_t fd, uint8_t* buf, uint32_t length){
     uint32_t bytes_read = read_data(fd_array[fd].inode_idx, fd_array[fd].file_position, buf, length);
     fd_array[fd].file_position += bytes_read;
     return bytes_read;
 }
-int32_t f_write             (FD fd, uint8_t* buf, uint32_t length){
+int32_t f_write             (uint32_t fd, uint8_t* buf, uint32_t length){
     return -1;
 }
 
 int32_t d_open              (const uint8_t* fname){
-    FD fd = get_free_fd_idx();
+    uint32_t fd = get_free_fd_entry_idx();
     fd_entry_t* entry = &fd_array[fd];
     entry->j_tbl = &dir_ops;
     entry->file_position = 0;
     entry->flags.type = 1;
     return fd;
 }
-int32_t d_close             (FD fd){
+int32_t d_close             (uint32_t fd){
     free_fd_entry(fd);
     return 0;
 }
 
-// file name,type,size (comma separated)
-int32_t d_read(FD fd, uint8_t *buf, uint32_t length){
-    uint32_t d_offset = fd_array[fd].file_position;
+
+int32_t d_read(uint32_t fd, uint8_t *buf, uint32_t length){
+    uint32_t* d_offset = &fd_array[fd].file_position;
     
-    if (d_offset >= boot_blk->num_dirs) return 0;
-    uint8_t buf_ptr = 0;
-    char* file_name = boot_blk->d_entries[d_offset].file_name;
-    uint32_t file_type = boot_blk->d_entries[d_offset].file_type;
-    uint32_t file_size = 0;
-    if (file_type == 2){
-        file_size = init_inode[boot_blk->d_entries[d_offset].inode_idx].file_size;
-    }
-    char file_type_str[10];
-    itoa(file_type,file_type_str,10);
-
-    char file_size_str[10];
-    itoa(file_size,file_size_str,10);
-    // Length check
-    uint32_t fname_len = strlen(file_name);
-    if(fname_len > FNAME_LIMIT){
-        fname_len = FNAME_LIMIT; //ceiling
-    }
-    uint32_t ftype_len = strlen(file_type_str);
-    uint32_t fsize_len = strlen(file_size_str);
-    if(fname_len + ftype_len + fsize_len > length) return -1; // overflow protection
-
-    fd_array[fd].file_position++;
-       
-    strncpy((int8_t *)buf+buf_ptr, file_name,fname_len);
-    buf_ptr += fname_len;
-
-    buf[buf_ptr] = DIR_READ_DELIM;
-    buf_ptr++;
-    
-    strncpy((int8_t *)buf+buf_ptr, file_type_str,ftype_len);
-    buf_ptr += ftype_len;
-
-    buf[buf_ptr] = DIR_READ_DELIM;
-    buf_ptr++;
-
-    strncpy((int8_t *)buf+buf_ptr, file_size_str,fsize_len);
-    buf_ptr += fsize_len;
-    
-    return buf_ptr;
+    if (*d_offset >= boot_blk->num_dirs) return 0;
+    if (length < sizeof(dentry_t)) return -1;
+    memcpy(buf, &boot_blk->d_entries[*d_offset], sizeof(dentry_t));
+    (*d_offset)++;
+    return sizeof(dentry_t);
 }
 
-int32_t d_write             (FD fd, uint8_t* buf, uint32_t length){
+int32_t d_write             (uint32_t fd, uint8_t* buf, uint32_t length){
     return -1;
 }

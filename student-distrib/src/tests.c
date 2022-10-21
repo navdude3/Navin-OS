@@ -207,24 +207,30 @@ int dir_read_test(){
 
 	int result = PASS;
 	clear();
-	char buf[80];
+	uint32_t buf_size = sizeof(dentry_t);
+	uint8_t buf[buf_size];
 	int32_t cnt;
-	FD fd;
+	uint32_t fd;
 
 	if ((fd = d_open((uint8_t *)".")) < 0){
 		printf("Dir open failed!\n");
 		result = FAIL;
 		return result;
 	}
-	while (0 != (cnt = d_read(fd, (uint8_t *) buf, 79))){
+	while (0 != (cnt = d_read(fd, buf, buf_size))){
 		if (-1 == cnt){
 			printf("Dir entry read failed!\n");
 			result = FAIL;
 			return result;
 		}
-		buf[cnt] = '\n';
-		buf[cnt+1] = '\0';
-		printf("%s", buf);
+		dentry_t * d_entry_pt = (dentry_t *) buf;
+		char fname [FNAME_LIMIT + 1];
+		strncpy(fname, d_entry_pt->file_name, FNAME_LIMIT);
+		printf("Filename: %s, Type: %d, Size: %d\n",
+				fname, 
+				d_entry_pt->file_type,
+				init_inode[d_entry_pt->inode_idx].file_size
+		);
 	}
 
 	d_close(fd);
@@ -238,7 +244,7 @@ int file_read_test(){
 	clear();
 	char buf;
 	int32_t cnt;
-	FD fd;
+	uint32_t fd;
 
 	char * filename = "frame0.txt";
 	if((fd = f_open((uint8_t *)filename)) < 0){
@@ -274,7 +280,7 @@ void launch_tests(){
 	// TEST_OUTPUT("Keyboard test", keyboard_test());
 
 	/* CP2 Tests*/
-	TEST_OUTPUT("directory read test", dir_read_test());
-	// TEST_OUTPUT("file read test", file_read_test());
+	// TEST_OUTPUT("directory read test", dir_read_test());
+	TEST_OUTPUT("file read test", file_read_test());
 	// launch your tests here
 }

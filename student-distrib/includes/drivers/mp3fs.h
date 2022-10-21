@@ -49,9 +49,9 @@ uint32_t         f_offset;
 
 
 int32_t f_open              (const uint8_t* fname);
-int32_t f_close             (FD fd);
-int32_t f_read              (FD fd, uint8_t* buf, uint32_t length);
-int32_t f_write             (FD fd, uint8_t* buf, uint32_t length); //readonly fs
+int32_t f_close             (uint32_t fd);
+int32_t f_read              (uint32_t fd, uint8_t* buf, uint32_t length);
+int32_t f_write             (uint32_t fd, uint8_t* buf, uint32_t length); //readonly fs
 
 /*directory related code*/
 uint32_t         d_offset;
@@ -59,9 +59,9 @@ uint32_t         d_offset;
 
 
 int32_t d_open              (const uint8_t* fname);
-int32_t d_close             (FD fd);
-int32_t d_read              (FD fd, uint8_t* buf, uint32_t length);
-int32_t d_write             (FD fd, uint8_t* buf, uint32_t length); //readonly fs
+int32_t d_close             (uint32_t fd);
+int32_t d_read              (uint32_t fd, uint8_t* buf, uint32_t length);
+int32_t d_write             (uint32_t fd, uint8_t* buf, uint32_t length); //readonly fs
 /* Module functions*/
 
 void    mp3fs_init          (module_t* mod);
