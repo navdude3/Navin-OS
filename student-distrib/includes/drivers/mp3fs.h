@@ -1,7 +1,8 @@
 #ifndef MP3FS_H
-#define MP3FS
+#define MP3FS_H
 #include "types.h"
 #include "multiboot.h"
+#include "vfs.h"
 
 
 #define BLK_SIZE        4096
@@ -48,9 +49,9 @@ uint32_t         f_offset;
 
 
 int32_t f_open              (const uint8_t* fname);
-int32_t f_close             (void);
-int32_t f_read              (uint8_t* buf, uint32_t length);
-int32_t f_write             (uint8_t* buf, uint32_t length); //readonly fs
+int32_t f_close             (FD fd);
+int32_t f_read              (FD fd, uint8_t* buf, uint32_t length);
+int32_t f_write             (FD fd, uint8_t* buf, uint32_t length); //readonly fs
 
 /*directory related code*/
 uint32_t         d_offset;
@@ -58,13 +59,18 @@ uint32_t         d_offset;
 
 
 int32_t d_open              (const uint8_t* fname);
-int32_t d_close             (void);
-int32_t d_read              (uint8_t* buf, uint32_t length);
-int32_t d_write             (uint8_t* buf, uint32_t length); //readonly fs
+int32_t d_close             (FD fd);
+int32_t d_read              (FD fd, uint8_t* buf, uint32_t length);
+int32_t d_write             (FD fd, uint8_t* buf, uint32_t length); //readonly fs
 /* Module functions*/
 
 void    mp3fs_init          (module_t* mod);
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry);
 int32_t read_dentry_by_index(uint32_t index, dentry_t* dentry);
 int32_t read_data           (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length);
-#endif
+
+/* vfs related declarations */
+extern fd_ops_t file_ops;
+
+extern fd_ops_t dir_ops;
+#endif // MP3FS_H

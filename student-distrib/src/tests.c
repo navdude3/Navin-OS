@@ -5,6 +5,7 @@
 #include "handle.h"
 #include "i8259.h"
 #include "mp3fs.h"
+#include "vfs.h"
 
 #define PASS 1
 #define FAIL 0
@@ -208,13 +209,14 @@ int dir_read_test(){
 	clear();
 	char buf[80];
 	int32_t cnt;
+	FD fd;
 
-	if (d_open((uint8_t *)".") < 0){
+	if ((fd = d_open((uint8_t *)".")) < 0){
 		printf("Dir open failed!\n");
 		result = FAIL;
 		return result;
 	}
-	while (0 != (cnt = d_read((uint8_t *) buf, 79))){
+	while (0 != (cnt = d_read(fd, (uint8_t *) buf, 79))){
 		if (-1 == cnt){
 			printf("Dir entry read failed!\n");
 			result = FAIL;
@@ -225,7 +227,7 @@ int dir_read_test(){
 		printf("%s", buf);
 	}
 
-	d_close();
+	d_close(fd);
 	return result;
 }
 
@@ -236,14 +238,15 @@ int file_read_test(){
 	clear();
 	char buf;
 	int32_t cnt;
+	FD fd;
 
 	char * filename = "frame0.txt";
-	if(f_open((uint8_t *)filename) < 0){
+	if((fd = f_open((uint8_t *)filename)) < 0){
 		printf("File open failed!\n");
 		result = FAIL;
 		return result;
 	}
-	while (0 != (cnt = f_read((uint8_t *) &buf, 1))){
+	while (0 != (cnt = f_read(fd, (uint8_t *) &buf, 1))){
 		if(-1 == cnt){
 			printf("File read failed!\n");
 			result = FAIL;
@@ -271,7 +274,7 @@ void launch_tests(){
 	// TEST_OUTPUT("Keyboard test", keyboard_test());
 
 	/* CP2 Tests*/
-	// TEST_OUTPUT("directory read test", dir_read_test());
-	TEST_OUTPUT("file read test", file_read_test());
+	TEST_OUTPUT("directory read test", dir_read_test());
+	// TEST_OUTPUT("file read test", file_read_test());
 	// launch your tests here
 }
