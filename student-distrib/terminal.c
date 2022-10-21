@@ -28,7 +28,7 @@ void fill_buffer(char input_char){
 //need to communicate with outside buffer
 void terminal_write(void* user_buffer){  //doesnt really need locking since only end of buffer can be modified
     int i;
-    for(i = 0; i < curr_size; i++){
+    for(i = 0; i < sizeof((char*)user_buffer); i++){
         if(((char*)user_buffer)[i] != '\0'){ // empty in C
             putc(((char*)user_buffer)[i]);
         }
