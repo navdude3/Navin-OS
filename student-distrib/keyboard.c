@@ -15,6 +15,7 @@ static int caps_en = 0;
 static int shift_en = 0;
 static int capital_letters = 0;
 static int caps_count = 0;
+static int ctrl = 0;
 /* 
 * keyboard_init 
  *   DESCRIPTION: Enables interrupts on IRQ 1 for the keyboard 
@@ -49,6 +50,12 @@ void shift_check(int key) {
             caps_count = 0;
         }
     }
+    if(key == LCTRL_PRESS || key == RCTRL_PRESS){
+        ctrl = 1;
+    }
+    if(key == LCTRL_RELEASE || key == RCTRL_RELEASE) {
+        ctrl = 0;
+    }
 }
 
 
@@ -66,9 +73,15 @@ void keyboard_link_handler(){
             else if(caps_en == 1) output = cap_let_num[i];
             else output = shift_let_num[i];
             if (caps_en == 1 && shift_en == 1 && ((i <= 10)|| (i>=36))) output = shift_let_num[i];
+            if(ctrl == 1 && key ==  0x26){
+                output = '\f';
+            }
         }
     }
     send_eoi(1);      
-    if(output != -1) putc(output);                                 
+    if(output != -1){
+        putc(output); 
+        fill_buffer(output);
+    }                                 
 }
 
