@@ -168,18 +168,110 @@ int32_t puts(int8_t* s) {
  * Inputs: uint_8* c = character to print
  * Return Value: void
  *  Function: Output a character to the console */
+// void putc(uint8_t c) {
+//     if(c == '\n' || c == '\r') {
+//         screen_y = (screen_y + 1) % NUM_ROWS;
+//         screen_x = 0;
+//     } else {
+//         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
+//         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+//         screen_x++;
+//         screen_x %= NUM_COLS;
+//         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+//     }
+// }
+
+
+
 void putc(uint8_t c) {
-    if(c == '\n' || c == '\r') {
-        screen_y = (screen_y + 1) % NUM_ROWS;
+    int i;
+    int j;
+    if(c == '\n' || c == '\r' || c == '\e') {
+        if(screen_y == (NUM_ROWS - 1)){
+            for(j = 1; j < NUM_ROWS; j++){
+                for(i = 0; i < NUM_COLS; i++){
+                    *(uint8_t *)(video_mem + ((NUM_COLS * (j - 1)+ i) << 1)) = *(uint8_t *)(video_mem + ((NUM_COLS * j + i) << 1));
+                    *(uint8_t *)(video_mem + ((NUM_COLS * (j - 1)+ i) << 1) + 1) = *(uint8_t *)(video_mem + ((NUM_COLS * j+ i) << 1) + 1);
+                }
+            }
+
+        }
+        if(screen_y == NUM_ROWS - 1){
+            screen_y = 24;
+            for(i = 0; i < NUM_COLS; i++){
+                *(uint8_t *)(video_mem + ((NUM_COLS * (screen_y) + i - 1) << 1)) = ' ';
+                *(uint8_t *)(video_mem + ((NUM_COLS * (screen_y) + i - 1) << 1) + 1) = ATTRIB;
+            }
+        }
+        else{
+            screen_y = (screen_y + 1) % NUM_ROWS;
+        }
         screen_x = 0;
-    } else {
+    } 
+    else if(c == '\b'){ //fix page fault error
+    if(screen_x == 0 && screen_y == 0){
+        screen_x = 0;
+        screen_y = 0;  
+    }
+    else{
+        if((*(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1) + 1)) == 0x1){ //do it 4 times for a tab
+            for(i = 0; i < 4; i++){
+                *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1)) = ' ';
+                *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1) + 1) = ATTRIB;
+                if(screen_x == 0){
+                    screen_y--;
+                    screen_x = 79;
+                }
+                else{
+                    screen_x--;
+                }
+            }
+        }
+        else{ //otherwise do it once
+                *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1)) = ' ';
+                *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1) + 1) = ATTRIB;
+                if(screen_x == 0 && screen_y == 0){
+                    
+                }
+                else if(screen_x == 0){
+                    screen_x = 79;
+                    screen_y--;
+                }
+                else{
+                    screen_x--;
+                }
+            }
+        }
+    }
+    else if(c == '\t'){ //use the attrib to check if its a tab
+        for(i = 0; i < 4; i++){
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x + 3) << 1)) = ' ';
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x + 3) << 1) + 1) = 0x1;
+            screen_x += 1;
+            if(screen_x > 79){
+                screen_x = 0;
+                screen_y++;
+            }
+        }
+    }
+    else if(c == '\f'){
+        clear();
+        screen_x = 0;
+        screen_y = 0;
+    }
+    else {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
-        screen_x %= NUM_COLS;
+        if(screen_x >= NUM_COLS){
+            screen_y++;
+            screen_x = 0;
+        }
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
 }
+
+
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
  * Inputs: uint32_t value = number to convert
