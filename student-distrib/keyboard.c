@@ -1,9 +1,9 @@
 #include "keyboard.h"
 
 /* array that holds the character corresponding to each scancode */
-static char let_num [OPTION_SIZE] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '-', '=', '[', ']', ';', '`', ',', '.', '/', ' ', '\\', '\'', '\t', '\b', '\e'};
-static char shift_let_num [OPTION_SIZE] = {')', '!', '@', '#', '$', '%', '^', '&', '*', '(', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '_', '+', '{', '}', ':', '~', '<', '>', '/', ' ', '|', '"', '\t', '\b','\e'};
-static char cap_let_num [OPTION_SIZE] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '-', '=', '[', ']', ';', '`', ',', '.', '/', ' ', '\\', '\'', '\t', '\b', '\e'};
+static char let_num [OPTION_SIZE] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '-', '=', '[', ']', ';', '`', ',', '.', '/', ' ', '\\', '\'', '\t', '\b', '\n'};
+static char shift_let_num [OPTION_SIZE] = {')', '!', '@', '#', '$', '%', '^', '&', '*', '(', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '_', '+', '{', '}', ':', '~', '<', '>', '/', ' ', '|', '"', '\t', '\b','\n'};
+static char cap_let_num [OPTION_SIZE] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '-', '=', '[', ']', ';', '`', ',', '.', '/', ' ', '\\', '\'', '\t', '\b', '\n'};
 
 /* scancode info from https://wiki.osdev.org/PS2_Keyboard && https://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html */
 /* array that holds the keyboard scancodes for 0-9 and a-z */
@@ -81,7 +81,9 @@ void keyboard_link_handler(){
     send_eoi(1);      
     if(output != -1){
         putc(output); 
-        fill_buffer(output);
+        if(output != '\f'){
+            fill_buffer(output);
+        }
     }                                 
 }
 

@@ -2,8 +2,9 @@
 
 #define BUFFER 128
 
-// extern void terminal_open();
-// extern void terminal_close();
-extern void terminal_write(void* user_buffer);
-extern void terminal_read(void* user_buffer);
+extern int32_t terminal_write(uint32_t fd, void* user_buffer, int32_t bytes);
+extern int32_t terminal_read(uint32_t fd, void* user_buffer, int32_t bytes);
 extern void fill_buffer(char input_char);
+extern int32_t terminal_close(uint32_t fd);
+extern int32_t terminal_open(const uint8_t fname);
+

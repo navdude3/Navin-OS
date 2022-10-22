@@ -4,6 +4,7 @@
 #include "rtc.h"
 #include "handle.h"
 #include "i8259.h"
+#include "terminal.h"
 
 #define PASS 1
 #define FAIL 0
@@ -199,6 +200,64 @@ int keyboard_test(){
 // add more tests here
 
 /* Checkpoint 2 tests */
+int terminal_write_test(){
+	TEST_HEADER;
+
+	int result = PASS;
+	clear();
+
+	terminal_write(1, "Hello there\n", 30);
+
+	//load terminal with some buffer and then check it, look into passing bytes that are out of range
+	
+
+	return result;
+
+
+}
+
+int terminal_RW_test_nobug(){
+	TEST_HEADER;
+	int result = PASS;
+	clear();
+
+	char user_buffer[128];
+	printf("Type your name\n");
+	terminal_read(1, user_buffer, 128);
+	printf("Hello ");
+	terminal_write(1, user_buffer, 128);
+
+	return result;
+}
+
+
+int terminal_RW_test_overflow(){
+	TEST_HEADER;
+	int result = PASS;
+	clear();
+
+	char user_buffer[128];
+	printf("Type over 128 charachters\n");
+	terminal_read(1, user_buffer, 200);
+	terminal_write(1, user_buffer, 200);
+
+	return result;
+}
+
+
+int terminal_open_and_close(){
+	TEST_HEADER;
+	int result = PASS;
+	clear();
+
+	terminal_open(1);
+	terminal_close(1);
+
+	return result;
+}
+
+
+
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -212,5 +271,9 @@ void launch_tests(){
 	// TEST_OUTPUT("deref null", deref_null_test());
 	// TEST_OUTPUT("rtc test", rtc_test());
 	// TEST_OUTPUT("Keyboard test", keyboard_test());
+	//Checkpoint 2
+	//TEST_OUTPUT("Terminal Test", terminal_test());
+	//TEST_OUTPUT("Terminal RW Test", terminal_RW_test_nobug());
+	TEST_OUTPUT("Terminal open and close", terminal_open_and_close());
 	// launch your tests here
 }
