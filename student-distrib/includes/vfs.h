@@ -2,6 +2,7 @@
 #define VFS_H
 #include "types.h"
 
+
 #define FD_ARRAY_SIZE 64
 
 
@@ -11,6 +12,7 @@ typedef struct fd_ops {
     int32_t (*read)     (uint32_t fd, uint8_t* buf, uint32_t length);
     int32_t (*write)    (uint32_t fd, uint8_t* buf, uint32_t length);
 } fd_ops_t;
+
 
 typedef struct fd_flags{
     uint32_t    present    : 1; // : is called bitfield
@@ -26,6 +28,14 @@ typedef struct fd_entry{
     fd_flags_t  flags;
 } fd_entry_t;
 
+/* Main file descriptor functions */
+
+int32_t open              (const uint8_t* fname);
+int32_t close             (uint32_t fd);
+int32_t read              (uint32_t fd, uint8_t* buf, uint32_t length);
+int32_t write             (uint32_t fd, uint8_t* buf, uint32_t length);
+
+/* Utility functions for file descriptor table*/
 uint32_t      get_free_fd_entry_idx();
 void    free_fd_entry(uint32_t idx);
 

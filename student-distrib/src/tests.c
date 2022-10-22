@@ -212,12 +212,12 @@ int dir_read_test(){
 	int32_t cnt;
 	uint32_t fd;
 
-	if ((fd = d_open((uint8_t *)".")) < 0){
+	if ((fd = open((uint8_t *)".")) < 0){
 		printf("Dir open failed!\n");
 		result = FAIL;
 		return result;
 	}
-	while (0 != (cnt = d_read(fd, buf, buf_size))){
+	while (0 != (cnt = read(fd, buf, buf_size))){
 		if (-1 == cnt){
 			printf("Dir entry read failed!\n");
 			result = FAIL;
@@ -248,12 +248,12 @@ int file_read_test(){
 	x_cnt = 0;
 
 	char * filename = "frame0.txt";
-	if((fd = f_open((uint8_t *)filename)) < 0){
+	if((fd = open((uint8_t *)filename)) < 0){
 		printf("File open failed!\n");
 		result = FAIL;
 		return result;
 	}
-	while (0 != (res = f_read(fd, (uint8_t *) &buf, 1))){
+	while (0 != (res = read(fd, (uint8_t *) &buf, 1))){
 		if(-1 == res){
 			printf("File read failed!\n");
 			result = FAIL;

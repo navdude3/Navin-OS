@@ -85,22 +85,10 @@ int32_t read_dentry_of_type(const uint8_t* fname, dentry_t* dentry, uint32_t typ
 }
 
 int32_t f_open              (const uint8_t* fname){
-    dentry_t f_dentry;
-    if ( -1 == read_dentry_of_type(fname, &f_dentry, REG_FILE_TYPE)){
-        return -1;
-    } 
-    uint32_t fd = get_free_fd_entry_idx();
-    if(fd < 0) return fd;
-    fd_entry_t* entry = &fd_array[fd];
-    entry->j_tbl = &file_ops;
-    entry->inode_idx = f_dentry.inode_idx;
-    entry->flags.type = 2;
-    entry->file_position = 0;
-    return fd;
+    return 0;
 }
 
 int32_t f_close             (uint32_t fd){
-    free_fd_entry(fd);
     return 0;
 }
 
@@ -114,15 +102,9 @@ int32_t f_write             (uint32_t fd, uint8_t* buf, uint32_t length){
 }
 
 int32_t d_open              (const uint8_t* fname){
-    uint32_t fd = get_free_fd_entry_idx();
-    fd_entry_t* entry = &fd_array[fd];
-    entry->j_tbl = &dir_ops;
-    entry->file_position = 0;
-    entry->flags.type = 1;
-    return fd;
+    return 0;
 }
 int32_t d_close             (uint32_t fd){
-    free_fd_entry(fd);
     return 0;
 }
 

@@ -20,7 +20,9 @@ tests.o: src/tests.c includes/tests.h includes/x86_desc.h \
   includes/drivers/i8259.h includes/types.h includes/handle.h \
   includes/drivers/i8259.h includes/drivers/mp3fs.h includes/multiboot.h \
   includes/vfs.h includes/vfs.h
-vfs.o: src/vfs.c includes/vfs.h includes/types.h
+vfs.o: src/vfs.c includes/vfs.h includes/types.h includes/lib.h \
+  includes/drivers/mp3fs.h includes/types.h includes/multiboot.h \
+  includes/vfs.h
 i8259.o: src/devices/i8259.c includes/drivers/i8259.h includes/types.h \
   includes/lib.h includes/types.h
 keyboard.o: src/devices/keyboard.c includes/drivers/keyboard.h \
