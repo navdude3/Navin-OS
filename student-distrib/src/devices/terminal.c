@@ -6,6 +6,12 @@ static int curr_size = 0;
 
 volatile static int read_flag = 0; //volatile?
 
+fd_ops_t terminal_ops = (fd_ops_t){
+    terminal_open,
+    terminal_close,
+    terminal_read,
+    terminal_write
+};
 
 void fill_buffer(char input_char){
     if(input_char == '\n' || input_char == '\e'){
@@ -34,7 +40,7 @@ void fill_buffer(char input_char){
 */
 
 //need to communicate with outside buffer
-int32_t terminal_write(uint32_t fd, void* user_buffer, int32_t bytes){  //doesnt really need locking since only end of buffer can be modified
+int32_t terminal_write(uint32_t fd, uint8_t* user_buffer, uint32_t bytes){  //doesnt really need locking since only end of buffer can be modified
     int i;
     if(bytes <= 0) return 0;                  /* If nothing to be written, return immediately */
     else if(bytes > 128){
@@ -48,7 +54,7 @@ int32_t terminal_write(uint32_t fd, void* user_buffer, int32_t bytes){  //doesnt
     return bytes;
 }
 
-int32_t terminal_read(uint32_t fd, void* user_buffer, int32_t bytes){
+int32_t terminal_read(uint32_t fd, uint8_t* user_buffer, uint32_t bytes){
     int i;
     int j;
     int contains_nl = 0; 

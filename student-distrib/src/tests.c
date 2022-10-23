@@ -278,7 +278,7 @@ int terminal_write_test(){
 	TEST_HEADER;
 	int result = PASS;
 	clear();
-	terminal_write(1, "Hello there\n", 30);
+	write(1, "Hello there\n", 30);
 
 	//load terminal with some buffer and then check it, look into passing bytes that are out of range
 	
@@ -295,9 +295,9 @@ int terminal_RW_test_nobug(){
 
 	char user_buffer[128];
 	printf("Type your name\n");
-	terminal_read(1, user_buffer, 128);
+	read(1, user_buffer, 128);
 	printf("Hello ");
-	terminal_write(1, user_buffer, 128);
+	write(1, user_buffer, 128);
 
 	return result;
 }
@@ -310,8 +310,8 @@ int terminal_RW_test_overflow(){
 
 	char user_buffer[128];
 	printf("Type over 128 charachters\n");
-	terminal_read(1, user_buffer, 200);
-	terminal_write(1, user_buffer, 200);
+	read(1, user_buffer, 200);
+	write(1, user_buffer, 200);
 
 	return result;
 }
@@ -322,7 +322,7 @@ int terminal_open_and_close(){
 	int result = PASS;
 	clear();
 
-	terminal_open(1);
+	
 	terminal_close(1);
 
 	return result;
@@ -348,8 +348,8 @@ void launch_tests(){
 	/* CP2 Tests*/
 	// TEST_OUTPUT("directory read test", dir_read_test());
 	// TEST_OUTPUT("file read test", file_read_test());
-	TEST_OUTPUT("Terminal Test", terminal_write_test());
-	// TEST_OUTPUT("Terminal RW Test", terminal_RW_test_nobug());
+	// TEST_OUTPUT("Terminal Test", terminal_write_test());
+	TEST_OUTPUT("Terminal RW Test", terminal_RW_test_nobug());
 	// TEST_OUTPUT("Terminal open and close", terminal_open_and_close());
 	// launch your tests here
 }

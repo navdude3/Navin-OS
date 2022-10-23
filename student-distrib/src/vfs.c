@@ -1,8 +1,18 @@
 #include "vfs.h"
 #include "lib.h"
 #include "mp3fs.h"
+#include "terminal.h"
 
-uint32_t      get_free_fd_entry_idx(){
+
+int32_t init_vfs(){
+    /* terminal driver assigned to fd 1*/
+    fd_entry_t* stdout_fd = &fd_array[1];
+    stdout_fd->file_position = 0;
+    stdout_fd->flags.present = 1;
+    stdout_fd->j_tbl = &terminal_ops;
+    stdout_fd->j_tbl->open("garbage"); // initialize terminal driver
+}
+int32_t      get_free_fd_entry_idx(){
     int idx;
     for (idx = 2; idx < FD_ARRAY_SIZE; ++idx){
         if(fd_array[idx].flags.present == 0){
@@ -37,6 +47,7 @@ int32_t open              (const uint8_t* fname){
     }
     entry->flags.type = f_dentry.file_type;
     entry->file_position = 0;
+    entry->j_tbl->open(fname);
     
     return fd;
 }

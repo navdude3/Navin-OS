@@ -13,6 +13,7 @@
 #include "keyboard.h"
 #include "rtc.h"
 #include "mp3fs.h"
+#include "vfs.h"
 
 #define RUN_TESTS
 
@@ -158,6 +159,8 @@ void entry(unsigned long magic, unsigned long addr) {
     keyboard_init();
     /* Init the RTC */
     rtc_init();
+    /* Init file descriptor table (with stdout)*/
+    init_vfs();
 
     clear();
     /* Initialize devices, memory, filesystem, enable device interrupts on the
