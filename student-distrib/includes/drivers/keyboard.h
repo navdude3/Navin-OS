@@ -8,10 +8,10 @@
 #define RSHIFT_PRESS       0x36        // Right shift pressed  
 #define LSHIFT_RELEASE     0xAA        // Left shift released      
 #define RSHIFT_RELEASE     0xB6        // Right shift released 
-#define LCTRL_PRESS        0x1D
-#define RCTRL_PRESS        0xE0
-#define LCTRL_RELEASE      0x9D
-#define RCTRL_RELEASE      0x9D //check these values, ps2 might be broken w rctrl?
+#define LCTRL_PRESS        0x1D        // left control pressed
+#define RCTRL_PRESS        0xE0         //right control pressed
+#define LCTRL_RELEASE      0x9D         //left control release
+#define RCTRL_RELEASE      0x9D         //right control release
 
 
 /* Initialization function */

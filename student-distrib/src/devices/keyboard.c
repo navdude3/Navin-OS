@@ -16,72 +16,85 @@ static int shift_en = 0;
 static int capital_letters = 0;
 static int caps_count = 0;
 static int ctrl = 0;
+
 /* 
-* keyboard_init 
+ * keyboard_init 
  *   DESCRIPTION: Enables interrupts on IRQ 1 for the keyboard 
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
 */
 void keyboard_init() {
-    enable_irq(1);
+    enable_irq(1);              // enables respective irq for the keyboard
 }
 
-
+/* 
+ * shift_check
+ *   DESCRIPTION: checker to see if shift should be enabled
+ *   INPUTS: key
+ *   OUTPUTS: lshift, rshift, ctrl, or caps set to 1
+ *   RETURN VALUE: void
+*/
 void shift_check(int key) {
     if(key == LSHIFT_PRESS){
-        lshift = 1;
+        lshift = 1;                                         // update lshift if left shift is pressed
     }
     if(key == RSHIFT_PRESS){
-        rshift = 1;
+        rshift = 1;                                         // update rshift if right shift is pressed
     }
     if(key == LSHIFT_RELEASE){
-        lshift = 0;
+        lshift = 0;                                         // update lshift if left shift is released
     }
     if(key == RSHIFT_RELEASE){
-        rshift = 0;
+        rshift = 0;                                         // update rshift if right shift is released
     }
     if(key == CAPS_PRESSED){
-        if(++caps_count == 1) caps_en = 1; 
+        if(++caps_count == 1) caps_en = 1;                  // update caps_en if is pressed
     }
     if(key == CAPS_RELEASED){
         if(caps_count == 2)  {
             caps_en = 0;
-            caps_count = 0;
+            caps_count = 0;                                 // if caps pressed twice, reset caps_en and cap_count
         }
     }
     if(key == LCTRL_PRESS || key == RCTRL_PRESS){
-        ctrl = 1;
+        ctrl = 1;                                           // update ctrl if either of them pressed
     }
     if(key == LCTRL_RELEASE || key == RCTRL_RELEASE) {
-        ctrl = 0;
+        ctrl = 0;                                           // update ctrl if either of them released
     }
 }
 
-
+/* 
+ * keyboard_link_handler
+ *   DESCRIPTION: print the value to screen based on the scancode, send an EOI to master pic irq 1 
+ *   INPUTS: none
+ *   OUTPUTS: print keyboard character to screen
+ *   RETURN VALUE: void
+*/
 void keyboard_link_handler(){
-    int key = inb(0x60);                            // port for keyboard
+    int key = inb(0x60);                                                                                           // port for keyboard
     int i;
     char output = -1;  
     shift_check(key);                       
     shift_en = lshift | rshift; 
-    capital_letters = shift_en ^ caps_en;           // xor so they negate
+    capital_letters = shift_en ^ caps_en;                                                                          // xor so they negate
    
     for(i = 0; i < OPTION_SIZE; i++) {
-        if(key == scancode_pressed[i]) {
-            if(capital_letters == 0) output = let_num[i];
+        if(key == scancode_pressed[i]) {                                                                           // check if the key is in scancode_pressed
+            if(capital_letters == 0) output = let_num[i]; 
             else if(caps_en == 1) output = cap_let_num[i];
-            else output = shift_let_num[i];
-            if (caps_en == 1 && shift_en == 1 && ((i <= 10)|| (i>=36))) output = shift_let_num[i];
-            if(ctrl == 1 && key ==  0x26){
+            else output = shift_let_num[i];                                                                        // check if the scancode should be from capital, lowercase or shifted letters 
+            if (caps_en == 1 && shift_en == 1 && ((i < 10)|| (i>=36))) output = shift_let_num[i];
+            if(ctrl == 1 && key ==  0x26){                                                                         //control l checking, send specific escape character if so
                 output = '\f';
             }
         }
     }
-    send_eoi(1);      
-    if(output != -1){
+    send_eoi(1);                                                                                                   //send eoi signal
+    if(output != -1){                                                                                              //if not invalid
         putc(output); 
-        if(output != '\f'){
+        if(output != '\f'){             //do not send to terminal buffer
             fill_buffer(output);
         }
     }                                 

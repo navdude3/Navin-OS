@@ -55,3 +55,11 @@ Difficulty finding bug (time and changes made): flag needed to be volatile as it
 Type of Error: algorithmic
 Symptom that drew attention: user buffer would print out wacky characters as it was reading random stuff from memory
 Difficulty finding bug (time and changes made): fill the buffer with empty spaces in case random data would be there
+
+Type of Error: semantic
+Symptom that drew attention: rtc speed could not change
+Difficulty finding bug (time and changes made): case statement did not have break statements which caused max speed to always be set
+
+Type of Error: algorithmic
+Symptom that drew attention: rtc rate unchanged
+Difficulty finding bug (time and changes made): added a set_rate call in rtc_write

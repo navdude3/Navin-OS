@@ -314,24 +314,3 @@ void simd_floating_point_exception(void){
         continue;
     }
 }
-
-
-/* 
- * rtc_link_handler
- *   DESCRIPTION: prints either a 1 or a 2 to the screen every time the interrupt is called every 1024 times
- *   INPUTS: none
- *   OUTPUTS: print a 1 or a 2 to the screen
- *   RETURN VALUE: void
-*/
-void rtc_link_handler(){
-    cli();
-    // test_interrupts();
-    rtc_count = rtc_count + 1;              //count to static variable every interrupt call
-    
-    
-    outb(0x8C, 0x70);	// choose register C
-    inb(0x71);		    // remove contents
-    send_eoi(8);        //send eoi to irq 8, (slave pic irq 0)
-    sti();
-}
-

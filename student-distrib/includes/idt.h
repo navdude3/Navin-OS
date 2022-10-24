@@ -2,6 +2,7 @@
 #include "handle.h"
 #include "intr_link.h"
 #include "keyboard.h"
+#include "rtc.h"
 
 /* Start of PIC Entries */
 #define START_PIC_VEC 0x20  

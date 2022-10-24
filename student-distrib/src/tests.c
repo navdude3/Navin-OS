@@ -10,7 +10,13 @@
 
 #define PASS 1
 #define FAIL 0
-
+#define MAX 1024
+#define MIN 2
+#define MAX_RTC 20480
+#define ROWEND 79
+#define PRINT 5
+#define BYTES 4
+#define NINEBYTES 36
 /* format these macros as you see fit */
 #define TEST_HEADER 	\
 	printf("[TEST %s] Running %s at %s:%d\n", __FUNCTION__, __FUNCTION__, __FILE__, __LINE__)
@@ -151,16 +157,16 @@ int rtc_test(){
 	char* video_mem = (char *) 0xB8000;
 	// print alternating characters with flag
 	int rtc_alt = 0;
-	while (rtc_count < 20480){
-			if(rtc_count % 1024 == 0 && rtc_alt == 0){  //cond to print 1
+	while (rtc_count < MAX_RTC){
+			if(rtc_count % MAX == 0 && rtc_alt == 0){  //cond to print 1
 			printf("1");
-			while(rtc_count % 1024 == 0); // trap to prevent repeats
+			while(rtc_count % MAX == 0); // trap to prevent repeats
 			
 			rtc_alt = 1;
 		}
-		else if(rtc_count % 1024 == 0 && rtc_alt == 1){ //cond to print 2
+		else if(rtc_count % MAX == 0 && rtc_alt == 1){ //cond to print 2
 			printf("2");
-			while(rtc_count % 1024 == 0); // trap to prevent repeats
+			while(rtc_count % MAX == 0); // trap to prevent repeats
 			rtc_alt = 0;
 		}
 	}
@@ -186,12 +192,12 @@ int keyboard_test(){
 	int result = PASS;
 	clear();
 	printf("Type the following within 10 seconds: asdfg\n");
-	char test_char [5] = {'a','s','d','f','g'};
+	char test_char [PRINT] = {'a','s','d','f','g'};
 	char* video_mem = (char *) 0xB8000;
-	while(rtc_count < 5120);
+	while(rtc_count < MAX * PRINT);
 	int i;
-	for(i = 0; i < 5; ++i){
-		char check_char = video_mem[(80 + i) << 1];
+	for(i = 0; i < PRINT; ++i){
+		char check_char = video_mem[(ROWEND + 1 + i) << 1];
 		if(check_char != test_char[i]){
 			assertion_failure();
 			result = FAIL;
@@ -216,7 +222,7 @@ int dir_read_test(){
 	int result = PASS;
 	clear();
 	uint32_t buf_size = sizeof(dentry_t);
-	uint8_t buf[buf_size];
+	uint8_t buf[buf_size]; // declare buffer big enough to fit dentry_t
 	int32_t cnt;
 	uint32_t fd;
 
@@ -225,6 +231,7 @@ int dir_read_test(){
 		result = FAIL;
 		return result;
 	}
+	/* Read directory entries one by one until EOF */
 	while (0 != (cnt = read(fd, buf, buf_size))){
 		if (-1 == cnt){
 			printf("Dir entry read failed!\n");
@@ -232,7 +239,7 @@ int dir_read_test(){
 			return result;
 		}
 		dentry_t * d_entry_pt = (dentry_t *) buf;
-		char fname [FNAME_LIMIT + 1];
+		char fname [FNAME_LIMIT + 1]; // Copy file_name from dentry into string to deal with long names 
 		strncpy(fname, d_entry_pt->file_name, FNAME_LIMIT);
 		printf("Filename: %s, Type: %d, Size: %d\n",
 				fname, 
@@ -268,13 +275,16 @@ int file_read_test(){
 		result = FAIL;
 		return result;
 	}
+
+	/* Read file byte by byte, print character to screen */
 	while (0 != (res = read(fd, (uint8_t *) &buf, 1))){
 		if(-1 == res){
 			printf("File read failed!\n");
 			result = FAIL;
 			return result;
-		}		
-		if(x_cnt == 79){
+		}
+		/* if end of row, go to next line (for non text files)*/		
+		if(x_cnt == ROWEND){
 			x_cnt = 0;
 			putc('\n');
 		}
@@ -299,11 +309,11 @@ int file_executable_test(){
 
 	int result = PASS;
 	clear();
-	int middle_padding_amt = 5308; //Size of ls is 5349
-	char start_ident_buf [5];
+	int middle_padding_amt = 5308; //Size of ls is 5349, 5349 - 4 (identity header) - 36 (end magic str) = 5308
+	char start_ident_buf [5]; // magic characters + null terminator (5 characters)
 	char* start_ident_str = "\x7f""ELF";
 	char m_buf;// middle padding read buf
-	char end_ident_buf[37];
+	char end_ident_buf[37]; // end magic characters (36) + null terminator
 	char* end_ident_str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 	int32_t res, x_cnt;
@@ -319,15 +329,15 @@ int file_executable_test(){
 	
 
 	/* Read first 4 bytes for 0x7f, E, L, F*/
-	res = read(fd, (uint8_t *) start_ident_buf, 4);
-	start_ident_buf[4] = '\0';
+	res = read(fd, (uint8_t *) start_ident_buf, BYTES);
+	start_ident_buf[BYTES] = '\0';
 	if(-1 == res){
 		printf("File read failed!\n");
 		result = FAIL;
 		return result;
 	}
-	if(strncmp((int8_t*)start_ident_buf, (int8_t*)start_ident_str,4) != 0){
-		printf("ELF read failed! Read this instead: %s", start_ident_buf);
+	if(strncmp((int8_t*)start_ident_buf, (int8_t*)start_ident_str, BYTES) != 0){
+		printf("Starting magic characters not read! Read this instead: %s", start_ident_buf);
 		result = FAIL;
 		return result;
 	}
@@ -343,15 +353,16 @@ int file_executable_test(){
 		}
 	}
 
-	res = read(fd, (uint8_t *) end_ident_buf, 36);
-	end_ident_buf[36] = '\0';
+	/* Read ending magic string */
+	res = read(fd, (uint8_t *) end_ident_buf, NINEBYTES);
+	end_ident_buf[NINEBYTES] = '\0';
 	if(-1 == res){
 		printf("File read failed!\n");
 		result = FAIL;
 		return result;
 	}
-	if(strncmp((int8_t*)end_ident_buf, (int8_t*)end_ident_str,36) != 0){
-		printf("End of exec read failed! Read this instead: %s", end_ident_buf);
+	if(strncmp((int8_t*)end_ident_buf, (int8_t*)end_ident_str, NINEBYTES) != 0){
+		printf("Ending magic characters do not match! Read this instead: %s", end_ident_buf);
 		result = FAIL;
 		return result;
 	}
@@ -388,61 +399,103 @@ int file_bad_filename_test(){
 }
 
 
-int terminal_write_test(){
-	TEST_HEADER;
-	int result = PASS;
-	clear();
-	write(1, (uint8_t *)"Hello there\n", 30);
 
-	//load terminal with some buffer and then check it, look into passing bytes that are out of range
-	
-
-	return result;
-
-
-}
-
+/* 
+ * terminal_RW_test_nobug
+ *   DESCRIPTION: send a buffer of 128 and write from keyboard to it
+ *   INPUTS: none
+ *   OUTPUTS: PASS if no errors, FAIL buffer could not be wrote back to
+ *   RETURN VALUE: none
+*/
 int terminal_RW_test_nobug(){
 	TEST_HEADER;
 	int result = PASS;
 	clear();
 
-	char user_buffer[128];
+	char user_buffer[128];			//size of buffer getting passed in
 	printf("Type your name\n");
-	read(1, (uint8_t *) user_buffer, 128);
+	read(1, (uint8_t *) user_buffer, 128);		//read input from user
 	printf("Hello ");
-	write(1,(uint8_t *) user_buffer, 128);
+	write(1,(uint8_t *) user_buffer, 128);		//write it to screen
 
 	return result;
 }
 
-
+/* 
+ * terminal_RW_test_overflow
+ *   DESCRIPTION: take a buffer of over 128 and only push first 128 charachtres
+ *   INPUTS: none
+ *   OUTPUTS: PASS if no errors, FAIL if buffer could not be read back
+ *   RETURN VALUE: none
+*/
 int terminal_RW_test_overflow(){
 	TEST_HEADER;
 	int result = PASS;
 	clear();
 
-	char user_buffer[128];
+	char user_buffer[128];					//user buffer to pass in
 	printf("Type over 128 charachters\n");
-	read(1,(uint8_t *) user_buffer, 200);
+	read(1,(uint8_t *) user_buffer, 200);		//overflow byte size
 	write(1,(uint8_t *) user_buffer, 200);
 
 	return result;
 }
 
-
+/* 
+ * terminal_open_and_close
+ *   DESCRIPTION: open and close the terminal
+ *   INPUTS: none
+ *   OUTPUTS: PASS if no errors, FAIL terminal fails to open
+ *   RETURN VALUE: none
+*/
 int terminal_open_and_close(){
 	TEST_HEADER;
 	int result = PASS;
 	clear();
 
 	
-	if( -1 != close(1)){
+	if( -1 != close(1)){		//if close fails then fail the test
 		result = FAIL;
 		return result;
 	}
 
 	return result;
+}
+
+
+/* 
+ * rtc_read_write_test
+ *   DESCRIPTION: tests open, read and write functions of RTC device
+ *   INPUTS: none
+ *   OUTPUTS: check variable printed i times for each frequency i
+ *   RETURN VALUE: PASS/FAIL
+*/
+int rtc_read_write_test() {
+    TEST_HEADER;
+	int result = PASS;
+	clear();
+    int i, j;
+	int check = 0;
+
+    check += rtc_open(NULL);							// call rtc_open
+    
+	for(i = MIN; i <= MAX; i = i * MIN) {
+        check += rtc_write(NULL, &i, sizeof(int)); 		// call rtc_write with each frequency
+		printf("%d", i);
+		for(j = 0; j < i/MIN; j++) {
+            check += rtc_read(NULL, NULL, NULL); 		
+			printf("%d", check);						// call rtc_read to read the frequency and print check
+        }
+        printf("]\n");
+    }
+	
+	check += rtc_close(0);								// call rtc_close
+	
+	if(check == 0) return result; 						// make sure check is 0 after all RTC calls are done
+	else{
+		result = FAIL;
+		return result;
+	}
 }
 
 
@@ -464,11 +517,12 @@ void launch_tests(){
 
 	/* CP2 Tests*/
 	// TEST_OUTPUT("directory read test", dir_read_test());
-	TEST_OUTPUT("file read test", file_read_test());
+	// TEST_OUTPUT("file read test", file_read_test());
 	// TEST_OUTPUT("Nonexistent file read test", file_bad_filename_test());
 	// TEST_OUTPUT("Executable file read test", file_executable_test());
-	// TEST_OUTPUT("Terminal Test", terminal_write_test());
 	// TEST_OUTPUT("Terminal RW Test", terminal_RW_test_nobug());
+	// TEST_OUTPUT("Terminal RW Overflow Test", terminal_RW_test_overflow());
 	// TEST_OUTPUT("Terminal open and close", terminal_open_and_close());
+	// TEST_OUTPUT("RTC read write test", rtc_read_write_test());
 	// launch your tests here
 }

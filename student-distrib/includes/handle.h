@@ -22,8 +22,4 @@ extern void machine_check();
 extern void simd_floating_point_exception();
 
 
-/* RTC handler */
-extern void rtc_link_handler();
-
-
 
