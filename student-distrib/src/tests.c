@@ -486,6 +486,7 @@ int rtc_read_write_test() {
             check += rtc_read(NULL, NULL, NULL); 		
 			printf("%d", check);						// call rtc_read to read the frequency and print check
         }
+
         printf("]\n");
     }
 	
@@ -517,13 +518,14 @@ void launch_tests(){
 
 	/* CP2 Tests*/
 	// TEST_OUTPUT("directory read test", dir_read_test());
-	TEST_OUTPUT("file read test", file_read_test("frame0.txt"));
-	// TEST_OUTPUT("file read test", file_read_test("verylargetextwithverylongname.txt"));
+	// TEST_OUTPUT("file read test", file_read_test("frame0.txt"));
+	// TEST_OUTPUT("file long name read test", file_read_test("verylargetextwithverylongname.txt"));
 	// TEST_OUTPUT("Nonexistent file read test", file_bad_filename_test());
 	// TEST_OUTPUT("Executable file read test", file_executable_test());
 	// TEST_OUTPUT("Terminal RW Test", terminal_RW_test_nobug());
 	// TEST_OUTPUT("Terminal RW Overflow Test", terminal_RW_test_overflow());
 	// TEST_OUTPUT("Terminal open and close", terminal_open_and_close());
 	// TEST_OUTPUT("RTC read write test", rtc_read_write_test());
+	
 	// launch your tests here
 }
