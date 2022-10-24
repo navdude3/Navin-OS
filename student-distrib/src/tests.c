@@ -464,11 +464,11 @@ void launch_tests(){
 
 	/* CP2 Tests*/
 	// TEST_OUTPUT("directory read test", dir_read_test());
-	// TEST_OUTPUT("file read test", file_read_test());
+	TEST_OUTPUT("file read test", file_read_test());
 	// TEST_OUTPUT("Nonexistent file read test", file_bad_filename_test());
 	// TEST_OUTPUT("Executable file read test", file_executable_test());
 	// TEST_OUTPUT("Terminal Test", terminal_write_test());
 	// TEST_OUTPUT("Terminal RW Test", terminal_RW_test_nobug());
-	TEST_OUTPUT("Terminal open and close", terminal_open_and_close());
+	// TEST_OUTPUT("Terminal open and close", terminal_open_and_close());
 	// launch your tests here
 }
