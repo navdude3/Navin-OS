@@ -259,7 +259,7 @@ int dir_read_test(){
  *   OUTPUTS: PASS if no errors, FAIL if any read/open/close errors occur
  *   RETURN VALUE: none
 */
-int file_read_test(){
+int file_read_test(const char* filename){
 	TEST_HEADER;
 
 	int result = PASS;
@@ -269,7 +269,7 @@ int file_read_test(){
 	uint32_t fd;
 	x_cnt = 0;
 
-	char * filename = "frame0.txt";
+	// char * filename = "frame0.txt";
 	if((fd = open((uint8_t *)filename)) < 0){
 		printf("File open failed!\n");
 		result = FAIL;
@@ -517,7 +517,8 @@ void launch_tests(){
 
 	/* CP2 Tests*/
 	// TEST_OUTPUT("directory read test", dir_read_test());
-	// TEST_OUTPUT("file read test", file_read_test());
+	TEST_OUTPUT("file read test", file_read_test("frame0.txt"));
+	TEST_OUTPUT("file read test", file_read_test("verylargetextwithverylongname.txt"));
 	// TEST_OUTPUT("Nonexistent file read test", file_bad_filename_test());
 	// TEST_OUTPUT("Executable file read test", file_executable_test());
 	// TEST_OUTPUT("Terminal RW Test", terminal_RW_test_nobug());
