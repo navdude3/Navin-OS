@@ -202,6 +202,13 @@ int keyboard_test(){
 // add more tests here
 
 /* Checkpoint 2 tests */
+/* 
+ * directory read test
+ *   DESCRIPTION: Opens the top level directory "." and prints all entries with name, type and size.
+ *   INPUTS: none
+ *   OUTPUTS: PASS if no errors, FAIL if any read/open/close errors occur
+ *   RETURN VALUE: none
+*/
 
 int dir_read_test(){
 
@@ -235,10 +242,17 @@ int dir_read_test(){
 		);
 	}
 
-	d_close(fd);
+	close(fd);
 	return result;
 }
 
+/* 
+ * directory read test
+ *   DESCRIPTION: Opens the "frame0.txt" and prints all contents. 
+ *   INPUTS: none
+ *   OUTPUTS: PASS if no errors, FAIL if any read/open/close errors occur
+ *   RETURN VALUE: none
+*/
 int file_read_test(){
 	TEST_HEADER;
 
@@ -271,9 +285,29 @@ int file_read_test(){
 		putc(buf);
 	}
 	putc('\n');
+	close(fd);
 	return result;
-
 }
+
+int file_bad_filename_test(){
+	TEST_HEADER;
+
+	int result = PASS;
+	clear();
+	char buf;
+	int32_t res, x_cnt;
+	uint32_t fd;
+	x_cnt = 0;
+
+	char * filename = "nonexistentfile.txt";
+	if( open((uint8_t *)filename) >= 0){
+		printf("Nonexistent file opened!\n");
+		result = FAIL;
+		return result;
+	}
+}
+
+
 int terminal_write_test(){
 	TEST_HEADER;
 	int result = PASS;
@@ -323,7 +357,10 @@ int terminal_open_and_close(){
 	clear();
 
 	
-	terminal_close(1);
+	if( -1 != close(1)){
+		result = FAIL;
+		return result;
+	}
 
 	return result;
 }
@@ -348,8 +385,9 @@ void launch_tests(){
 	/* CP2 Tests*/
 	// TEST_OUTPUT("directory read test", dir_read_test());
 	// TEST_OUTPUT("file read test", file_read_test());
+	TEST_OUTPUT("Nonexistent file read test", file_bad_filename_test());
 	// TEST_OUTPUT("Terminal Test", terminal_write_test());
-	TEST_OUTPUT("Terminal RW Test", terminal_RW_test_nobug());
+	// TEST_OUTPUT("Terminal RW Test", terminal_RW_test_nobug());
 	// TEST_OUTPUT("Terminal open and close", terminal_open_and_close());
 	// launch your tests here
 }

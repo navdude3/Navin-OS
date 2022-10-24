@@ -30,10 +30,13 @@ void free_fd_entry(uint32_t idx){
 int32_t open              (const uint8_t* fname){
     dentry_t f_dentry;
     fd_entry_t* entry;
+    
+    if(read_dentry_by_name(fname, &f_dentry) < 0){
+        return -1;
+    } 
     uint32_t fd = get_free_fd_entry_idx();
     if (fd < 0) return fd;
     entry = &fd_array[fd];
-    if(read_dentry_by_name(fname, &f_dentry) < 0) return -1;
 
     switch (f_dentry.file_type){
         // ADD CASE 0 ONCE FD OPERATIONS IMPLEMENTED FOR RTC
@@ -53,6 +56,7 @@ int32_t open              (const uint8_t* fname){
 }
 
 int32_t close             (uint32_t fd){
+    if(fd < 2) return -1; // cannot close stdin/out
     if(fd_array[fd].j_tbl->close(fd) < 0) return -1;
     free_fd_entry(fd);
     return 0;

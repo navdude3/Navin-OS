@@ -75,14 +75,6 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length
     return cnt;
 }
 
-int32_t read_dentry_of_type(const uint8_t* fname, dentry_t* dentry, uint32_t type){
-    if(read_dentry_by_name(fname, dentry) < 0){
-        return -1;
-    } else if (dentry->file_type != type){
-        return -1;
-    }
-    return 0;
-}
 
 int32_t f_open              (const uint8_t* fname){
     return 0;
