@@ -1,5 +1,4 @@
 #include "idt.h"
-// DONE
 
 /* 
  * init_idt

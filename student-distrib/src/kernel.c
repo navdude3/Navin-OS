@@ -1,7 +1,7 @@
 /* kernel.c - the C part of the kernel
  * vim:ts=4 noexpandtab
  */
-// DONE
+
 #include "multiboot.h"
 #include "x86_desc.h"
 #include "lib.h"

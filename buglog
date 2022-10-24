@@ -1,5 +1,7 @@
 Bug Log:
 
+//checkpoint 1
+
 Type of Error: semantic
 Symptom that drew attention: general_protection_fault return 
 Difficulty finding bug (time and changes made): realized our PIC init was incorrect, did not need to restore the masks (took about 1 hour to find)
@@ -27,3 +29,29 @@ Difficulty finding bug (time and changes made): flag in rtc handler not set prop
 Type of Error: semantic
 Symptom that drew attention: printf causing a page fault
 Difficulty finding bug (time and changes made): simply got rid of it, one line change took about 10 minutes
+
+//checkpoint 2
+
+Type of Error: algorithmic
+Symptom that drew attention: backspace at begining column and row would cause a page fault
+Difficulty finding bug (time and changes made): needed to add edge checker if cursor is at the point, took about 5 minutes
+
+Type of Error: semantic
+Symptom that drew attention: enter key would cause random errors and sometimes newline would not be sent
+Difficulty finding bug (time and changes made): changed \e (our original implementation), to just be \n on an enter key press since its basically just that
+
+Type of Error: semantic
+Symptom that drew attention: array used to hold tabs began to become overcomplicated during row shifts
+Difficulty finding bug (time and changes made): hacky way by modifying attrib for that specific location to indicate a tab was there
+
+Type of Error: algorithmic
+Symptom that drew attention: ctrl l command would reset terminal buffer in an incorrect way
+Difficulty finding bug (time and changes made): add condition checker if ctrl l is seen to not send it to the buffer, only the keyboard space
+
+Type of Error: semantic
+Symptom that drew attention: keyboard interrupt was not able to interrupt the terminal read
+Difficulty finding bug (time and changes made): flag needed to be volatile as it needed to be updated constantly, very easy fix
+
+Type of Error: algorithmic
+Symptom that drew attention: user buffer would print out wacky characters as it was reading random stuff from memory
+Difficulty finding bug (time and changes made): fill the buffer with empty spaces in case random data would be there

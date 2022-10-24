@@ -14,8 +14,9 @@
 #define RCTRL_RELEASE      0x9D //check these values, ps2 might be broken w rctrl?
 
 
-/* initialization function */
+/* Initialization function */
 extern void keyboard_init();
 /* Keyboard handler function */
 extern void keyboard_link_handler();
+/* Checking the shift status based on left and right shift */
 void shift_check();

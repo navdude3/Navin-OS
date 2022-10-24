@@ -3,6 +3,8 @@
 #include "intr_link.h"
 #include "keyboard.h"
 
-#define START_PIC_VEC 0x20 // start of PIC entries
+/* Start of PIC Entries */
+#define START_PIC_VEC 0x20  
+
 /* Function that sets the IDT entries */
 extern void idt_init();

@@ -199,7 +199,6 @@ int keyboard_test(){
 	}
 	return result;
 }
-// add more tests here
 
 /* Checkpoint 2 tests */
 /* 
@@ -364,6 +363,14 @@ int file_executable_test(){
 	return result;
 }
 
+
+/* 
+ * file_bad_filename_test
+ *   DESCRIPTION: Sees if file name is a real file name 
+ *   INPUTS: none
+ *   OUTPUTS: PASS if no errors, FAIL if any read/open/close errors occur OR if file does not match ELF spec per MP3.2 documentation
+ *   RETURN VALUE: none
+*/
 int file_bad_filename_test(){
 	TEST_HEADER;
 

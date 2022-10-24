@@ -1,4 +1,5 @@
-// First 20 entries of IDT - exceptions, #15 not covered since reserved by intel
+/* First 20 entries of IDT - exceptions */
+/* #15 not covered since reserved by intel */
 extern void divide_error();
 extern void RESERVED_1();
 extern void nmi_int();
@@ -21,7 +22,7 @@ extern void machine_check();
 extern void simd_floating_point_exception();
 
 
-// handler for specific interactions
+/* RTC handler */
 extern void rtc_link_handler();
 
 
