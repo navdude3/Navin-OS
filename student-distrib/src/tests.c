@@ -247,7 +247,7 @@ int dir_read_test(){
 }
 
 /* 
- * directory read test
+ * regular file read test
  *   DESCRIPTION: Opens the "frame0.txt" and prints all contents. 
  *   INPUTS: none
  *   OUTPUTS: PASS if no errors, FAIL if any read/open/close errors occur
@@ -288,16 +288,88 @@ int file_read_test(){
 	close(fd);
 	return result;
 }
+/* 
+ * executable file read test
+ *   DESCRIPTION: Opens the "ls" and checks if it matches ELF specs (start identifier and ending magic string). 
+ *   INPUTS: none
+ *   OUTPUTS: PASS if no errors, FAIL if any read/open/close errors occur OR if file does not match ELF spec per MP3.2 documentation
+ *   RETURN VALUE: none
+*/
+int file_executable_test(){
+	TEST_HEADER;
+
+	int result = PASS;
+	clear();
+	int middle_padding_amt = 5308; //Size of ls is 5349
+	char start_ident_buf [5];
+	char* start_ident_str = "\x7f""ELF";
+	char m_buf;// middle padding read buf
+	char end_ident_buf[37];
+	char* end_ident_str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	int32_t res, x_cnt;
+	uint32_t fd;
+	x_cnt = 0;
+
+	char * filename = "ls";
+	if((fd = open((uint8_t *)filename)) < 0){
+		printf("File open failed!\n");
+		result = FAIL;
+		return result;
+	}
+	
+
+	/* Read first 4 bytes for 0x7f, E, L, F*/
+	res = read(fd, (uint8_t *) start_ident_buf, 4);
+	start_ident_buf[4] = '\0';
+	if(-1 == res){
+		printf("File read failed!\n");
+		result = FAIL;
+		return result;
+	}
+	if(strncmp((int8_t*)start_ident_buf, (int8_t*)start_ident_str,4) != 0){
+		printf("ELF read failed! Read this instead: %s", start_ident_buf);
+		result = FAIL;
+		return result;
+	}
+
+	/* Skip till last 31 chars*/
+	unsigned i;
+	for(i = 0; i < middle_padding_amt; ++i){
+		res = read(fd,(uint8_t *) &m_buf, 1);
+		if(-1 == res){
+			printf("Middle padding read fail!\n");
+			result = FAIL;
+			return result;
+		}
+	}
+
+	res = read(fd, (uint8_t *) end_ident_buf, 36);
+	end_ident_buf[36] = '\0';
+	if(-1 == res){
+		printf("File read failed!\n");
+		result = FAIL;
+		return result;
+	}
+	if(strncmp((int8_t*)end_ident_buf, (int8_t*)end_ident_str,36) != 0){
+		printf("End of exec read failed! Read this instead: %s", end_ident_buf);
+		result = FAIL;
+		return result;
+	}
+	
+
+
+	putc('\n');
+	close(fd);
+	return result;
+}
 
 int file_bad_filename_test(){
 	TEST_HEADER;
 
 	int result = PASS;
 	clear();
-	char buf;
-	int32_t res, x_cnt;
-	uint32_t fd;
-	x_cnt = 0;
+	
 
 	char * filename = "nonexistentfile.txt";
 	if( open((uint8_t *)filename) >= 0){
@@ -305,6 +377,7 @@ int file_bad_filename_test(){
 		result = FAIL;
 		return result;
 	}
+	return result;
 }
 
 
@@ -312,7 +385,7 @@ int terminal_write_test(){
 	TEST_HEADER;
 	int result = PASS;
 	clear();
-	write(1, "Hello there\n", 30);
+	write(1, (uint8_t *)"Hello there\n", 30);
 
 	//load terminal with some buffer and then check it, look into passing bytes that are out of range
 	
@@ -329,9 +402,9 @@ int terminal_RW_test_nobug(){
 
 	char user_buffer[128];
 	printf("Type your name\n");
-	read(1, user_buffer, 128);
+	read(1, (uint8_t *) user_buffer, 128);
 	printf("Hello ");
-	write(1, user_buffer, 128);
+	write(1,(uint8_t *) user_buffer, 128);
 
 	return result;
 }
@@ -344,8 +417,8 @@ int terminal_RW_test_overflow(){
 
 	char user_buffer[128];
 	printf("Type over 128 charachters\n");
-	read(1, user_buffer, 200);
-	write(1, user_buffer, 200);
+	read(1,(uint8_t *) user_buffer, 200);
+	write(1,(uint8_t *) user_buffer, 200);
 
 	return result;
 }
@@ -385,9 +458,10 @@ void launch_tests(){
 	/* CP2 Tests*/
 	// TEST_OUTPUT("directory read test", dir_read_test());
 	// TEST_OUTPUT("file read test", file_read_test());
-	TEST_OUTPUT("Nonexistent file read test", file_bad_filename_test());
+	// TEST_OUTPUT("Nonexistent file read test", file_bad_filename_test());
+	// TEST_OUTPUT("Executable file read test", file_executable_test());
 	// TEST_OUTPUT("Terminal Test", terminal_write_test());
 	// TEST_OUTPUT("Terminal RW Test", terminal_RW_test_nobug());
-	// TEST_OUTPUT("Terminal open and close", terminal_open_and_close());
+	TEST_OUTPUT("Terminal open and close", terminal_open_and_close());
 	// launch your tests here
 }
