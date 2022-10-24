@@ -518,7 +518,7 @@ void launch_tests(){
 	/* CP2 Tests*/
 	// TEST_OUTPUT("directory read test", dir_read_test());
 	TEST_OUTPUT("file read test", file_read_test("frame0.txt"));
-	TEST_OUTPUT("file read test", file_read_test("verylargetextwithverylongname.txt"));
+	// TEST_OUTPUT("file read test", file_read_test("verylargetextwithverylongname.txt"));
 	// TEST_OUTPUT("Nonexistent file read test", file_bad_filename_test());
 	// TEST_OUTPUT("Executable file read test", file_executable_test());
 	// TEST_OUTPUT("Terminal RW Test", terminal_RW_test_nobug());
