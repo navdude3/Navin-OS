@@ -10,7 +10,8 @@ int32_t init_vfs(){
     stdout_fd->file_position = 0;
     stdout_fd->flags.present = 1;
     stdout_fd->j_tbl = &terminal_ops;
-    stdout_fd->j_tbl->open("garbage"); // initialize terminal driver
+    stdout_fd->j_tbl->open((uint8_t*)"garbage"); // initialize terminal driver
+    return 0;
 }
 int32_t      get_free_fd_entry_idx(){
     int idx;
