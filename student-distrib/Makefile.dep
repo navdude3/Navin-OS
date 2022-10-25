@@ -1,35 +1,34 @@
 boot.o: boot.S includes/multiboot.h includes/x86_desc.h includes/types.h
 init_helpers.o: src/init_helpers.S
+intr_link.o: src/intr_link.S
 x86_desc.o: src/x86_desc.S includes/x86_desc.h includes/types.h
 handle.o: src/handle.c includes/handle.h includes/lib.h includes/types.h \
-  includes/drivers/i8259.h includes/types.h includes/drivers/rtc.h \
-  includes/lib.h includes/drivers/i8259.h
+  includes/i8259.h includes/rtc.h includes/lib.h includes/i8259.h
+i8259.o: src/i8259.c includes/i8259.h includes/types.h includes/lib.h
 idt.o: src/idt.c includes/idt.h includes/x86_desc.h includes/types.h \
-  includes/handle.h includes/drivers/intr_link.h
+  includes/handle.h includes/intr_link.h includes/keyboard.h \
+  includes/lib.h includes/i8259.h includes/terminal.h includes/vfs.h \
+  includes/rtc.h
 kernel.o: src/kernel.c includes/multiboot.h includes/types.h \
-  includes/x86_desc.h includes/lib.h includes/drivers/i8259.h \
-  includes/types.h includes/debug.h includes/tests.h \
-  includes/init_helpers.h includes/idt.h includes/x86_desc.h \
-  includes/handle.h includes/drivers/intr_link.h \
-  includes/drivers/keyboard.h includes/lib.h includes/drivers/i8259.h \
-  includes/drivers/rtc.h includes/drivers/mp3fs.h includes/multiboot.h \
-  includes/vfs.h
+  includes/x86_desc.h includes/lib.h includes/i8259.h includes/debug.h \
+  includes/tests.h includes/init_helpers.h includes/idt.h \
+  includes/x86_desc.h includes/handle.h includes/intr_link.h \
+  includes/keyboard.h includes/lib.h includes/i8259.h includes/terminal.h \
+  includes/vfs.h includes/rtc.h includes/keyboard.h includes/rtc.h \
+  includes/mp3fs.h includes/multiboot.h includes/vfs.h
+keyboard.o: src/keyboard.c includes/keyboard.h includes/lib.h \
+  includes/types.h includes/i8259.h includes/terminal.h includes/vfs.h
 lib.o: src/lib.c includes/lib.h includes/types.h
+mp3fs.o: src/mp3fs.c includes/mp3fs.h includes/types.h \
+  includes/multiboot.h includes/vfs.h includes/lib.h
+rtc.o: src/rtc.c includes/rtc.h includes/lib.h includes/types.h \
+  includes/i8259.h
+terminal.o: src/terminal.c includes/terminal.h includes/lib.h \
+  includes/types.h includes/vfs.h
 tests.o: src/tests.c includes/tests.h includes/x86_desc.h \
-  includes/types.h includes/lib.h includes/drivers/rtc.h includes/lib.h \
-  includes/drivers/i8259.h includes/types.h includes/handle.h \
-  includes/drivers/i8259.h includes/drivers/mp3fs.h includes/multiboot.h \
-  includes/vfs.h includes/vfs.h
+  includes/types.h includes/lib.h includes/rtc.h includes/lib.h \
+  includes/i8259.h includes/handle.h includes/i8259.h includes/mp3fs.h \
+  includes/multiboot.h includes/vfs.h includes/vfs.h includes/terminal.h
 vfs.o: src/vfs.c includes/vfs.h includes/types.h includes/lib.h \
-  includes/drivers/mp3fs.h includes/types.h includes/multiboot.h \
-  includes/vfs.h
-i8259.o: src/devices/i8259.c includes/drivers/i8259.h includes/types.h \
-  includes/lib.h includes/types.h
-keyboard.o: src/devices/keyboard.c includes/drivers/keyboard.h \
-  includes/lib.h includes/types.h includes/drivers/i8259.h \
-  includes/types.h
-mp3fs.o: src/devices/mp3fs.c includes/drivers/mp3fs.h includes/types.h \
-  includes/multiboot.h includes/types.h includes/vfs.h includes/lib.h
-rtc.o: src/devices/rtc.c includes/drivers/rtc.h includes/lib.h \
-  includes/types.h includes/drivers/i8259.h includes/types.h
-intr_link.o: src/devices/intr_link.S
+  includes/mp3fs.h includes/multiboot.h includes/vfs.h \
+  includes/terminal.h includes/lib.h
