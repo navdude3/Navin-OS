@@ -3,6 +3,8 @@
 #include "intr_link.h"
 #include "keyboard.h"
 #include "rtc.h"
+#include "syscall_handler.h"
+#include "syscall_functions.h"
 
 /* Start of PIC Entries */
 #define START_PIC_VEC 0x20  
