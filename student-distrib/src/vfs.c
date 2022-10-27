@@ -63,6 +63,8 @@ void free_fd_entry(uint32_t idx){
 int32_t open              (const uint8_t* fname){
     dentry_t f_dentry;
     fd_entry_t* entry;
+
+    if(fname == NULL) return -1;
     
     if(read_dentry_by_name(fname, &f_dentry) < 0){
         return -1;
@@ -97,7 +99,7 @@ int32_t open              (const uint8_t* fname){
  *   SIDE EFFECTS: calls file type's close() function, marks entry as not present (might need to implement race condition handling)
  */
 int32_t close             (uint32_t fd){
-    if(fd < 2) return -1; // cannot close stdin/out
+    if(fd < 2 || fd > 10) return -1;   // cannot close stdin/out
     if(fd_array[fd].j_tbl->close(fd) < 0) return -1;
     free_fd_entry(fd);
     return 0;
@@ -111,6 +113,7 @@ int32_t close             (uint32_t fd){
  *   RETURN VALUE: return value of file type's read function
  */
 int32_t read              (uint32_t fd, uint8_t* buf, uint32_t length){
+    if(fd < 1 || fd > 10 || buf == NULL) return -1;
     return fd_array[fd].j_tbl->read(fd, buf, length);
 }
 
@@ -122,5 +125,6 @@ int32_t read              (uint32_t fd, uint8_t* buf, uint32_t length){
  *   RETURN VALUE: return value of file type's write function
  */
 int32_t write              (uint32_t fd, uint8_t* buf, uint32_t length){
+    if(fd < 1 || fd > 10 || buf == NULL) return -1;  
     return fd_array[fd].j_tbl->write(fd, buf, length);
 }
