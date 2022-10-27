@@ -147,7 +147,8 @@ void entry(unsigned long magic, unsigned long addr) {
 
         tss.ldt_segment_selector = KERNEL_LDT;
         tss.ss0 = KERNEL_DS;
-        tss.esp0 = 0x800000;
+        // tss.esp0 = 0x800000;
+        tss.esp0 = 0x7F4000; // Reserve bottom 6*8kb for process kernel stacks
         ltr(KERNEL_TSS);
     }
 
