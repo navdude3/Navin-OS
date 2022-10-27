@@ -3,7 +3,7 @@
 #include "vfs.h"
 
 typedef struct __attribute__((packed)) proc_ctrl_blk{
-        fd_entry_t fd_array [PROC_FD_ARRAY_SIZE]
+        fd_entry_t fd_array [PROC_FD_ARRAY_SIZE];
 } proc_ctrl_blk_t;
 
 typedef struct proc_kernel_blk{

@@ -32,7 +32,8 @@ continue:
 
 keep_going:
     # Set up ESP so we can have an initial stack
-    movl    $0x800000, %esp
+    # movl    $0x800000, %esp ; OLD 
+    movl    $0x7F4000, %esp   # Reserve bottom 6*8kb for process kernel stacks
 
     # Load the IDT (added)
     lidt idt_desc_ptr
