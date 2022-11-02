@@ -98,7 +98,7 @@ int32_t open              (const uint8_t* fname){
  *   RETURN VALUE: 0 if successful, -1 if error
  *   SIDE EFFECTS: calls file type's close() function, marks entry as not present (might need to implement race condition handling)
  */
-int32_t close             (uint32_t fd){
+int32_t close(uint32_t fd){
     if(fd < 2 || fd > 10) return -1;   // cannot close stdin/out
     if(fd_array[fd].j_tbl->close(fd) < 0) return -1;
     free_fd_entry(fd);
@@ -112,7 +112,7 @@ int32_t close             (uint32_t fd){
  *   OUTPUTS: writes length bytes or until EOF into buf, whichever is shorter
  *   RETURN VALUE: return value of file type's read function
  */
-int32_t read              (uint32_t fd, uint8_t* buf, uint32_t length){
+int32_t read(uint32_t fd, uint8_t* buf, uint32_t length){
     if(fd < 1 || fd > 10 || buf == NULL) return -1;
     return fd_array[fd].j_tbl->read(fd, buf, length);
 }

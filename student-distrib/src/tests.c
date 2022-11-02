@@ -309,11 +309,11 @@ int file_executable_test(){
 
 	int result = PASS;
 	clear();
-	int middle_padding_amt = 5308; //Size of ls is 5349, 5349 - 4 (identity header) - 36 (end magic str) = 5308
-	char start_ident_buf [5]; // magic characters + null terminator (5 characters)
+	int middle_padding_amt = 5308; 						// Size of ls is 5349, 5349 - 4 (identity header) - 36 (end magic str) = 5308
+	char start_ident_buf [5]; 							// magic characters + null terminator (5 characters)
 	char* start_ident_str = "\x7f""ELF";
-	char m_buf;// middle padding read buf
-	char end_ident_buf[37]; // end magic characters (36) + null terminator
+	char m_buf;											// middle padding read buf
+	char end_ident_buf[37]; 							// end magic characters (36) + null terminator
 	char* end_ident_str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 	int32_t res, x_cnt;
