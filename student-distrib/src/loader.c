@@ -30,6 +30,7 @@ int32_t sys_execute(const uint8_t* command) {
     int i;
     int fname_indexer, args_indexer;
     int file_flag, args_flag;
+    uint32_t user_addr = (num_active_procs * 0x400000) + USER_MEMORY_BASE;
 
     if(command == NULL) return -1;
     if(command[0] == '\0') return -1;                // file non existent
@@ -79,7 +80,6 @@ int32_t sys_execute(const uint8_t* command) {
 
 
     /* 3. Set up program paging */
-    uint32_t user_addr = (num_active_procs * 0x400000) + USER_MEMORY_BASE;
     setup_user_page((void*)user_addr);
     flush_tlb();
 
@@ -94,8 +94,8 @@ int32_t sys_execute(const uint8_t* command) {
     // set file descriptor 
 
     /* 6. Create it’s own context switch stack */
-
-    /* IRET */
+    num_active_procs++;                           
+    //return;
 }
 
 
