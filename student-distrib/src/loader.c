@@ -25,18 +25,16 @@ int32_t setup_pcb(void *addr) {
 
 
 int32_t sys_execute(const uint8_t* command) {
-    uint8_t fname[32];      //max filesize name
-    uint8_t args[32];      //store args here
+    uint8_t fname[32];                              // max filesize name
+    uint8_t args[32];                               // store args here
     int i;
     int fname_indexer, args_indexer;
     int file_flag, args_flag;
 
-
-
     if(command == NULL) return -1;
-    if(command[0] == '\0') return -1;                // file non existent, use \0 not '  ' bc we could have space at beginning of buffer for some reason
-    /* 1. Parse args and name*/
+    if(command[0] == '\0') return -1;                // file non existent
 
+    /* 1. Parse args and name */
     file_flag = 0;
     args_flag = 0;
     for(i = 0; i < 128; i++){
@@ -67,16 +65,12 @@ int32_t sys_execute(const uint8_t* command) {
     //make a test case here to see if these can print name and args
 
 
-
-
-
-
     /* 2. Executable check */
     dentry_t dentry;   
     uint32_t buf[4];      
     uint32_t start;              
-    /* SHOULD COMMAND BE THE FIRST ARG HERE ???? */     
-    if(read_dentry_by_name(fname, &dentry) == -1) return -1;          /* Does file exist */
+      
+    if(read_dentry_by_name(fname, &dentry) == -1) return -1;            /* Does file exist */
     if(read_data(dentry.inode_idx, 0, buf, 4) == -1) return -1;         /* Error occurred while writing */
     if(*buf != 0x464c457f) return -1;                                   /* Checks if it is an executable */
     /* Valid Executable */
@@ -85,10 +79,14 @@ int32_t sys_execute(const uint8_t* command) {
 
 
     /* 3. Set up program paging */
-    // no idea
-    // flush tlb prob
+    uint32_t user_addr = (num_active_procs * 0x400000) + USER_MEMORY_BASE;
+    setup_user_page((void*)user_addr);
+    flush_tlb();
 
     /* 4. User Level Program Loader */
+    inode_t inode = init_inode[dentry.inode_idx];
+    uint32_t size = inode.file_size;
+    read_data(dentry.inode_idx, 0, (uint8_t*)0x08048000, size);         /* Copying entire file to memory */
 
     /* 5. Create PCB */
     // give pcb memory
