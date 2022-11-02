@@ -1,11 +1,13 @@
 #include "loader.h"
+#include "paging.h"
+
 int32_t load_program(void *addr, int fd) {
 
 }
 
 
-int32_t setup_user_page(void *addr) {
-
+int32_t setup_user_page(int process_number) {
+    
 }
 
 
