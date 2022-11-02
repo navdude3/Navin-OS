@@ -1,4 +1,6 @@
 #include "loader.h"
+#include "paging.h"
+
 int32_t load_program(void *addr, int fd) {
     dentry_t entry;
     uint32_t buf[4];
