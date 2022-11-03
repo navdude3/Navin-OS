@@ -1,8 +1,9 @@
-#ifndef PROCESS_H
+//#ifndef PROCESS_H
 #define PROCESS_H
 
 #define KERNEL_AREA_SIZE 0x2000
 #define PROC_FD_ARRAY_SIZE 8
+#define MAX_PROCESS        6
 #include "vfs.h"
 
 
@@ -29,12 +30,14 @@
 // } proc_kernel_blk_t;
 
 
+static int pid_array[MAX_PROCESS]; //account for stdin and stdout
 
 typedef struct{
+    int proc_fd_map[PROC_FD_ARRAY_SIZE];
     uint32_t pid;
     uint32_t parent_pid;
     uint32_t fd;
     uint32_t saved_esp;
     uint32_t saved_ebp;
     uint32_t active;
-}
+} pcb_t;
