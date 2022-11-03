@@ -23,7 +23,7 @@ int32_t init_vfs(){
 
 /* 
  * get_free_fd_entry_idx
- *   DESCRIPTION: Finds first available fd entry in fd array
+ *   DESCRIPTION: Finds first available fd entry in global fd array
  *   INPUTS: none
  *   OUTPUTS: index to available entry
  *   RETURN VALUE: none

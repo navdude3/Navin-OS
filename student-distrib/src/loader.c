@@ -1,4 +1,5 @@
 #include "loader.h"
+#include "process.h"
 int32_t load_program(void *addr, int fd) {
     dentry_t entry;
     uint32_t buf[4];
@@ -20,7 +21,13 @@ int32_t setup_user_page(void *addr) {
 
 
 int32_t setup_pcb(void *addr) {
+    uint32_t kernel_area_base_addr = (uint32_t) KERNEL_AREA_BASE - ((num_active_procs + 1)* KERNEL_AREA_SIZE);
+    proc_ctrl_blk_t pblk;
 
+    pblk.parent_ctrl_blk = (proc_ctrl_blk_t*) kernel_area_base_addr + KERNEL_AREA_SIZE; // assumes parent process is right below in stack
+    init_proc_fd_array(&pblk);
+    *(proc_ctrl_blk_t*) kernel_area_base_addr = pblk; // write initialized pblk to top of kernel process area
+    return 0;
 }
 
 
@@ -89,13 +96,11 @@ int32_t sys_execute(const uint8_t* command) {
     read_data(dentry.inode_idx, 0, (uint8_t*)0x08048000, size);         /* Copying entire file to memory */
 
     /* 5. Create PCB */
-    // give pcb memory
-    // set active
-    // set file descriptor 
+    setup_pcb(NULL);
 
     /* 6. Create it’s own context switch stack */
-    num_active_procs++;                           
-    //return;
+    ++num_active_procs;
+    //return IRET;
 }
 
 

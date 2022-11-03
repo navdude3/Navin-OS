@@ -2,6 +2,7 @@
 #include "mp3fs.h"
 
 #define USER_MEMORY_BASE    0x800000
+#define KERNEL_AREA_BASE    (USER_MEMORY_BASE) // grows upwards
 #define PROGRAM_VMEM_BASE   0x8000000
 static int num_active_procs;
 extern int32_t load_program(void *addr, int fd);                   /* Reads bytes from an executable file into this address */
