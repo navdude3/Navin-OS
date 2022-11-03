@@ -2,26 +2,30 @@
 #include "paging.h"
 #include "process.h"
 
-int32_t load_program(void *addr, int fd) {
+int32_t load_program() {
     dentry_t entry;
     uint32_t buf[4];
-    if(addr == NULL || fd == NULL) return -1;                                           /* Invalid arguments */
-    if(read_dentry_by_name(fd, &entry) == -1) return -1;                                /* Entry does not exist in directory */
+    int32_t start;
+    // if(addr == NULL || fd == NULL) return -1;                                           /* Invalid arguments */
+    // if(read_dentry_by_name(fd, &entry) == -1) return -1;                                /* Entry does not exist in directory */
     read_data(entry.inode_idx, 0, buf, 4);                                              /* Writes first four bytes of data to buf */
     if(*buf != 0x464c457f) return -1;                                                   /* Not an executable */
     /* At this point, we have verified that the file exists and is a valid executable. Can now copy the program into address */
-    while (0 != read_data(entry.inode_idx, 0, addr, 4)) continue;                       /* Not sure abt length -- intention is to read whole program byte by byte */ 
+   //while (0 != read_data(entry.inode_idx, 0, addr, 4)) continue;                       /* Not sure abt length -- intention is to read whole program byte by byte */ 
     /* How is switch to user done? */
-    int32_t entry_point = (uint32_t*) (addr+24);                                        /* Return entry point at bit 24 */
-    return addr;                                           
+    read_data(entry.inode_idx, 24, buf, 4);                                         /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */
+    start = (*(uint32_t*)buf);                                                       /* Return entry point at bit 24 */
+    return start;                                           
 }
 
 
 void setup_user_page(){
     pde_desc_t user_page;
 
-    int start_mem_index = PROGRAM_VMEM_BASE >> 12;
+    int start_mem_index = PROGRAM_VMEM_BASE >> 22;
     int start_mem = set_pdentry(start_mem_index, user_page);
+
+    uint32_t user_addr = (num_active_procs * 0x400000) + USER_MEMORY_BASE;
 
     user_page.pde_p = 1;
     user_page.pde_rw = 1;
@@ -35,21 +39,31 @@ void setup_user_page(){
     user_page.pde_avail = 0;
     user_page.pde_pat = 0;
     user_page.pde_reserved = 0;
-    user_page.pde_pba = start_mem + (2 + num_active_procs);
+    user_page.pde_pba = user_addr;
     
     flush_tlb();
 }       
 
 
-int32_t setup_pcb(void *addr) {
-    uint32_t kernel_area_base_addr = (uint32_t) KERNEL_AREA_BASE - ((num_active_procs + 1)* KERNEL_AREA_SIZE);
-    proc_ctrl_blk_t pblk;
+// int32_t setup_pcb(void *addr) {
+//     uint32_t kernel_area_base_addr = (uint32_t) KERNEL_AREA_BASE - ((num_active_procs + 1)* KERNEL_AREA_SIZE);
+//     proc_ctrl_blk_t pblk;
 
-    pblk.parent_ctrl_blk = (proc_ctrl_blk_t*) kernel_area_base_addr + KERNEL_AREA_SIZE; // assumes parent process is right below in stack
-    init_proc_fd_array(&pblk);
-    *(proc_ctrl_blk_t*) kernel_area_base_addr = pblk; // write initialized pblk to top of kernel process area
-    return 0;
+//     pblk.parent_ctrl_blk = (proc_ctrl_blk_t*) kernel_area_base_addr + KERNEL_AREA_SIZE; // assumes parent process is right below in stack
+//     init_proc_fd_array(&pblk);
+//     *(proc_ctrl_blk_t*) kernel_area_base_addr = pblk; // write initialized pblk to top of kernel process area
+//     return 0;
+// }
+
+
+int32_t setup_pcb(void *addr){
+    
+
+
+
+
 }
+
 
 
 int32_t sys_execute(const uint8_t* command) {
@@ -58,7 +72,7 @@ int32_t sys_execute(const uint8_t* command) {
     int i;
     int fname_indexer, args_indexer;
     int file_flag, args_flag;
-    uint32_t user_addr = (num_active_procs * 0x400000) + USER_MEMORY_BASE;
+    
 
     if(command == NULL) return -1;
     if(command[0] == '\0') return -1;                // file non existent
@@ -95,21 +109,27 @@ int32_t sys_execute(const uint8_t* command) {
 
 
     /* 2. Executable check */
-    dentry_t dentry;   
-    uint32_t buf[4];      
-    uint32_t start;              
+     dentry_t dentry;   
+    // uint32_t buf[4];      
+    // uint32_t start;              
       
-    if(read_dentry_by_name(fname, &dentry) == -1) return -1;            /* Does file exist */
-    if(read_data(dentry.inode_idx, 0, buf, 4) == -1) return -1;         /* Error occurred while writing */
-    if(*buf != 0x464c457f) return -1;                                   /* Checks if it is an executable */
-    /* Valid Executable */
-    read_data(dentry.inode_idx, 24, buf, 4);                            /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */
-    start = (*(uint32_t*)buf);                                          /* ?? is this the right accessing */
-
+    // if(read_dentry_by_name(fname, &dentry) == -1) return -1;            /* Does file exist */
+    // if(read_data(dentry.inode_idx, 0, buf, 4) == -1) return -1;         /* Error occurred while writing */
+    // if(*buf != 0x464c457f) return -1;                                   /* Checks if it is an executable */
+    // /* Valid Executable */
+    // read_data(dentry.inode_idx, 24, buf, 4);                            /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */
+    // start = (*(uint32_t*)buf);                                          /* ?? is this the right accessing */
 
     /* 3. Set up program paging */
-    setup_user_page((void*)user_addr); // flushes TLB
-    
+    setup_user_page(); // flushes TLB
+    uint32_t start = load_program();
+    uint32_t entry;
+    if(start == -1) return -1;
+    int i;
+    for (i = 0; i < 4; i++) {
+		entry |= (start[i] << (i * 8));                         /* Reversing data so entry contains bytes 27-24*/
+	}
+
     /* 4. User Level Program Loader */
     inode_t inode = init_inode[dentry.inode_idx];
     uint32_t size = inode.file_size;
@@ -132,7 +152,27 @@ int32_t sys_execute(const uint8_t* command) {
 
 int32_t sys_halt(uint8_t status) {
     /* Restore Parent Data */
+    //load user program with old pid? need PCB
+
     /* Restore Parent Paging */ //pcb needs to be done for this to retrive parent block
+
+
     /* Close any relevant FDs */
+    int i;
+    for(i = 0; i<8; i++) {
+        //if flag is in use (PCB)
+            close(i);
+    }
+
     /* Jump to execute return */
+    // asm volatile (
+	//     "movl smthn into smthn"
+    //     "movl smthn into smthn"
+    //     "jmp to smthn"
+	//     : "r" //to old kernal ebp and esp prob
+	//     : "%eax"
+	// );
+
+	return 0;
+
 }
