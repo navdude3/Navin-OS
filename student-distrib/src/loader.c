@@ -87,8 +87,8 @@ int32_t sys_execute(const uint8_t* command) {
 
 
     /* 3. Set up program paging */
-    setup_user_page((void*)user_addr);
-    flush_tlb();
+    setup_user_page((void*)user_addr); // flushes TLB
+    
 
     /* 4. User Level Program Loader */
     inode_t inode = init_inode[dentry.inode_idx];
