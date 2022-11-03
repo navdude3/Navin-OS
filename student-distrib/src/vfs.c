@@ -2,23 +2,28 @@
 #include "lib.h"
 #include "mp3fs.h"
 #include "terminal.h"
+#include "process.h"
 
 /* 
  * init_vfs
- *   DESCRIPTION: Initializes the virtual filesystem and stdoutput
+ *   DESCRIPTION: Initializes the global 
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: 0 if successful
  *   SIDE EFFECTS: Initializes stdout to fd entry 1
  */
 int32_t init_vfs(){
+    init_fd_array(global_fd_array);
+    return 0;
+}
+
+int32_t init_fd_array(fd_entry_t* fd_array){
     /* terminal driver assigned to fd 1*/
     fd_entry_t* stdout_fd = &fd_array[1];
     stdout_fd->file_position = 0;
     stdout_fd->flags.present = 1;
     stdout_fd->j_tbl = &terminal_ops;
     stdout_fd->j_tbl->open((uint8_t*)"garbage"); // initialize terminal driver
-    return 0;
 }
 
 /* 
@@ -29,7 +34,7 @@ int32_t init_vfs(){
  *   RETURN VALUE: none
  *   SIDE EFFECTS: marks entry as present (might need to implement race condition handling), must be freed with close()
  */
-int32_t      get_free_fd_entry_idx(){
+int32_t      get_free_fd_entry_idx(fd_entry_t* fd_array){
     int idx;
     for (idx = 2; idx < FD_ARRAY_SIZE; ++idx){
         if(fd_array[idx].flags.present == 0){
@@ -48,7 +53,7 @@ int32_t      get_free_fd_entry_idx(){
  *   RETURN VALUE: none
  *   SIDE EFFECTS: marks entry as not present (might need to implement race condition handling), does not clear contents (for now)
  */
-void free_fd_entry(uint32_t idx){
+void free_fd_entry(fd_entry_t* fd_array, uint32_t idx){
     fd_array[idx].flags.present = 0;
 }
 
@@ -63,6 +68,7 @@ void free_fd_entry(uint32_t idx){
 int32_t open              (const uint8_t* fname){
     dentry_t f_dentry;
     fd_entry_t* entry;
+
 
     if(fname == NULL) return -1;
     

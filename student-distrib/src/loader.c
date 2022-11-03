@@ -2,73 +2,34 @@
 #include "paging.h"
 #include "process.h"
 #include "mp3fs.h"
-
-// int32_t load_program() {
-//     dentry_t entry;
-//     uint32_t buf[4];
-//     int32_t start;
-//     // if(addr == NULL || fd == NULL) return -1;                                           /* Invalid arguments */
-//     // if(read_dentry_by_name(fd, &entry) == -1) return -1;                                /* Entry does not exist in directory */
-//     read_data(entry.inode_idx, 0, buf, 4);                                              /* Writes first four bytes of data to buf */
-//     if(*buf != 0x464c457f) return -1;                                                   /* Not an executable */
-//     /* At this point, we have verified that the file exists and is a valid executable. Can now copy the program into address */
-//    //while (0 != read_data(entry.inode_idx, 0, addr, 4)) continue;                       /* Not sure abt length -- intention is to read whole program byte by byte */ 
-//     /* How is switch to user done? */
-//     read_data(entry.inode_idx, 24, buf, 4);                                         /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */
-//     start = (*(uint32_t*)buf);                                                       /* Return entry point at bit 24 */
-//     return start;                                           
-// }
+#include "vfs.h"
 
 
 void setup_user_page(int pid){
     pde_desc_t user_page;
 
-    int start_mem_index = PROGRAM_VMEM_BASE >> 22;
-    set_pdentry(start_mem_index, user_page);
+    int start_mem_index = PROGRAM_VMEM_BASE >> 22;                                  /* Page Directory Bits = 10 MSB */
+    
 
     uint32_t user_addr = (pid * 0x400000) + USER_MEMORY_BASE;
 
-    user_page.pde_p = 1;
-    user_page.pde_rw = 1;
-    user_page.pde_us = 1;
+    user_page.pde_p = 1;                                                            /* Mark as preset */
+    user_page.pde_rw = 1;                                                           /* Enable Read/Write */
+    user_page.pde_us = 1;                                                           /* Enable user mode */
     user_page.pde_pwt = 0;
     user_page.pde_pcd = 0;
     user_page.pde_a = 0;
     user_page.pde_d = 0;
-    user_page.pde_ps = 1;
+    user_page.pde_ps = 1;                                                           /* Set to 4MB pages */
     user_page.pde_g = 0;
     user_page.pde_avail = 0;
     user_page.pde_pat = 0;
     user_page.pde_reserved = 0;
     user_page.pde_pba = user_addr;
     
-    flush_tlb();
+    set_pdentry(start_mem_index, user_page);
 }       
-
-
-
-//ravyu code
-
-// int32_t setup_pcb(void *addr) {
-//     uint32_t kernel_area_base_addr = (uint32_t) KERNEL_AREA_BASE - ((num_active_procs + 1)* KERNEL_AREA_SIZE);
-//     proc_ctrl_blk_t pblk;
-
-//     pblk.parent_ctrl_blk = (proc_ctrl_blk_t*) kernel_area_base_addr + KERNEL_AREA_SIZE; // assumes parent process is right below in stack
-//     init_proc_fd_array(&pblk);
-//     *(proc_ctrl_blk_t*) kernel_area_base_addr = pblk; // write initialized pblk to top of kernel process area
-//     return 0;
-// }
-
-
-// int32_t setup_pcb(void *addr){
-    
-
-
-
-
-// }
-
-
+ 
 
 int32_t sys_execute(const uint8_t* command) {
     uint8_t fname[32];                              // max filesize name
@@ -76,22 +37,17 @@ int32_t sys_execute(const uint8_t* command) {
     int i;
     int fname_indexer, args_indexer;
     int file_flag, args_flag;
-    uint32_t esp, ebp;
+    uint32_t esp = 0;
+    uint32_t ebp = 0;
     uint32_t curr_pid;
-    int active_processes;
+    int active_processes = 0;
     uint8_t eip_buffer[4];
     uint32_t entry;
     uint8_t exe_check[4];
     dentry_t dentry;   
     inode_t inode;
     uint32_t size;
-
-    asm volatile(                                    //immediately get esp and ebp
-        "movl %%esp, %0" : "=r"(esp)
-    );
-    asm volatile(
-        "movl %%ebp, %0" : "=r"(esp)
-    );
+    
 
     if(command == NULL) return -1;
     if(command[0] == '\0') return -1;                // file non existent
@@ -111,6 +67,7 @@ int32_t sys_execute(const uint8_t* command) {
             return -1;
         }
    }
+   
    num_active_procs = active_processes; //always check to see how many active processes we have
 
    
@@ -155,17 +112,16 @@ int32_t sys_execute(const uint8_t* command) {
 
 
     /* 3. Set up program paging */
-    setup_user_page(curr_pid); // flushes TLB aswell
+    setup_user_page(curr_pid);                  /* Sets up page and flushes TLB */
 
 
-
-//this might be needed for some more null checking later on?
+  //this might be needed for some more null checking later on?
     // if(addr == NULL || fd == NULL) return -1;                                          
     // if(read_dentry_by_name(fd, &entry) == -1) return -1;  
     
                                 
     
-       /* 4. User Level Program Loader */                                     
+    /* 4. User Level Program Loader */                                     
                                        
     /* At this point, we have verified that the file exists and is a valid executable. Can now copy the program into address */
     read_data(dentry.inode_idx, 24, eip_buffer, 4);                                                                                   /* Return entry point at bit 24 */
@@ -176,23 +132,25 @@ int32_t sys_execute(const uint8_t* command) {
 
     inode = init_inode[dentry.inode_idx];
     size = inode.file_size;
-    read_data(dentry.inode_idx, 0, (uint8_t*)0x08048000, size);         /* Copying entire file to memory */
+    read_data(dentry.inode_idx, 0, (uint8_t*)PROGRAM_VMEM_START, size);         /* Copying entire file to memory */
 
     /* 5. Create PCB */
     pcb_t* pcb_startmem = (pcb_t *) USER_MEMORY_BASE - ((curr_pid + 1) * PCB_SIZE);  //+1 because curr_pid goes from 0 to 5
 
     pcb_startmem->pid = curr_pid;
-   // uint32_t parent_pid; //grab the terminals pid
+    // uint32_t parent_pid; //grab the terminals pid
 
     pcb_startmem->saved_esp = esp;   //use the esp and epb got from beginning of execute
     pcb_startmem->saved_ebp = ebp;
+    init_fd_array(pcb_startmem->proc_fd_array);
 
     /* 6. Create it’s own context switch stack */
-    
+
 
 
     tss.ss0 = KERNEL_DS;
     tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * curr_pid);
+    tss.esp = PROGRAM_VMEM_STACK;
 
 
 
@@ -200,22 +158,25 @@ int32_t sys_execute(const uint8_t* command) {
 
     //this is basically the context switch, we need to get back to user mode :)
 
+    asm volatile ("                                                             \n\
+        mov (4 * 8) | 3, ax ; ring 3 data with bottom 2 bits set for ring 3     \n\
+        mov ax, ds                                                              \n\
+        mov ax, es                                                              \n\
+        mov ax, fs                                                              \n\
+        mov ax, gs                                                              \n\
 
-
-    // mov ax, (4 * 8) | 3 ; ring 3 data with bottom 2 bits set for ring 3
-	// mov ds, ax
-	// mov es, ax 
-	// mov fs, ax 
-	// mov gs, ax ; SS is handled by iret
- 
-	// ; set up the stack frame iret expects
-	// mov eax, esp
-	// push (4 * 8) | 3 ; data selector
-	// push eax ; current esp
-	// pushf ; eflags
-	// push (3 * 8) | 3 ; code selector (ring 3 code with bottom 2 bits set for ring 3)
-	// push test_user_function ; instruction address to return to
-	// iret
+        mov esp, eax                                                            \n\
+        push (4 * 8) | 3 ; data selector                                        \n\
+        push eax ; current esp                                                  \n\
+        pushf ; eflags                                                          \n\
+        push (3 * 8) | 3 ; code selector                                        \n\
+        push test_user_function ; instruction address to return to              \n\
+        iret                                                                    \n\
+        "
+        :
+        :
+        :
+    );
 
 
     return 0;

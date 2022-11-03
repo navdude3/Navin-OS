@@ -3,7 +3,7 @@
 #include "types.h"
 
 
-#define FD_ARRAY_SIZE 64
+#define FD_ARRAY_SIZE 8
 
 
 typedef struct fd_ops {
@@ -29,6 +29,7 @@ typedef struct fd_entry{
 } fd_entry_t;
 
 int32_t init_vfs();
+int32_t init_fd_array(fd_entry_t* fd_array);
 /* Main file descriptor functions */
 
 int32_t open              (const uint8_t* fname);
@@ -37,9 +38,9 @@ int32_t read              (uint32_t fd, uint8_t* buf, uint32_t length);
 int32_t write             (uint32_t fd, uint8_t* buf, uint32_t length);
 
 /* Utility functions for file descriptor table*/
-int32_t      get_free_fd_entry_idx();
-void    free_fd_entry(uint32_t idx);
+int32_t      get_free_fd_entry_idx(fd_entry_t* fd_array);
+void    free_fd_entry(fd_entry_t* fd_array, uint32_t idx);
 
-fd_entry_t fd_array [FD_ARRAY_SIZE];
+fd_entry_t global_fd_array [FD_ARRAY_SIZE];
 
 #endif // VFS_H
