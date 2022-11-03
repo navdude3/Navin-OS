@@ -1,6 +1,7 @@
 #define   VIRTUAL_MEM   0x8000000
 #define   PAGING_H
 
+#include "x86_desc.h"
 #include "types.h"
 
 /* Page directory entry descriptor*/
@@ -54,6 +55,11 @@ typedef struct pte_desc{
     uint32_t pte_pba : 20;
 } pte_desc_t;
 
-init_page_directory(dir_desc, first_table_desc);
-init_first_page_table(first_table_desc);
+extern x86_desc_t cr3_desc; // PDBR
+extern x86_desc_t first_4_desc; // Page table descriptor for first 4Mb
+
+extern void init_page_directory(dir_desc, first_table_desc);
+extern void init_first_page_table(first_table_desc);
+uint32_t set_pdentry(uint32_t index, pde_desc_t pdentry);
+
 

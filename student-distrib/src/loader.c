@@ -16,8 +16,27 @@ int32_t load_program(void *addr, int fd) {
 }
 
 
-int32_t setup_user_page(void *addr) {
+void setup_user_page(){
+    pde_desc_t user_page;
 
+    int start_mem_index = PROGRAM_VMEM_BASE >> 12;
+    int start_mem = set_pdentry(start_mem_index, user_page);
+
+    user_page.pde_p = 1;
+    user_page.pde_rw = 1;
+    user_page.pde_us = 1;
+    user_page.pde_pwt = 0;
+    user_page.pde_pcd = 0;
+    user_page.pde_a = 0;
+    user_page.pde_d = 0;
+    user_page.pde_ps = 1;
+    user_page.pde_g = 0;
+    user_page.pde_avail = 0;
+    user_page.pde_pat = 0;
+    user_page.pde_reserved = 0;
+    user_page.pde_pba = start_mem + (2 + num_active_procs);
+    
+    flush_tlb();
 }       
 
 
