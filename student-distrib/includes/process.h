@@ -27,7 +27,3 @@ typedef struct proc_kernel_blk{
         }__attribute__((packed));
     };
 } proc_kernel_blk_t;
-
-int init_proc_fd_array(proc_ctrl_blk_t* ctrl_blk);
-
-#endif

@@ -1,5 +1,7 @@
 #include "loader.h"
+#include "paging.h"
 #include "process.h"
+
 int32_t load_program(void *addr, int fd) {
     dentry_t entry;
     uint32_t buf[4];
@@ -15,8 +17,27 @@ int32_t load_program(void *addr, int fd) {
 }
 
 
-int32_t setup_user_page(void *addr) {
+void setup_user_page(){
+    pde_desc_t user_page;
 
+    int start_mem_index = PROGRAM_VMEM_BASE >> 12;
+    int start_mem = set_pdentry(start_mem_index, user_page);
+
+    user_page.pde_p = 1;
+    user_page.pde_rw = 1;
+    user_page.pde_us = 1;
+    user_page.pde_pwt = 0;
+    user_page.pde_pcd = 0;
+    user_page.pde_a = 0;
+    user_page.pde_d = 0;
+    user_page.pde_ps = 1;
+    user_page.pde_g = 0;
+    user_page.pde_avail = 0;
+    user_page.pde_pat = 0;
+    user_page.pde_reserved = 0;
+    user_page.pde_pba = start_mem + (2 + num_active_procs);
+    
+    flush_tlb();
 }       
 
 
@@ -83,13 +104,12 @@ int32_t sys_execute(const uint8_t* command) {
     if(*buf != 0x464c457f) return -1;                                   /* Checks if it is an executable */
     /* Valid Executable */
     read_data(dentry.inode_idx, 24, buf, 4);                            /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */
-    start = (uint32_t*)buf;                                             /* ?? is this the right accessing */
+    start = (*(uint32_t*)buf);                                          /* ?? is this the right accessing */
 
 
     /* 3. Set up program paging */
     setup_user_page((void*)user_addr); // flushes TLB
     
-
     /* 4. User Level Program Loader */
     inode_t inode = init_inode[dentry.inode_idx];
     uint32_t size = inode.file_size;
@@ -97,13 +117,22 @@ int32_t sys_execute(const uint8_t* command) {
 
     /* 5. Create PCB */
     setup_pcb(NULL);
+    // allocate it 8kB within the 4MB (memcpy not actual memory allocation)
+    // mark the process as running?
+    // store parent task's PCB pointer
 
     /* 6. Create it’s own context switch stack */
     ++num_active_procs;
-    //return IRET;
+
+    //TSS updates go within here
+
+    return 0;
 }
 
 
 int32_t sys_halt(uint8_t status) {
-
+    /* Restore Parent Data */
+    /* Restore Parent Paging */ //pcb needs to be done for this to retrive parent block
+    /* Close any relevant FDs */
+    /* Jump to execute return */
 }
