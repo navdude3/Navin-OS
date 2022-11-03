@@ -9,7 +9,10 @@
 
 typedef struct __attribute__((packed)) proc_ctrl_blk{
         struct proc_ctrl_blk* parent_ctrl_blk;
-        fd_entry_t* proc_fd_array [PROC_FD_ARRAY_SIZE]; // array of pointers pointing to fd's in global array (see vfs.h)
+        /* array of indexes (indices?) to fd's in global fd array (see vfs.h) 
+        * For example, if proc_fd_map[5] = 20, the actual file descriptor is in fd_array[20]
+        */ 
+        int proc_fd_map [PROC_FD_ARRAY_SIZE]; 
 } proc_ctrl_blk_t;
 
 static proc_ctrl_blk_t* active_proc;
