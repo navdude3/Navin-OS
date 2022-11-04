@@ -89,34 +89,34 @@ int32_t sys_execute(const uint8_t* command) {
     /* 1. Parse args and name */
     file_flag = 0;
     args_flag = 0;
-    for(i = 0; i < 128; i++){
-        if(command[i] != ' ' && file_flag == 0){
-            for(fname_indexer = i; fname_indexer < 128; fname_indexer++){       //put file name into fname
-                if(command[fname_indexer] == ' ' || command[fname_indexer] == '\0'){
-                    file_flag = 1;
-                    break;
-                }
-                fname[fname_indexer] = command[fname_indexer];
-            }
-        }
-    }
+    // for(i = 0; i < 128; i++){
+    //     if(command[i] != ' ' && file_flag == 0){
+    //         for(fname_indexer = i; fname_indexer < 128; fname_indexer++){       //put file name into fname
+    //             if(command[fname_indexer] == ' ' || command[fname_indexer] == '\0'){
+    //                 file_flag = 1;
+    //                 break;
+    //             }
+    //             fname[fname_indexer] = command[fname_indexer];
+    //         }
+    //     }
+    // }
 
-    for(i = fname_indexer; i < 128; i++){
-        if(command[i] != ' ' && args_flag == 0){
-            for(args_indexer = i; args_indexer < 128; args_indexer++){          //put arguments into args
-                if(command[args_indexer] == ' '|| command[fname_indexer] == '\0'){                               //NOT NEEDED UNTIL AFTER 3.3
-                    args_flag = 1;
-                    break;
-                }
-                args[args_indexer] = command[args_indexer];
-            }
-        }
-    }
+    // for(i = fname_indexer; i < 128; i++){
+    //     if(command[i] != ' ' && args_flag == 0){
+    //         for(args_indexer = i; args_indexer < 128; args_indexer++){          //put arguments into args
+    //             if(command[args_indexer] == ' '|| command[fname_indexer] == '\0'){                               //NOT NEEDED UNTIL AFTER 3.3
+    //                 args_flag = 1;
+    //                 break;
+    //             }
+    //             args[args_indexer] = command[args_indexer];
+    //         }
+    //     }
+    // }
 
 
 
     /* 2. Executable check */
-    read_dentry_by_name(fname, &dentry);
+    read_dentry_by_name(command, &dentry);
      
     read_data(dentry.inode_idx, 0, exe_check, 4);          /* Writes first four bytes of data to buf */
     //if(*exe_check != 0x464c457f){                         changed because was getting warning                                                    

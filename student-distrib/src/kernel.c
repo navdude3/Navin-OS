@@ -187,7 +187,7 @@ void entry(unsigned long magic, unsigned long addr) {
     launch_tests();
 
     clear();
-    hellothere_test();
+    //hellothere_test();
 
 #endif
     /* Execute the first program ("shell") ... */
