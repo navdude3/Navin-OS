@@ -14,6 +14,7 @@
 #include "rtc.h"
 #include "mp3fs.h"
 #include "vfs.h"
+#include "paging.h"
 
 #define RUN_TESTS
 

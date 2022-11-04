@@ -24,6 +24,7 @@ int32_t init_fd_array(fd_entry_t* fd_array){
     stdout_fd->flags.present = 1;
     stdout_fd->j_tbl = &terminal_ops;
     stdout_fd->j_tbl->open((uint8_t*)"garbage"); // initialize terminal driver
+    return 0;
 }
 
 /* 
@@ -34,11 +35,11 @@ int32_t init_fd_array(fd_entry_t* fd_array){
  *   RETURN VALUE: none
  *   SIDE EFFECTS: marks entry as present (might need to implement race condition handling), must be freed with close()
  */
-int32_t      get_free_fd_entry_idx(fd_entry_t* fd_array){
+int32_t      get_free_fd_entry_idx(){
     int idx;
     for (idx = 2; idx < FD_ARRAY_SIZE; ++idx){
-        if(fd_array[idx].flags.present == 0){
-            fd_array[idx].flags.present = 1;
+        if(cur_process->fd_array[idx].flags.present == 0){
+            cur_process->fd_array[idx].flags.present = 1;
             return idx;
         }
     }
@@ -53,8 +54,8 @@ int32_t      get_free_fd_entry_idx(fd_entry_t* fd_array){
  *   RETURN VALUE: none
  *   SIDE EFFECTS: marks entry as not present (might need to implement race condition handling), does not clear contents (for now)
  */
-void free_fd_entry(fd_entry_t* fd_array, uint32_t idx){
-    fd_array[idx].flags.present = 0;
+void free_fd_entry(uint32_t idx){
+    cur_process->fd_array[idx].flags.present = 0;
 }
 
 /* 
@@ -77,7 +78,7 @@ int32_t open              (const uint8_t* fname){
     } 
     uint32_t fd = get_free_fd_entry_idx();
     if (fd < 0) return fd;
-    entry = &fd_array[fd];
+    entry = &cur_process->fd_array[fd];
 
     switch (f_dentry.file_type){
         // ADD CASE 0 ONCE FD OPERATIONS IMPLEMENTED FOR RTC
@@ -106,7 +107,7 @@ int32_t open              (const uint8_t* fname){
  */
 int32_t close(uint32_t fd){
     if(fd < 2 || fd > 10) return -1;   // cannot close stdin/out
-    if(fd_array[fd].j_tbl->close(fd) < 0) return -1;
+    if(cur_process->fd_array[fd].j_tbl->close(fd) < 0) return -1;
     free_fd_entry(fd);
     return 0;
 }
@@ -120,7 +121,7 @@ int32_t close(uint32_t fd){
  */
 int32_t read(uint32_t fd, uint8_t* buf, uint32_t length){
     if(fd < 1 || fd > 10 || buf == NULL) return -1;
-    return fd_array[fd].j_tbl->read(fd, buf, length);
+    return cur_process->fd_array[fd].j_tbl->read(fd, buf, length);
 }
 
 /* 
@@ -132,5 +133,5 @@ int32_t read(uint32_t fd, uint8_t* buf, uint32_t length){
  */
 int32_t write              (uint32_t fd, uint8_t* buf, uint32_t length){
     if(fd < 1 || fd > 10 || buf == NULL) return -1;  
-    return fd_array[fd].j_tbl->write(fd, buf, length);
+    return cur_process->fd_array[fd].j_tbl->write(fd, buf, length);
 }

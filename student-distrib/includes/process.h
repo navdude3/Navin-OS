@@ -30,16 +30,15 @@
 // } proc_kernel_blk_t;
 
 
-static int pid_array[MAX_PROCESS]; //account for stdin and stdout
+ //account for stdin and stdout
 
 typedef struct{
-    fd_entry_t proc_fd_array [PROC_FD_ARRAY_SIZE];
+    fd_entry_t fd_array [PROC_FD_ARRAY_SIZE];
     uint32_t pid;
     uint32_t parent_pid;
-    uint32_t fd;
     uint32_t saved_esp;
     uint32_t saved_ebp;
-    uint32_t active;
+    // uint32_t active;
 } pcb_t;
 
-static pcb_t* active_proc;
+static pcb_t* cur_process; // currently active process

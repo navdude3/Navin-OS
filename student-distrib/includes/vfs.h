@@ -31,6 +31,7 @@ typedef struct fd_entry{
 int32_t init_vfs();
 int32_t init_fd_array(fd_entry_t* fd_array);
 /* Main file descriptor functions */
+// TODO: rename to sys_
 
 int32_t open              (const uint8_t* fname);
 int32_t close             (uint32_t fd);
@@ -38,9 +39,11 @@ int32_t read              (uint32_t fd, uint8_t* buf, uint32_t length);
 int32_t write             (uint32_t fd, uint8_t* buf, uint32_t length);
 
 /* Utility functions for file descriptor table*/
-int32_t      get_free_fd_entry_idx(fd_entry_t* fd_array);
-void    free_fd_entry(fd_entry_t* fd_array, uint32_t idx);
+int32_t      get_free_fd_entry_idx();
+void    free_fd_entry(uint32_t idx);
+void    refresh_cur_fd_array();
 
-fd_entry_t global_fd_array [FD_ARRAY_SIZE];
+fd_entry_t global_fd_array [FD_ARRAY_SIZE];// TODO: should be removed soon
+
 
 #endif // VFS_H

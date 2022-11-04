@@ -37,8 +37,8 @@ int32_t sys_execute(const uint8_t* command) {
     int i;
     int fname_indexer, args_indexer;
     int file_flag, args_flag;
-    uint32_t esp = 0;
-    uint32_t ebp = 0;
+    uint32_t esp;
+    uint32_t ebp;
     uint32_t curr_pid;
     int active_processes = 0;
     uint8_t eip_buffer[4];
@@ -47,13 +47,20 @@ int32_t sys_execute(const uint8_t* command) {
     dentry_t dentry;   
     inode_t inode;
     uint32_t size;
+    uint32_t stack_top;
+
+
+    stack_top = (uint32_t) &command;
+    esp = stack_top + 14 * 4; //esp is 14 down on stack * 4 bytes
+    ebp = stack_top + 8 * 4;
+    
     
 
     if(command == NULL) return -1;
-    if(command[0] == '\0') return -1;                // file non existent
+    if(command[0] == '\0') return -1;                                           // file non existent
 
 
-   for(i = 0; i < MAX_PROCESS; i++){                    //check which pids are open 
+   for(i = 0; i < MAX_PROCESS; i++){                                            // check which pids are open 
         if(pid_array[i] == 0){
             curr_pid = i;
             pid_array[i] = 1;
@@ -63,14 +70,13 @@ int32_t sys_execute(const uint8_t* command) {
         if(pid_array[i] == 1){
             active_processes++;
         }
-        if(i == 5 && pid_array[5] == 1){           //every pid is used
+        if(i == 5 && pid_array[5] == 1){                                        //every pid is used
             return -1;
         }
    }
    
-   num_active_procs = active_processes; //always check to see how many active processes we have
+   num_active_procs = active_processes;                                         //always check to see how many active processes we have
 
-   
 
     /* 1. Parse args and name */
     file_flag = 0;
@@ -115,7 +121,7 @@ int32_t sys_execute(const uint8_t* command) {
     setup_user_page(curr_pid);                  /* Sets up page and flushes TLB */
 
 
-  //this might be needed for some more null checking later on?
+    //this might be needed for some more null checking later on?
     // if(addr == NULL || fd == NULL) return -1;                                          
     // if(read_dentry_by_name(fd, &entry) == -1) return -1;  
     
@@ -138,11 +144,11 @@ int32_t sys_execute(const uint8_t* command) {
     pcb_t* pcb_startmem = (pcb_t *) USER_MEMORY_BASE - ((curr_pid + 1) * PCB_SIZE);  //+1 because curr_pid goes from 0 to 5
 
     pcb_startmem->pid = curr_pid;
-    // uint32_t parent_pid; //grab the terminals pid
+    pcb_startmem->parent_pid = cur_process->pid;
 
     pcb_startmem->saved_esp = esp;   //use the esp and epb got from beginning of execute
     pcb_startmem->saved_ebp = ebp;
-    init_fd_array(pcb_startmem->proc_fd_array);
+    init_fd_array(pcb_startmem->fd_array);
 
     /* 6. Create it’s own context switch stack */
 
@@ -154,28 +160,18 @@ int32_t sys_execute(const uint8_t* command) {
 
 
 
-    //ring3 implementation below, need to rewrite so correct args are passed
-
-    //this is basically the context switch, we need to get back to user mode :)
+    /* Context Switch */
 
     asm volatile ("                                                             \n\
-        mov (4 * 8) | 3, ax ; ring 3 data with bottom 2 bits set for ring 3     \n\
-        mov ax, ds                                                              \n\
-        mov ax, es                                                              \n\
-        mov ax, fs                                                              \n\
-        mov ax, gs                                                              \n\
-
-        mov esp, eax                                                            \n\
-        push (4 * 8) | 3 ; data selector                                        \n\
-        push eax ; current esp                                                  \n\
-        pushf ; eflags                                                          \n\
-        push (3 * 8) | 3 ; code selector                                        \n\
-        push test_user_function ; instruction address to return to              \n\
+        push %0                                                                 \n\
+        push %1                                                                 \n\
+        pushfl                                                                  \n\
+        push %2                                                                 \n\
+        push %3                                                                 \n\
         iret                                                                    \n\
         "
-        :
-        :
-        :
+        :   \
+        :"r" (USER_DS), "r" (PROGRAM_VMEM_STACK), "r" (USER_CS), "r" (entry) \
     );
 
 
@@ -187,20 +183,30 @@ int32_t sys_halt(uint8_t status) {
     /* Restore Parent Data */
     //load user program with old pid? need PCB
 
-    /* Restore Parent Paging */ //pcb needs to be done for this to retrive parent block
+    /* Restore Parent Paging */ //pcb needs to be done for this to retrive parent block]
 
-
+    // pcb_t* pcb_parent_pid = cur_process->parent_pid;
+    // pcb_t* pcb_current_pid = cur_process->pid;
     /* Close any relevant FDs */
     int i;
     for(i = 0; i<8; i++) {
-        //if flag is in use (PCB)
-            close(i);
+       // if(pcb_current_pid->fd_array[i].flags == 1)
+        close(i);
     }
+    // pid_array[pcb_current_pid] = 0;
+
+
+
+    // cur_process = (pcb_t *) USER_MEMORY_BASE - ((pcb_parent_pid + 1) * PCB_SIZE);
+
+
+    // set_pdentry()
+    // flush_tlb();
 
     /* Jump to execute return */
     // asm volatile (
-	//     "movl smthn into smthn"
-    //     "movl smthn into smthn"
+	//     "movl smthn into %esp"
+    //     "movl smthn into %ebp"
     //     "jmp to smthn"
 	//     : "r" //to old kernal ebp and esp prob
 	//     : "%eax"

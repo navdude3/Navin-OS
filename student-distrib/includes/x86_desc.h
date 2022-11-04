@@ -229,22 +229,24 @@ typedef struct pte_desc{
 extern x86_desc_t cr3_desc; // PDBR
 extern x86_desc_t first_4_desc; // Page table descriptor for first 4Mb
 
-/* Initializes page table for 0-4mb. Sets video memory to present*/
-#define init_first_page_table(first_table_desc)  \
-do{ \
-    unsigned i; \
-    for (i = 0; i < NUM_PTE; ++i) {\
-        *(uint32_t *)(first_table_desc.addr + (i << 2)) = (i<<12);\
-    }\
-    *(uint32_t *)(first_table_desc.addr + (0xB8 << 2)) = (0xB8000 |0x7);\
-} while(0)
 
-/* Initializes page directory, only first two entries are defined and present for CP1.*/
-#define init_page_directory(dir_desc, first_table_desc) \
-do{                                                     \
-    *(uint32_t *)(dir_desc.addr) = (first_table_desc.addr & 0xFFFFF000) | 0x007; \
-    *(uint32_t *) (dir_desc.addr + 4) = 0x00400087;  \
-}while(0)
+//removed backslashed look at previous commits if u want them back :)
+// /* Initializes page table for 0-4mb. Sets video memory to present*/
+// // #define init_first_page_table(first_table_desc)  
+// // do{ 
+// //     unsigned i; 
+// //     for (i = 0; i < NUM_PTE; ++i) {
+// //         *(uint32_t *)(first_table_desc.addr + (i << 2)) = (i<<12);
+// //     }
+// //     *(uint32_t *)(first_table_desc.addr + (0xB8 << 2)) = (0xB8000 |0x7);
+// // } while(0)
+
+// // /* Initializes page directory, only first two entries are defined and present for CP1.*/
+// // #define init_page_directory(dir_desc, first_table_desc) 
+// // do{                                                     
+// //     *(uint32_t *)(dir_desc.addr) = (first_table_desc.addr & 0xFFFFF000) | 0x007; 
+// //     *(uint32_t *) (dir_desc.addr + 4) = 0x00400087;  
+// // }while(0)
 
 
 
