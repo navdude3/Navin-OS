@@ -27,7 +27,7 @@ void setup_user_page(int pid){
     user_page.pde_avail = 0;
     user_page.pde_pat = 0;
     user_page.pde_reserved = 0;
-    user_page.pde_pba = user_addr;
+    user_page.pde_pba = (user_addr>>22);
     
     set_pdentry(start_mem_index, user_page);
 }       
@@ -56,6 +56,9 @@ int32_t sys_execute(const uint8_t* command) {
     // esp = stack_top + 14 * 4; //esp is 14 down on stack * 4 bytes
     // ebp = stack_top + 8 * 4;
 
+
+   
+
     asm volatile(                                    //immediately get esp and ebp
         "movl %%esp, %0" : "=r"(esp)
     );
@@ -81,6 +84,10 @@ int32_t sys_execute(const uint8_t* command) {
         if(i == 5 && pid_array[5] == 1){                                        //every pid is used
             return -1;
         }
+   }
+
+   for(i = 0; i < 4; i++){
+    eip_buffer[i] = 0;
    }
    
    num_active_procs = active_processes;                                         //always check to see how many active processes we have
@@ -125,7 +132,6 @@ int32_t sys_execute(const uint8_t* command) {
         return -1;        
     }           
 
-
     /* 3. Set up program paging */
     setup_user_page(curr_pid);                  /* Sets up page and flushes TLB */
 
@@ -141,9 +147,12 @@ int32_t sys_execute(const uint8_t* command) {
     /* At this point, we have verified that the file exists and is a valid executable. Can now copy the program into address */
     read_data(dentry.inode_idx, 24, eip_buffer, 4);                                                                                   /* Return entry point at bit 24 */
     
-    for (i = 0; i < 4; i++) {                                         /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */      
-		entry |= (eip_buffer[i] << (i * 8));                         /* Reversing data so entry contains bytes 27-24*/
-	}
+    entry = *((uint32_t*)eip_buffer);
+
+
+    // for (i = 0; i < 4; i++) {                                         /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */      
+	// 	entry |= (eip_buffer[i] << (i * 8));                         /* Reversing data so entry contains bytes 27-24*/
+	// }
 
     inode = init_inode[dentry.inode_idx];
     size = inode.file_size;
@@ -152,8 +161,15 @@ int32_t sys_execute(const uint8_t* command) {
     /* 5. Create PCB */
     pcb_t* pcb_startmem = (pcb_t *) USER_MEMORY_BASE - ((curr_pid + 1) * PCB_SIZE);  //+1 because curr_pid goes from 0 to 5
 
+
+
     pcb_startmem->pid = curr_pid;
-    pcb_startmem->parent_pid = cur_process->pid;
+
+    if(curr_pid == 0){
+        pcb_startmem->parent_pid = -1;
+    }else{
+        pcb_startmem->parent_pid = cur_process->pid;
+    }
 
     pcb_startmem->saved_esp = esp;   //use the esp and epb got from beginning of execute
     pcb_startmem->saved_ebp = ebp;
@@ -165,7 +181,7 @@ int32_t sys_execute(const uint8_t* command) {
 
     tss.ss0 = KERNEL_DS;
     tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * curr_pid);
-    tss.esp = PROGRAM_VMEM_STACK;
+    //tss.esp = PROGRAM_VMEM_STACK;
 
 
 
