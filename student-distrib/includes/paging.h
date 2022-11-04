@@ -55,8 +55,7 @@
 //     uint32_t pte_pba : 20;
 // } pte_desc_t;
 
-extern x86_desc_t cr3_desc; // PDBR
-extern x86_desc_t first_4_desc; // Page table descriptor for first 4Mb
+
 
 extern void flush_tlb();
 

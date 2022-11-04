@@ -2,7 +2,7 @@
 
 /* Initializes page table for 0-4mb. Sets video memory to present*/
 void init_first_page_table(x86_desc_t first_table_desc){
-    unsigned i; 
+    unsigned i;
 
     for(i = 0; i < NUM_PTE; ++i){
         *(uint32_t *)(first_table_desc.addr + (i << 2)) = (i << 12);
