@@ -502,6 +502,14 @@ int rtc_read_write_test() {
 
 
 /* Checkpoint 3 tests */
+
+
+
+
+
+
+
+
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
 
@@ -526,6 +534,6 @@ void launch_tests(){
 	// TEST_OUTPUT("Terminal RW Overflow Test", terminal_RW_test_overflow());
 	// TEST_OUTPUT("Terminal open and close", terminal_open_and_close());
 	// TEST_OUTPUT("RTC read write test", rtc_read_write_test());
-	
+	//TEST_OUTPUT("hello syscall", syscall_hello());
 	// launch your tests here
 }

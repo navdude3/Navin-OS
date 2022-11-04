@@ -15,6 +15,8 @@
 #include "mp3fs.h"
 #include "vfs.h"
 #include "paging.h"
+#include "tests_assem.h"
+
 
 #define RUN_TESTS
 
@@ -183,6 +185,10 @@ void entry(unsigned long magic, unsigned long addr) {
 #ifdef RUN_TESTS
     /* Run tests */
     launch_tests();
+
+    clear();
+    hellothere_test();
+
 #endif
     /* Execute the first program ("shell") ... */
 
