@@ -1,5 +1,6 @@
 #include "types.h"
 #include "mp3fs.h"
+#include "syscall_functions.h"
 
 #define USER_MEMORY_BASE    0x800000
 #define KERNEL_AREA_BASE    (USER_MEMORY_BASE) // grows upwards
@@ -9,10 +10,10 @@
 #define PROGRAM_VMEM_START  PROGRAM_VMEM_BASE+ 0x48000
 
 
-static int num_active_procs;               /* Reads bytes from an executable file into this address */
+
 extern void setup_user_page(int pid);                        /* Addr is the bounds of user page we want to define */
 extern int32_t setup_pcb(void *addr);
 extern int32_t sys_execute(const uint8_t* command);
 extern int32_t sys_halt(uint8_t status);
 
-static int pid_array[6];
+

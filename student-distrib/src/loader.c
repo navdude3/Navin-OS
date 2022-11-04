@@ -4,6 +4,8 @@
 #include "mp3fs.h"
 #include "vfs.h"
 
+static int num_active_procs;                                 /* Reads bytes from an executable file into this address */
+static int pid_array[6];
 
 void setup_user_page(int pid){
     pde_desc_t user_page;
@@ -50,10 +52,16 @@ int32_t sys_execute(const uint8_t* command) {
     uint32_t stack_top;
 
 
-    stack_top = (uint32_t) &command;
-    esp = stack_top + 14 * 4; //esp is 14 down on stack * 4 bytes
-    ebp = stack_top + 8 * 4;
-    
+    // stack_top = (uint32_t) &command;
+    // esp = stack_top + 14 * 4; //esp is 14 down on stack * 4 bytes
+    // ebp = stack_top + 8 * 4;
+
+    asm volatile(                                    //immediately get esp and ebp
+        "movl %%esp, %0" : "=r"(esp)
+    );
+    asm volatile(
+        "movl %%ebp, %0" : "=r"(ebp)
+    );
     
 
     if(command == NULL) return -1;
@@ -109,7 +117,7 @@ int32_t sys_execute(const uint8_t* command) {
 
     /* 2. Executable check */
      
-    read_data(dentry.inode_idx, 0, exe_check, 4);        /* Writes first four bytes of data to buf */
+    read_data(dentry.inode_idx, 0, exe_check, 4);          /* Writes first four bytes of data to buf */
     //if(*exe_check != 0x464c457f){                         changed because was getting warning                                                    
     if(exe_check[3] != 0x46 || exe_check[2] != 0x4C || exe_check[1] != 0x45 || exe_check[0] != 0x7f){      /* Not an executable */
         pid_array[curr_pid] = 0;
@@ -183,7 +191,9 @@ int32_t sys_halt(uint8_t status) {
     /* Restore Parent Data */
     //load user program with old pid? need PCB
 
+
     /* Restore Parent Paging */ //pcb needs to be done for this to retrive parent block]
+    //setup_user_page(curr_pid);
 
     // pcb_t* pcb_parent_pid = cur_process->parent_pid;
     // pcb_t* pcb_current_pid = cur_process->pid;

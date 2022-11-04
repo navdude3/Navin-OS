@@ -7,6 +7,7 @@
 #include "mp3fs.h"
 #include "vfs.h"
 #include "terminal.h"
+#include "loader.h"
 
 #define PASS 1
 #define FAIL 0
@@ -503,8 +504,14 @@ int rtc_read_write_test() {
 
 /* Checkpoint 3 tests */
 
+int execute_test(){
+    TEST_HEADER;
+	int result = PASS;
 
-
+	char * command = "hello";
+	sys_execute((uint8_t*) command);
+	return result;
+}
 
 
 
@@ -535,5 +542,6 @@ void launch_tests(){
 	// TEST_OUTPUT("Terminal open and close", terminal_open_and_close());
 	// TEST_OUTPUT("RTC read write test", rtc_read_write_test());
 	//TEST_OUTPUT("hello syscall", syscall_hello());
+	TEST_OUTPUT("execute", execute_test());
 	// launch your tests here
 }
