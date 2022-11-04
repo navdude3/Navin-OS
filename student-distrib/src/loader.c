@@ -36,7 +36,7 @@ void setup_user_page(int pid){
 int32_t sys_execute(const uint8_t* command) {
     uint8_t fname[32];                              // max filesize name
     uint8_t args[32];                               // store args here
-    int i;
+    int i,j;
     int fname_indexer, args_indexer;
     int file_flag, args_flag;
     uint32_t esp;
@@ -51,13 +51,6 @@ int32_t sys_execute(const uint8_t* command) {
     uint32_t size;
     uint32_t stack_top;
 
-
-    // stack_top = (uint32_t) &command;
-    // esp = stack_top + 14 * 4; //esp is 14 down on stack * 4 bytes
-    // ebp = stack_top + 8 * 4;
-
-
-   
 
     asm volatile(                                    //immediately get esp and ebp
         "movl %%esp, %0" : "=r"(esp)
@@ -86,9 +79,8 @@ int32_t sys_execute(const uint8_t* command) {
         }
    }
 
-   for(i = 0; i < 4; i++){
-    eip_buffer[i] = 0;
-   }
+   for(i = 0; i < 4; i++) eip_buffer[i] = 0;
+   for(j = 0; j < 32; j++) fname[j] = NULL;
    
    num_active_procs = active_processes;                                         //always check to see how many active processes we have
 
@@ -96,34 +88,35 @@ int32_t sys_execute(const uint8_t* command) {
     /* 1. Parse args and name */
     file_flag = 0;
     args_flag = 0;
-    // for(i = 0; i < 128; i++){
-    //     if(command[i] != ' ' && file_flag == 0){
-    //         for(fname_indexer = i; fname_indexer < 128; fname_indexer++){       //put file name into fname
-    //             if(command[fname_indexer] == ' ' || command[fname_indexer] == '\0'){
-    //                 file_flag = 1;
-    //                 break;
-    //             }
-    //             fname[fname_indexer] = command[fname_indexer];
-    //         }
-    //     }
-    // }
+    for(i = 0; i < 128; i++){
+        if(command[i] == "\0") break;
+        if(command[i] != ' ' && file_flag == 0){
+            for(fname_indexer = i; fname_indexer < 128; fname_indexer++){       //put file name into fname
+                if(command[fname_indexer] == ' ' || command[fname_indexer] == '\0'){
+                    file_flag = 1;
+                    break;
+                }
+                fname[fname_indexer] = command[fname_indexer];
+            }
+        }
+    }
 
-    // for(i = fname_indexer; i < 128; i++){
-    //     if(command[i] != ' ' && args_flag == 0){
-    //         for(args_indexer = i; args_indexer < 128; args_indexer++){          //put arguments into args
-    //             if(command[args_indexer] == ' '|| command[fname_indexer] == '\0'){                               //NOT NEEDED UNTIL AFTER 3.3
-    //                 args_flag = 1;
-    //                 break;
-    //             }
-    //             args[args_indexer] = command[args_indexer];
-    //         }
-    //     }
-    // }
+    for(i = fname_indexer; i < 128; i++){
+        if(command[i] != ' ' && args_flag == 0){
+            for(args_indexer = i; args_indexer < 128; args_indexer++){          //put arguments into args
+                if(command[args_indexer] == ' '|| command[args_indexer] == '\0'){                               //NOT NEEDED UNTIL AFTER 3.3
+                    args_flag = 1;
+                    break;
+                }
+                args[args_indexer] = command[args_indexer];
+            }
+        }
+    }
 
-
+    
 
     /* 2. Executable check */
-    read_dentry_by_name(command, &dentry);
+    read_dentry_by_name(fname, &dentry);
      
     read_data(dentry.inode_idx, 0, exe_check, 4);          /* Writes first four bytes of data to buf */
     //if(*exe_check != 0x464c457f){                         changed because was getting warning                                                    
@@ -183,22 +176,19 @@ int32_t sys_execute(const uint8_t* command) {
     tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * curr_pid);
     //tss.esp = PROGRAM_VMEM_STACK;
 
-
-
     /* Context Switch */
 
-    asm volatile ("                                                             \n\
-        push %0                                                                 \n\
-        push %1                                                                 \n\
-        pushfl                                                                  \n\
-        push %2                                                                 \n\
-        push %3                                                                 \n\
-        iret                                                                    \n\
-        "
-        :   \
-        :"r" (USER_DS), "r" (PROGRAM_VMEM_STACK), "r" (USER_CS), "r" (entry) \
-    );
+    asm volatile(
+        "pushl %0                           \n"
+        "pushl %1                           \n"
+        "pushfl                             \n"
 
+        "pushl %2                           \n"
+        "pushl %3                           \n"
+        "iret                               \n"
+        : 
+        : "r"(USER_DS), "r"(PROGRAM_VMEM_STACK), "r" (USER_CS), "r" (entry)
+        );
 
     return 0;
 }
