@@ -1,13 +1,11 @@
-
+#define ASM     1
 .globl syscall_linkage
-
-
 
 error_seen:    .long 0x0  
 
 jumptable:
-    .long 0x0 //this is a placeholder so a sys call w eax 1 can call halt
-    .long sys_halt //put c function here
+    .long 0x0                   # this is a placeholder so a sys call w eax 1 can call halt 
+    .long sys_halt              # put c function here 
     .long sys_execute
     .long sys_read
     .long sys_write
@@ -34,8 +32,7 @@ syscall_linkage:
     pushl %ebx
 
 
-    call *jumptable(, %eax, 4)  //use call to get back here
-        //eax has error value at this point
+    call *jumptable(, %eax, 4)  # use call to get back here eax has error value at this point 
     popl %ebx
     popl %ecx
     popl %edx
@@ -50,10 +47,3 @@ syscall_linkage:
    
 oob_error:
     iret
-
-
-
-//takes us to specific fn
-
-
-//use jumptable to take us to vidmap

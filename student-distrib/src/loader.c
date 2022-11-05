@@ -49,15 +49,11 @@ int32_t sys_execute(const uint8_t* command) {
     dentry_t dentry;   
     inode_t inode;
     uint32_t size;
-    uint32_t stack_top;
 
 
-    asm volatile(                                    //immediately get esp and ebp
-        "movl %%esp, %0" : "=r"(esp)
-    );
     asm volatile(
-        "movl %%ebp, %0" : "=r"(ebp)
-    );
+        "movl %%ebp, %0" : "=r"(ebp) 
+    );                              //immediately get ebp, get esp just before IRET 
     
 
     if(command == NULL) return -1;
@@ -112,11 +108,10 @@ int32_t sys_execute(const uint8_t* command) {
             }
         }
     }
-
     
 
     /* 2. Executable check */
-    read_dentry_by_name(fname, &dentry);
+    read_dentry_by_name(command, &dentry);
      
     read_data(dentry.inode_idx, 0, exe_check, 4);          /* Writes first four bytes of data to buf */
     //if(*exe_check != 0x464c457f){                         changed because was getting warning                                                    
@@ -138,35 +133,27 @@ int32_t sys_execute(const uint8_t* command) {
     /* 4. User Level Program Loader */                                     
                                        
     /* At this point, we have verified that the file exists and is a valid executable. Can now copy the program into address */
-    read_data(dentry.inode_idx, 24, eip_buffer, 4);                                                                                   /* Return entry point at bit 24 */
-    
-    entry = *((uint32_t*)eip_buffer);
-
-
-    // for (i = 0; i < 4; i++) {                                         /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */      
-	// 	entry |= (eip_buffer[i] << (i * 8));                         /* Reversing data so entry contains bytes 27-24*/
-	// }
+    read_data(dentry.inode_idx, 24, eip_buffer, 4);                               /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */ 
+    entry = *((uint32_t*)eip_buffer);                                             /* Return entry point at bit 24 */
+	
 
     inode = init_inode[dentry.inode_idx];
     size = inode.file_size;
     read_data(dentry.inode_idx, 0, (uint8_t*)PROGRAM_VMEM_START, size);         /* Copying entire file to memory */
 
     /* 5. Create PCB */
-    pcb_t* pcb_startmem = (pcb_t *) USER_MEMORY_BASE - ((curr_pid + 1) * PCB_SIZE);  //+1 because curr_pid goes from 0 to 5
+    pcb_t* new_process = (pcb_t *) USER_MEMORY_BASE - ((curr_pid + 1) * PCB_SIZE);  //+1 because curr_pid goes from 0 to 5
 
 
 
-    pcb_startmem->pid = curr_pid;
+    new_process->pid = curr_pid;
 
     if(curr_pid == 0){
-        pcb_startmem->parent_pid = -1;
+        new_process->parent_pid = -1;
     }else{
-        pcb_startmem->parent_pid = cur_process->pid;
+        new_process->parent_pid = cur_process->pid;
     }
-
-    pcb_startmem->saved_esp = esp;   //use the esp and epb got from beginning of execute
-    pcb_startmem->saved_ebp = ebp;
-    init_fd_array(pcb_startmem->fd_array);
+    init_fd_array(new_process->fd_array);
 
     /* 6. Create it’s own context switch stack */
 
@@ -175,6 +162,18 @@ int32_t sys_execute(const uint8_t* command) {
     tss.ss0 = KERNEL_DS;
     tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * curr_pid);
     //tss.esp = PROGRAM_VMEM_STACK;
+
+    /* Save current ESP and EBP before context switch*/
+    asm volatile(
+        "movl %%esp, %0" : "=r"(esp) 
+    );   
+    // cur_process->saved_ebp = ebp;
+    // cur_process->saved_esp = esp;
+    new_process->saved_esp = esp;   //use the esp and epb got from beginning of execute
+    new_process->saved_ebp = ebp;
+
+    cur_process = new_process;
+
 
     /* Context Switch */
 
@@ -195,6 +194,7 @@ int32_t sys_execute(const uint8_t* command) {
 
 
 int32_t sys_halt(uint8_t status) {
+
     /* Restore Parent Data */
     //load user program with old pid? need PCB
 
@@ -212,8 +212,6 @@ int32_t sys_halt(uint8_t status) {
     }
     // pid_array[pcb_current_pid] = 0;
 
-
-
     // cur_process = (pcb_t *) USER_MEMORY_BASE - ((pcb_parent_pid + 1) * PCB_SIZE);
 
 
@@ -230,5 +228,4 @@ int32_t sys_halt(uint8_t status) {
 	// );
 
 	return 0;
-
 }

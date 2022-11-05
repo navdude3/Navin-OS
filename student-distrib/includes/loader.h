@@ -1,6 +1,7 @@
 #include "types.h"
 #include "mp3fs.h"
 #include "syscall_functions.h"
+#include "x86_desc.h"
 
 #define USER_MEMORY_BASE    0x800000
 #define KERNEL_AREA_BASE    (USER_MEMORY_BASE) // grows upwards
