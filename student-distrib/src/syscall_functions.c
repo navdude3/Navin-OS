@@ -25,7 +25,7 @@
 int32_t sys_open (const uint8_t* filename) {
     dentry_t f_dentry;
     fd_entry_t* entry;
-    pcb_t* cur_process = get_curr_pid();
+    pcb_t* cur_process = get_curr_pcb();
 
     if(filename == NULL) return -1;
     
@@ -63,7 +63,8 @@ int32_t sys_open (const uint8_t* filename) {
  */
 int32_t sys_close(uint32_t fd){
     if(fd < 2 || fd > 10) return -1;   // cannot close stdin/out
-    pcb_t* cur_process = get_curr_pid();
+    pcb_t* cur_process = get_curr_pcb();
+    if(cur_process->fd_array[fd].flags.present == 0) return -1;
     if(cur_process->fd_array[fd].j_tbl->close(fd) < 0) return -1;
     free_fd_entry(fd);
     return 0;
@@ -78,7 +79,7 @@ int32_t sys_close(uint32_t fd){
  */
 int32_t sys_read(uint32_t fd, uint8_t* buf, uint32_t length){
     if(fd < 1 || fd > 10 || buf == NULL) return -1;
-    pcb_t* cur_process = get_curr_pid();
+    pcb_t* cur_process = get_curr_pcb();
     return cur_process->fd_array[fd].j_tbl->read(fd, buf, length);
 }
 
@@ -91,7 +92,7 @@ int32_t sys_read(uint32_t fd, uint8_t* buf, uint32_t length){
  */
 int32_t sys_write (uint32_t fd, uint8_t* buf, uint32_t length){
     if(fd < 1 || fd > 10 || buf == NULL) return -1;  
-    pcb_t* cur_process = get_curr_pid();
+    pcb_t* cur_process = get_curr_pcb();
     return cur_process->fd_array[fd].j_tbl->write(fd, buf, length);
 }
 

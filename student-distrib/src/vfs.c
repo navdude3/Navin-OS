@@ -37,7 +37,7 @@ int32_t init_fd_array(fd_entry_t* fd_array){
  */
 int32_t get_free_fd_entry_idx(){
     int idx;
-    pcb_t* cur_process = get_curr_pid();
+    pcb_t* cur_process = get_curr_pcb();
 
     for (idx = 2; idx < FD_ARRAY_SIZE; ++idx){
         if(cur_process->fd_array[idx].flags.present == 0){
@@ -57,7 +57,7 @@ int32_t get_free_fd_entry_idx(){
  *   SIDE EFFECTS: marks entry as not present (might need to implement race condition handling), does not clear contents (for now)
  */
 void free_fd_entry(uint32_t idx){
-    pcb_t* cur_process = get_curr_pid();
+    pcb_t* cur_process = get_curr_pcb();
     cur_process->fd_array[idx].flags.present = 0;
 }
 

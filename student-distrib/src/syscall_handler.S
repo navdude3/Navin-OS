@@ -32,7 +32,7 @@ syscall_linkage:
     pushl %ebx
 
 
-    call *jumptable(, %eax, 4)  # use call to get back here eax has error value at this point 
+    call *jumptable(, %eax, 4)      # use call to get back here eax has error value at this point 
     popl %ebx
     popl %ecx
     popl %edx

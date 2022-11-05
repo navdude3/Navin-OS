@@ -132,7 +132,7 @@ int32_t f_close (uint32_t fd){
  *   RETURN VALUE: number of bytes written to buffer, 0 if EOF is reacehd, -1 if any error in reading file data (buffer might still have been written into at this point)
 */
 int32_t f_read (uint32_t fd, uint8_t* buf, uint32_t length){
-    pcb_t* cur_process = get_curr_pid();
+    pcb_t* cur_process = get_curr_pcb();
     uint32_t bytes_read = read_data(cur_process->fd_array[fd].inode_idx, cur_process->fd_array[fd].file_position, buf, length);
     cur_process->fd_array[fd].file_position += bytes_read;
     return bytes_read;
@@ -175,7 +175,7 @@ int32_t d_close (uint32_t fd){
  *   RETURN VALUE: returns 0 if reached end of directory entries, -1 if length is not large enough to fit directory entry
 */
 int32_t d_read(uint32_t fd, uint8_t *buf, uint32_t length){
-    pcb_t* cur_process = get_curr_pid();
+    pcb_t* cur_process = get_curr_pcb();
     uint32_t* d_offset = &cur_process->fd_array[fd].file_position;
     
     if (*d_offset >= boot_blk->num_dirs) return 0;

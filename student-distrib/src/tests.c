@@ -518,7 +518,7 @@ int execute_syscall_test(){
     TEST_HEADER;
 	int result = PASS;
 
-	char * command = "shell";
+	char * command = "testprint";
 	asm volatile("						\
 				int $0x80 	\
 				"
