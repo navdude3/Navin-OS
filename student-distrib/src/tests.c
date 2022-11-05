@@ -217,252 +217,252 @@ int keyboard_test(){
  *   RETURN VALUE: none
 */
 
-int dir_read_test(){
+// int dir_read_test(){
 
-	TEST_HEADER;
+// 	TEST_HEADER;
 
-	int result = PASS;
-	clear();
-	uint32_t buf_size = sizeof(dentry_t);
-	uint8_t buf[buf_size]; // declare buffer big enough to fit dentry_t
-	int32_t cnt;
-	uint32_t fd;
+// 	int result = PASS;
+// 	clear();
+// 	uint32_t buf_size = sizeof(dentry_t);
+// 	uint8_t buf[buf_size]; // declare buffer big enough to fit dentry_t
+// 	int32_t cnt;
+// 	uint32_t fd;
 
-	if ((fd = open((uint8_t *)".")) < 0){
-		printf("Dir open failed!\n");
-		result = FAIL;
-		return result;
-	}
-	/* Read directory entries one by one until EOF */
-	while (0 != (cnt = read(fd, buf, buf_size))){
-		if (-1 == cnt){
-			printf("Dir entry read failed!\n");
-			result = FAIL;
-			return result;
-		}
-		dentry_t * d_entry_pt = (dentry_t *) buf;
-		char fname [FNAME_LIMIT + 1]; // Copy file_name from dentry into string to deal with long names 
-		strncpy(fname, d_entry_pt->file_name, FNAME_LIMIT);
-		printf("Filename: %s, Type: %d, Size: %d\n",
-				fname, 
-				d_entry_pt->file_type,
-				init_inode[d_entry_pt->inode_idx].file_size
-		);
-	}
+// 	if ((fd = open((uint8_t *)".")) < 0){
+// 		printf("Dir open failed!\n");
+// 		result = FAIL;
+// 		return result;
+// 	}
+// 	/* Read directory entries one by one until EOF */
+// 	while (0 != (cnt = read(fd, buf, buf_size))){
+// 		if (-1 == cnt){
+// 			printf("Dir entry read failed!\n");
+// 			result = FAIL;
+// 			return result;
+// 		}
+// 		dentry_t * d_entry_pt = (dentry_t *) buf;
+// 		char fname [FNAME_LIMIT + 1]; // Copy file_name from dentry into string to deal with long names 
+// 		strncpy(fname, d_entry_pt->file_name, FNAME_LIMIT);
+// 		printf("Filename: %s, Type: %d, Size: %d\n",
+// 				fname, 
+// 				d_entry_pt->file_type,
+// 				init_inode[d_entry_pt->inode_idx].file_size
+// 		);
+// 	}
 
-	close(fd);
-	return result;
-}
+// 	close(fd);
+// 	return result;
+// }
 
-/* 
- * regular file read test
- *   DESCRIPTION: Opens the "frame0.txt" and prints all contents. 
- *   INPUTS: none
- *   OUTPUTS: PASS if no errors, FAIL if any read/open/close errors occur
- *   RETURN VALUE: none
-*/
-int file_read_test(const char* filename){
-	TEST_HEADER;
+// /* 
+//  * regular file read test
+//  *   DESCRIPTION: Opens the "frame0.txt" and prints all contents. 
+//  *   INPUTS: none
+//  *   OUTPUTS: PASS if no errors, FAIL if any read/open/close errors occur
+//  *   RETURN VALUE: none
+// */
+// int file_read_test(const char* filename){
+// 	TEST_HEADER;
 
-	int result = PASS;
-	clear();
-	char buf;
-	int32_t res, x_cnt;
-	uint32_t fd;
-	x_cnt = 0;
+// 	int result = PASS;
+// 	clear();
+// 	char buf;
+// 	int32_t res, x_cnt;
+// 	uint32_t fd;
+// 	x_cnt = 0;
 
-	// char * filename = "frame0.txt";
-	if((fd = open((uint8_t *)filename)) < 0){
-		printf("File open failed!\n");
-		result = FAIL;
-		return result;
-	}
+// 	// char * filename = "frame0.txt";
+// 	if((fd = open((uint8_t *)filename)) < 0){
+// 		printf("File open failed!\n");
+// 		result = FAIL;
+// 		return result;
+// 	}
 
-	/* Read file byte by byte, print character to screen */
-	while (0 != (res = read(fd, (uint8_t *) &buf, 1))){
-		if(-1 == res){
-			printf("File read failed!\n");
-			result = FAIL;
-			return result;
-		}
-		/* if end of row, go to next line (for non text files)*/		
-		if(x_cnt == ROWEND){
-			x_cnt = 0;
-			putc('\n');
-		}
-		if(buf == '\n') x_cnt = 0;
+// 	/* Read file byte by byte, print character to screen */
+// 	while (0 != (res = read(fd, (uint8_t *) &buf, 1))){
+// 		if(-1 == res){
+// 			printf("File read failed!\n");
+// 			result = FAIL;
+// 			return result;
+// 		}
+// 		/* if end of row, go to next line (for non text files)*/		
+// 		if(x_cnt == ROWEND){
+// 			x_cnt = 0;
+// 			putc('\n');
+// 		}
+// 		if(buf == '\n') x_cnt = 0;
 		
-		++x_cnt;
-		putc(buf);
-	}
-	putc('\n');
-	close(fd);
-	return result;
-}
-/* 
- * executable file read test
- *   DESCRIPTION: Opens the "ls" and checks if it matches ELF specs (start identifier and ending magic string). 
- *   INPUTS: none
- *   OUTPUTS: PASS if no errors, FAIL if any read/open/close errors occur OR if file does not match ELF spec per MP3.2 documentation
- *   RETURN VALUE: none
-*/
-int file_executable_test(){
-	TEST_HEADER;
+// 		++x_cnt;
+// 		putc(buf);
+// 	}
+// 	putc('\n');
+// 	close(fd);
+// 	return result;
+// }
+// /* 
+//  * executable file read test
+//  *   DESCRIPTION: Opens the "ls" and checks if it matches ELF specs (start identifier and ending magic string). 
+//  *   INPUTS: none
+//  *   OUTPUTS: PASS if no errors, FAIL if any read/open/close errors occur OR if file does not match ELF spec per MP3.2 documentation
+//  *   RETURN VALUE: none
+// */
+// int file_executable_test(){
+// 	TEST_HEADER;
 
-	int result = PASS;
-	clear();
-	int middle_padding_amt = 5308; 						// Size of ls is 5349, 5349 - 4 (identity header) - 36 (end magic str) = 5308
-	char start_ident_buf [5]; 							// magic characters + null terminator (5 characters)
-	char* start_ident_str = "\x7f""ELF";
-	char m_buf;											// middle padding read buf
-	char end_ident_buf[37]; 							// end magic characters (36) + null terminator
-	char* end_ident_str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+// 	int result = PASS;
+// 	clear();
+// 	int middle_padding_amt = 5308; 						// Size of ls is 5349, 5349 - 4 (identity header) - 36 (end magic str) = 5308
+// 	char start_ident_buf [5]; 							// magic characters + null terminator (5 characters)
+// 	char* start_ident_str = "\x7f""ELF";
+// 	char m_buf;											// middle padding read buf
+// 	char end_ident_buf[37]; 							// end magic characters (36) + null terminator
+// 	char* end_ident_str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-	int32_t res, x_cnt;
-	uint32_t fd;
-	x_cnt = 0;
+// 	int32_t res, x_cnt;
+// 	uint32_t fd;
+// 	x_cnt = 0;
 
-	char * filename = "ls";
-	if((fd = open((uint8_t *)filename)) < 0){
-		printf("File open failed!\n");
-		result = FAIL;
-		return result;
-	}
+// 	char * filename = "ls";
+// 	if((fd = open((uint8_t *)filename)) < 0){
+// 		printf("File open failed!\n");
+// 		result = FAIL;
+// 		return result;
+// 	}
 	
 
-	/* Read first 4 bytes for 0x7f, E, L, F*/
-	res = read(fd, (uint8_t *) start_ident_buf, BYTES);
-	start_ident_buf[BYTES] = '\0';
-	if(-1 == res){
-		printf("File read failed!\n");
-		result = FAIL;
-		return result;
-	}
-	if(strncmp((int8_t*)start_ident_buf, (int8_t*)start_ident_str, BYTES) != 0){
-		printf("Starting magic characters not read! Read this instead: %s", start_ident_buf);
-		result = FAIL;
-		return result;
-	}
+// 	/* Read first 4 bytes for 0x7f, E, L, F*/
+// 	res = read(fd, (uint8_t *) start_ident_buf, BYTES);
+// 	start_ident_buf[BYTES] = '\0';
+// 	if(-1 == res){
+// 		printf("File read failed!\n");
+// 		result = FAIL;
+// 		return result;
+// 	}
+// 	if(strncmp((int8_t*)start_ident_buf, (int8_t*)start_ident_str, BYTES) != 0){
+// 		printf("Starting magic characters not read! Read this instead: %s", start_ident_buf);
+// 		result = FAIL;
+// 		return result;
+// 	}
 
-	/* Skip till last 31 chars*/
-	unsigned i;
-	for(i = 0; i < middle_padding_amt; ++i){
-		res = read(fd,(uint8_t *) &m_buf, 1);
-		if(-1 == res){
-			printf("Middle padding read fail!\n");
-			result = FAIL;
-			return result;
-		}
-	}
+// 	/* Skip till last 31 chars*/
+// 	unsigned i;
+// 	for(i = 0; i < middle_padding_amt; ++i){
+// 		res = read(fd,(uint8_t *) &m_buf, 1);
+// 		if(-1 == res){
+// 			printf("Middle padding read fail!\n");
+// 			result = FAIL;
+// 			return result;
+// 		}
+// 	}
 
-	/* Read ending magic string */
-	res = read(fd, (uint8_t *) end_ident_buf, NINEBYTES);
-	end_ident_buf[NINEBYTES] = '\0';
-	if(-1 == res){
-		printf("File read failed!\n");
-		result = FAIL;
-		return result;
-	}
-	if(strncmp((int8_t*)end_ident_buf, (int8_t*)end_ident_str, NINEBYTES) != 0){
-		printf("Ending magic characters do not match! Read this instead: %s", end_ident_buf);
-		result = FAIL;
-		return result;
-	}
+// 	/* Read ending magic string */
+// 	res = read(fd, (uint8_t *) end_ident_buf, NINEBYTES);
+// 	end_ident_buf[NINEBYTES] = '\0';
+// 	if(-1 == res){
+// 		printf("File read failed!\n");
+// 		result = FAIL;
+// 		return result;
+// 	}
+// 	if(strncmp((int8_t*)end_ident_buf, (int8_t*)end_ident_str, NINEBYTES) != 0){
+// 		printf("Ending magic characters do not match! Read this instead: %s", end_ident_buf);
+// 		result = FAIL;
+// 		return result;
+// 	}
 	
 
 
-	putc('\n');
-	close(fd);
-	return result;
-}
+// 	putc('\n');
+// 	close(fd);
+// 	return result;
+// }
 
 
-/* 
- * file_bad_filename_test
- *   DESCRIPTION: Sees if file name is a real file name 
- *   INPUTS: none
- *   OUTPUTS: PASS if no errors, FAIL if any read/open/close errors occur OR if file does not match ELF spec per MP3.2 documentation
- *   RETURN VALUE: none
-*/
-int file_bad_filename_test(){
-	TEST_HEADER;
+// /* 
+//  * file_bad_filename_test
+//  *   DESCRIPTION: Sees if file name is a real file name 
+//  *   INPUTS: none
+//  *   OUTPUTS: PASS if no errors, FAIL if any read/open/close errors occur OR if file does not match ELF spec per MP3.2 documentation
+//  *   RETURN VALUE: none
+// */
+// int file_bad_filename_test(){
+// 	TEST_HEADER;
 
-	int result = PASS;
-	clear();
+// 	int result = PASS;
+// 	clear();
 	
 
-	char * filename = "nonexistentfile.txt";
-	if( open((uint8_t *)filename) >= 0){
-		printf("Nonexistent file opened!\n");
-		result = FAIL;
-		return result;
-	}
-	return result;
-}
+// 	char * filename = "nonexistentfile.txt";
+// 	if( open((uint8_t *)filename) >= 0){
+// 		printf("Nonexistent file opened!\n");
+// 		result = FAIL;
+// 		return result;
+// 	}
+// 	return result;
+// }
 
 
 
-/* 
- * terminal_RW_test_nobug
- *   DESCRIPTION: send a buffer of 128 and write from keyboard to it
- *   INPUTS: none
- *   OUTPUTS: PASS if no errors, FAIL buffer could not be wrote back to
- *   RETURN VALUE: none
-*/
-int terminal_RW_test_nobug(){
-	TEST_HEADER;
-	int result = PASS;
-	clear();
+// /* 
+//  * terminal_RW_test_nobug
+//  *   DESCRIPTION: send a buffer of 128 and write from keyboard to it
+//  *   INPUTS: none
+//  *   OUTPUTS: PASS if no errors, FAIL buffer could not be wrote back to
+//  *   RETURN VALUE: none
+// */
+// int terminal_RW_test_nobug(){
+// 	TEST_HEADER;
+// 	int result = PASS;
+// 	clear();
 
-	char user_buffer[128];			//size of buffer getting passed in
-	printf("Type your name\n");
-	read(1, (uint8_t *) user_buffer, 128);		//read input from user
-	printf("Hello ");
-	write(1,(uint8_t *) user_buffer, 128);		//write it to screen
+// 	char user_buffer[128];			//size of buffer getting passed in
+// 	printf("Type your name\n");
+// 	read(1, (uint8_t *) user_buffer, 128);		//read input from user
+// 	printf("Hello ");
+// 	write(1,(uint8_t *) user_buffer, 128);		//write it to screen
 
-	return result;
-}
+// 	return result;
+// }
 
-/* 
- * terminal_RW_test_overflow
- *   DESCRIPTION: take a buffer of over 128 and only push first 128 charachtres
- *   INPUTS: none
- *   OUTPUTS: PASS if no errors, FAIL if buffer could not be read back
- *   RETURN VALUE: none
-*/
-int terminal_RW_test_overflow(){
-	TEST_HEADER;
-	int result = PASS;
-	clear();
+// /* 
+//  * terminal_RW_test_overflow
+//  *   DESCRIPTION: take a buffer of over 128 and only push first 128 charachtres
+//  *   INPUTS: none
+//  *   OUTPUTS: PASS if no errors, FAIL if buffer could not be read back
+//  *   RETURN VALUE: none
+// */
+// int terminal_RW_test_overflow(){
+// 	TEST_HEADER;
+// 	int result = PASS;
+// 	clear();
 
-	char user_buffer[128];					//user buffer to pass in
-	printf("Type over 128 charachters\n");
-	read(1,(uint8_t *) user_buffer, 200);		//overflow byte size
-	write(1,(uint8_t *) user_buffer, 200);
+// 	char user_buffer[128];					//user buffer to pass in
+// 	printf("Type over 128 charachters\n");
+// 	read(1,(uint8_t *) user_buffer, 200);		//overflow byte size
+// 	write(1,(uint8_t *) user_buffer, 200);
 
-	return result;
-}
+// 	return result;
+// }
 
-/* 
- * terminal_open_and_close
- *   DESCRIPTION: open and close the terminal
- *   INPUTS: none
- *   OUTPUTS: PASS if no errors, FAIL terminal fails to open
- *   RETURN VALUE: none
-*/
-int terminal_open_and_close(){
-	TEST_HEADER;
-	int result = PASS;
-	clear();
+// /* 
+//  * terminal_open_and_close
+//  *   DESCRIPTION: open and close the terminal
+//  *   INPUTS: none
+//  *   OUTPUTS: PASS if no errors, FAIL terminal fails to open
+//  *   RETURN VALUE: none
+// */
+// int terminal_open_and_close(){
+// 	TEST_HEADER;
+// 	int result = PASS;
+// 	clear();
 
 	
-	if( -1 != close(1)){		//if close fails then fail the test
-		result = FAIL;
-		return result;
-	}
+// 	if( -1 != close(1)){		//if close fails then fail the test
+// 		result = FAIL;
+// 		return result;
+// 	}
 
-	return result;
-}
+// 	return result;
+// }
 
 
 /* 
@@ -518,7 +518,7 @@ int execute_syscall_test(){
     TEST_HEADER;
 	int result = PASS;
 
-	char * command = "testprint";
+	char * command = "shell";
 	asm volatile("						\
 				int $0x80 	\
 				"

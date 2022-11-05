@@ -120,7 +120,7 @@ int32_t f_open              (const uint8_t* fname){
  *   INPUTS: fd- corresponding file descriptor entry to close. Note that system close call wrapper handles the fd entry cleanup, so nothing is done here. Strictly for adhering to abstraction interface.
  *   RETURN VALUE: 0
 */
-int32_t f_close             (uint32_t fd){
+int32_t f_close (uint32_t fd){
     return 0;
 }
 
@@ -131,7 +131,8 @@ int32_t f_close             (uint32_t fd){
  *   OUTPUTS: Writes length bytes or until EOF into buf, whichever is shorter
  *   RETURN VALUE: number of bytes written to buffer, 0 if EOF is reacehd, -1 if any error in reading file data (buffer might still have been written into at this point)
 */
-int32_t f_read              (uint32_t fd, uint8_t* buf, uint32_t length){
+int32_t f_read (uint32_t fd, uint8_t* buf, uint32_t length){
+    pcb_t* cur_process = get_curr_pid();
     uint32_t bytes_read = read_data(cur_process->fd_array[fd].inode_idx, cur_process->fd_array[fd].file_position, buf, length);
     cur_process->fd_array[fd].file_position += bytes_read;
     return bytes_read;
@@ -142,7 +143,7 @@ int32_t f_read              (uint32_t fd, uint8_t* buf, uint32_t length){
  *   DESCRIPTION: Does not do anything, file system is read-only
  *   RETURN VALUE: -1 because write is an error case
 */
-int32_t f_write             (uint32_t fd, uint8_t* buf, uint32_t length){
+int32_t f_write (uint32_t fd, uint8_t* buf, uint32_t length){
     return -1;
 }
 
@@ -152,7 +153,7 @@ int32_t f_write             (uint32_t fd, uint8_t* buf, uint32_t length){
  *   INPUTS: fname- filename that is to be opened. Note that the system open call has a wrapper that handles the actual file lookup, so we don't use fname here. Strictly for adhering to abstraction interface
  *   RETURN VALUE: 0
 */
-int32_t d_open              (const uint8_t* fname){
+int32_t d_open (const uint8_t* fname){
     return 0;
 }
 
@@ -162,7 +163,7 @@ int32_t d_open              (const uint8_t* fname){
  *   INPUTS: fd- corresponding file descriptor entry to close. Note that system close call wrapper handles the fd entry cleanup, so nothing is done here. Strictly for adhering to abstraction interface.
  *   RETURN VALUE: 0
 */
-int32_t d_close             (uint32_t fd){
+int32_t d_close (uint32_t fd){
     return 0;
 }
 
@@ -174,6 +175,7 @@ int32_t d_close             (uint32_t fd){
  *   RETURN VALUE: returns 0 if reached end of directory entries, -1 if length is not large enough to fit directory entry
 */
 int32_t d_read(uint32_t fd, uint8_t *buf, uint32_t length){
+    pcb_t* cur_process = get_curr_pid();
     uint32_t* d_offset = &cur_process->fd_array[fd].file_position;
     
     if (*d_offset >= boot_blk->num_dirs) return 0;

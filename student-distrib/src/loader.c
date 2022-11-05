@@ -27,7 +27,7 @@ void setup_user_page(int pid){
     user_page.pde_avail = 0;
     user_page.pde_pat = 0;
     user_page.pde_reserved = 0;
-    user_page.pde_pba = (user_addr>>22);
+    user_page.pde_pba = (user_addr >> 22);
     
     set_pdentry(start_mem_index, user_page);
 }       
@@ -41,7 +41,6 @@ int32_t sys_execute(const uint8_t* command) {
     int file_flag, args_flag;
     uint32_t esp;
     uint32_t ebp;
-    uint32_t curr_pid;
     int active_processes = 0;
     uint8_t eip_buffer[4];
     uint32_t entry;
@@ -139,11 +138,11 @@ int32_t sys_execute(const uint8_t* command) {
 
     inode = init_inode[dentry.inode_idx];
     size = inode.file_size;
-    read_data(dentry.inode_idx, 0, (uint8_t*)PROGRAM_VMEM_START, size);         /* Copying entire file to memory */
+    read_data(dentry.inode_idx, 0, (uint8_t*)PROGRAM_VMEM_START, size);             /* Copying entire file to memory */
 
     /* 5. Create PCB */
-    pcb_t* new_process = (pcb_t *) USER_MEMORY_BASE - ((curr_pid + 1) * PCB_SIZE);  //+1 because curr_pid goes from 0 to 5
-
+    pcb_t* new_process = (pcb_t *) (USER_MEMORY_BASE - ((curr_pid + 1) * PCB_SIZE));  //+1 because curr_pid goes from 0 to 5
+    pcb_t* cur_process = get_curr_pid();
 
 
     new_process->pid = curr_pid;
@@ -156,8 +155,6 @@ int32_t sys_execute(const uint8_t* command) {
     init_fd_array(new_process->fd_array);
 
     /* 6. Create it’s own context switch stack */
-
-
 
     tss.ss0 = KERNEL_DS;
     tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * curr_pid);
@@ -188,6 +185,7 @@ int32_t sys_execute(const uint8_t* command) {
         : 
         : "r"(USER_DS), "r"(PROGRAM_VMEM_STACK), "r" (USER_CS), "r" (entry)
         );
+    asm volatile ("BACK_TO_EXECUTE:");
 
     return 0;
 }
@@ -195,37 +193,78 @@ int32_t sys_execute(const uint8_t* command) {
 
 int32_t sys_halt(uint8_t status) {
 
-    /* Restore Parent Data */
-    //load user program with old pid? need PCB
-
-
-    /* Restore Parent Paging */ //pcb needs to be done for this to retrive parent block]
-    //setup_user_page(curr_pid);
-
-    // pcb_t* pcb_parent_pid = cur_process->parent_pid;
-    // pcb_t* pcb_current_pid = cur_process->pid;
-    /* Close any relevant FDs */
-    int i;
-    for(i = 0; i<8; i++) {
-       // if(pcb_current_pid->fd_array[i].flags == 1)
-        close(i);
+   /* Restore Parent Data */
+    uint32_t statusval = (uint32_t) status;
+    pcb_t* cur_process = get_curr_pid();
+    uint32_t pcb_parent_pid = cur_process->parent_pid;
+    uint32_t pcb_current_pid = cur_process->pid;
+    pid_array[cur_process->pid] = 0;
+    
+    cur_process = (pcb_t *)(USER_MEMORY_BASE -  PCB_SIZE * ((pcb_parent_pid + 1)));
+    if(cur_process == NULL){
+        return -1;
     }
-    // pid_array[pcb_current_pid] = 0;
 
-    // cur_process = (pcb_t *) USER_MEMORY_BASE - ((pcb_parent_pid + 1) * PCB_SIZE);
+    uint32_t esp, ebp;
+    esp = cur_process->saved_esp;
+    ebp = cur_process->saved_ebp;
+
+    /* Restore Parent Paging */
+    setup_user_page(cur_process->parent_pid);
+    
+    /* Close any relevant FDs */ 
+    int i;
+    for(i = 0; i < 8; i++){
+        sys_close(i);
+    }
+
+    /* Jump to Execute Return */
+    asm volatile("                   \n\  
+            mov %0, %%esp;           \n\
+            mov %1, %%ebp;           \n\
+            mov %2, %%eax;           \n\
+            jmp BACK_TO_EXECUTE      \n\
+            "
+            :
+            : "r"(esp), "r" (ebp), "r"(statusval)
+            : "eax"
+    );
+
+    return 0;
+   
+   
+   
+   
+    // /* Restore Parent Data */
+    // //load user program with old pid? need PCB
 
 
-    // set_pdentry()
-    // flush_tlb();
+    // /* Restore Parent Paging */ //pcb needs to be done for this to retrive parent block]
+    // //setup_user_page(curr_pid);
 
-    /* Jump to execute return */
-    // asm volatile (
-	//     "movl smthn into %esp"
-    //     "movl smthn into %ebp"
-    //     "jmp to smthn"
-	//     : "r" //to old kernal ebp and esp prob
-	//     : "%eax"
-	// );
+    // // pcb_t* pcb_parent_pid = cur_process->parent_pid;
+    // // pcb_t* pcb_current_pid = cur_process->pid;
+    // /* Close any relevant FDs */
+    // int i;
+    // for(i = 0; i<8; i++) {
+    //    // if(pcb_current_pid->fd_array[i].flags == 1)
+    //     close(i);
+    // }
+    // // pid_array[pcb_current_pid] = 0;
 
-	return 0;
+    // // cur_process = (pcb_t *) USER_MEMORY_BASE - ((pcb_parent_pid + 1) * PCB_SIZE);
+
+
+    // // set_pdentry()
+
+    // /* Jump to execute return */
+    // // asm volatile (
+	// //     "movl smthn into %esp"
+    // //     "movl smthn into %ebp"
+    // //     "jmp to smthn"
+	// //     : "r" //to old kernal ebp and esp prob
+	// //     : "%eax"
+	// // );
+
+	// return 0;
 }

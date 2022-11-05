@@ -33,10 +33,10 @@ int32_t init_fd_array(fd_entry_t* fd_array);
 /* Main file descriptor functions */
 // TODO: rename to sys_
 
-int32_t open              (const uint8_t* fname);
-int32_t close             (uint32_t fd);
-int32_t read              (uint32_t fd, uint8_t* buf, uint32_t length);
-int32_t write             (uint32_t fd, uint8_t* buf, uint32_t length);
+// int32_t sys_open              (const uint8_t* fname);
+// int32_t sys_close             (uint32_t fd);
+// int32_t sys_read              (uint32_t fd, uint8_t* buf, uint32_t length);
+// int32_t sys_write             (uint32_t fd, uint8_t* buf, uint32_t length);
 
 /* Utility functions for file descriptor table*/
 int32_t      get_free_fd_entry_idx();

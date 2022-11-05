@@ -16,7 +16,8 @@
 #include "vfs.h"
 #include "paging.h"
 #include "tests_assem.h"
-
+#include "process.h"
+#include "loader.h"
 
 #define RUN_TESTS
 
@@ -29,6 +30,7 @@
 void entry(unsigned long magic, unsigned long addr) {
 
     multiboot_info_t *mbi;
+    curr_pid = -1;
 
     /* Clear the screen. */
     clear();
