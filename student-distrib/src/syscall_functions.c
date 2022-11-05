@@ -78,7 +78,7 @@ int32_t sys_close(uint32_t fd){
  *   RETURN VALUE: return value of file type's read function
  */
 int32_t sys_read(uint32_t fd, uint8_t* buf, uint32_t length){
-    if(fd < 1 || fd > 10 || buf == NULL) return -1;
+    if(fd == 1 || fd > 10 || buf == NULL) return -1;
     pcb_t* cur_process = get_curr_pcb();
     return cur_process->fd_array[fd].j_tbl->read(fd, buf, length);
 }

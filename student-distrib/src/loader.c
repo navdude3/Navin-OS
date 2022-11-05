@@ -140,17 +140,15 @@ int32_t sys_execute(const uint8_t* command) {
 
     /* 5. Create PCB */
     pcb_t* new_process = (pcb_t *) (USER_MEMORY_BASE - ((new_pid + 1) * PCB_SIZE));        //+1 because curr_pid goes from 0 to 5
-    pcb_t* cur_process = get_curr_pcb();
 
 
     new_process->pid = new_pid;
 
-    // if(new_pid == 0){
-    //     new_process->parent_pid = curr_pid;
-    // }else{
-    //     new_process->parent_pid = cur_process->pid;
-    // }
-    new_process->parent_pid = curr_pid;
+    if(new_pid == 0){
+        new_process->parent_pid = -1;
+    }else{
+        new_process->parent_pid = cur_process->pid;
+    }
     init_fd_array(new_process->fd_array);
 
     /* 6. Create it’s own context switch stack */
@@ -164,22 +162,23 @@ int32_t sys_execute(const uint8_t* command) {
         "movl %%esp, %0" : "=r"(esp) 
     );   
 
-    if(curr_pid != -1){
+    if(cur_process){
         cur_process->saved_ebp = ebp;
         cur_process->saved_esp = esp;
     }
     
    
-    // cur_process_g = new_process;
-    curr_pid  = new_pid;
+    cur_process = new_process;
 
     /* Context Switch */
 
     asm volatile(
         "pushl %0                           \n"
         "pushl %1                           \n"
-        "pushfl                             \n"
 
+        "pushfl                             \n"
+        "orl $0x200, (%%esp)                \n"
+        
         "pushl %2                           \n"
         "pushl %3                           \n"
         "iret                               \n"
@@ -193,14 +192,11 @@ int32_t sys_execute(const uint8_t* command) {
 
 
 int32_t sys_halt(uint8_t status) {
+    if(cur_process == NULL) {return -1;}
 
    /* Restore Parent Data */
     uint32_t statusval = (uint32_t) status;
-    pcb_t* cur_process = get_curr_pcb();
-    uint32_t pcb_parent_pid = cur_process->parent_pid;
     
-
-    if(cur_process == NULL) {return -1;}
 
     /* Close any relevant FDs */ 
     int i;
@@ -210,26 +206,24 @@ int32_t sys_halt(uint8_t status) {
     
     if(cur_process->parent_pid == -1) {
         pid_array[cur_process->pid] = 0;
-        curr_pid = -1;
-        char * command = "shell";
-	    sys_execute((uint8_t*) command);
+        cur_process = NULL;
+	    sys_execute((uint8_t*) "shell");
         return 0;
     }
 
 
     pid_array[cur_process->pid] = 0;
-    curr_pid = pcb_parent_pid;
-    // if pcb_parent_pid = 0 do we return?
-    pcb_t* parent_process = get_curr_pcb();
-    
-    // cur_process = (pcb_t *)(USER_MEMORY_BASE -  PCB_SIZE * ((pcb_parent_pid + 1)));
+    pcb_t* parent_process = get_pcb(cur_process->parent_pid);
 
     uint32_t esp, ebp;
     esp = parent_process->saved_esp;
     ebp = parent_process->saved_ebp;
 
     /* Restore Paging */
-    setup_user_page(curr_pid);
+    // setup_user_page(curr_pid);
+    setup_user_page(parent_process->pid);
+    cur_process = parent_process;
+    
 
     /* Jump to Execute Return */
     asm volatile("                   \n\  

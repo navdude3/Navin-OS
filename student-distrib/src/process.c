@@ -2,7 +2,7 @@
 #include "loader.h"
 
 pcb_t* get_curr_pcb() {
-    get_pcb(curr_pid);    
+    return cur_process;    
 }
 
 pcb_t* get_pcb(uint32_t pid){

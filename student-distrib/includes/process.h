@@ -15,7 +15,7 @@ typedef struct{
     // uint32_t active;
 } pcb_t;
 
-pcb_t* cur_process_g;              // currently active process
+pcb_t* cur_process;              // currently active process
 uint32_t curr_pid;
 extern pcb_t* get_curr_pcb();
 extern pcb_t* get_pcb(uint32_t pid);
