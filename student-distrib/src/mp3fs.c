@@ -79,21 +79,21 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
  *   RETURN VALUE: number of bytes written to buffer, 0 if EOF is reacehd, -1 if any error in reading file data (buffer might still have been written into at this point)
 */
 int32_t read_data(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length){
-    inode_t inode_entry = init_inode[inode];
+    inode_t* inode_entry = &init_inode[inode];
     uint32_t dblk_idx,dblk_off, cnt, file_size;
-    file_size = inode_entry.file_size;
+    file_size = inode_entry->file_size;
     if(offset >= file_size) return 0;
     dblk_idx = (offset/BLK_SIZE);
     dblk_off = offset%BLK_SIZE;
-    dblock_t* blk = &(init_dblock[inode_entry.dblock_idxs[dblk_idx]]);
-    if(inode_entry.dblock_idxs[dblk_idx] >= boot_blk->num_dblocks) return -1; //bad block
+    dblock_t* blk = &(init_dblock[inode_entry->dblock_idxs[dblk_idx]]);
+    if(inode_entry->dblock_idxs[dblk_idx] >= boot_blk->num_dblocks) return -1; //bad block
     cnt = 0;
 
     while(cnt < length && offset < file_size){
         if (dblk_off == BLK_SIZE){
             ++dblk_idx;
             dblk_off = 0;
-            blk = &(init_dblock[inode_entry.dblock_idxs[dblk_idx]]);
+            blk = &(init_dblock[inode_entry->dblock_idxs[dblk_idx]]);
             if((uint32_t*) blk >= fs_end_pt) return -1;    
         }
         buf[cnt] = blk->data[dblk_off];

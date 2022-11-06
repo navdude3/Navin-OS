@@ -85,7 +85,7 @@ int32_t sys_execute(const uint8_t* command) {
     file_flag = 0;
     args_flag = 0;
     for(i = 0; i < 128; i++){
-        if(command[i] == "\0") break;
+        if(command[i] == "\n") break;
         if(command[i] != ' ' && file_flag == 0){
             for(fname_indexer = i; fname_indexer < 128; fname_indexer++){                             //put file name into fname
                 if(command[fname_indexer] == ' ' || command[fname_indexer] == '\0'){
@@ -111,7 +111,7 @@ int32_t sys_execute(const uint8_t* command) {
     
 
     /* 2. Executable check */
-    read_dentry_by_name(command, &dentry);
+    read_dentry_by_name(fname, &dentry);
      
     read_data(dentry.inode_idx, 0, exe_check, 4);                                                          /* Writes first four bytes of data to buf */                                                 
     if(exe_check[3] != 0x46 || exe_check[2] != 0x4C || exe_check[1] != 0x45 || exe_check[0] != 0x7f){      /* Not an executable */
@@ -123,8 +123,7 @@ int32_t sys_execute(const uint8_t* command) {
     setup_user_page(new_pid);                  /* Sets up page and flushes TLB */
 
 
-    //this might be needed for some more null checking later on?
-    // if(addr == NULL || fd == NULL) return -1;                                          
+    //this might be needed for some more null checking later on?                                        
     // if(read_dentry_by_name(fd, &entry) == -1) return -1;  
                    
     
@@ -199,10 +198,11 @@ int32_t sys_halt(uint8_t status) {
     
 
     /* Close any relevant FDs */ 
-    int i;
-    for(i = 0; i < 8; i++){
-        sys_close(i);
-    }
+    // int i;
+    // for(i = 0; i < 8; i++){
+    //     if(cur_process->fd_array[i].flags.present == 1) sys_close(i);
+    //     //cur_process->fd_array[i].flags.present == 0;
+    // }
     
     if(cur_process->parent_pid == -1) {
         pid_array[cur_process->pid] = 0;

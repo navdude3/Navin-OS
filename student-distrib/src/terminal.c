@@ -82,9 +82,10 @@ int32_t terminal_read(uint32_t fd, uint8_t* user_buffer, uint32_t bytes){
     int j;
     int contains_nl = 0;                                        //newline checker, starts at 0
 
+    sti();
     while(read_flag == 0);
 
-    cli();                                                      //allow interrupts
+    cli();                                                      // disable interrupts 
     if(bytes <= 0) {                                            /* If nothing to be read, return immediately */
         sti();
         return 0;
@@ -122,7 +123,7 @@ int32_t terminal_read(uint32_t fd, uint8_t* user_buffer, uint32_t bytes){
 
     curr_size = 0;
     read_flag = 0;
-    sti();                                                      //disable interrupts
+    sti();                                                      //enable interrupts 
     
     return bytes; 
 }
