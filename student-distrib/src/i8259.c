@@ -109,6 +109,5 @@ void send_eoi(uint32_t irq_num) {
     } else {
         outb((EOI | irq_num), MASTER_8259_PORT);      //else, only clear primary
     }
-	
 }
 

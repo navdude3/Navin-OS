@@ -1,6 +1,6 @@
 Bug Log:
 
-//checkpoint 1
+// Checkpoint 1
 
 Type of Error: semantic
 Symptom that drew attention: general_protection_fault return 
@@ -30,7 +30,7 @@ Type of Error: semantic
 Symptom that drew attention: printf causing a page fault
 Difficulty finding bug (time and changes made): simply got rid of it, one line change took about 10 minutes
 
-//checkpoint 2
+// Checkpoint 2
 
 Type of Error: algorithmic
 Symptom that drew attention: backspace at begining column and row would cause a page fault
@@ -63,3 +63,49 @@ Difficulty finding bug (time and changes made): case statement did not have brea
 Type of Error: algorithmic
 Symptom that drew attention: rtc rate unchanged
 Difficulty finding bug (time and changes made): added a set_rate call in rtc_write
+
+// Checkpoint 3
+Type of Error: algorithmic
+Symptom that drew attention: page faulting
+Difficulty finding bug (time and changes made): forgot to set the DPL to 3 in the IDT. Took us around 2 hours to figure out and was only a one line fix
+
+Type of Error: algorithmic
+Symptom that drew attention: page faulting
+Difficulty finding bug (time and changes made): Kernel stack overflow because we declared an inode entry (4kb) in sys_execute twice so the stack (8kb) was filling up too quickly. Fixed in about an hour
+and only had to change one line
+
+Type of Error: algorithmic
+Symptom that drew attention: page faulting
+Difficulty finding bug (time and changes made): entry location for page directory entry was off by factor of four because of erroneous left shift of 2 bits, 
+fixed in under 30 minutes and only had to delete the shift
+
+Type of Error: semantic
+Symptom that drew attention: execute called random call when only a space was written to terminal
+Difficulty finding bug (time and changes made): terminal buffer was initially filled with spaces for CP2, so we changed this to fill with null terminators (/0). 
+Took about an hour to fix and was only modifying a few lines
+
+Type of Error: algorithmic
+Symptom that drew attention: page faulting
+Difficulty finding bug (time and changes made): was not accessing correct PCB for new processes because of an int casting issue, lead to accessing wrong place in
+physical memory. Took a few hours to find and moved the int cast
+
+Type of Error: semantic
+Symptom that drew attention: halt not working
+Difficulty finding bug (time and changes made): we were accessing the current and parent PCBs incorrectly, took few hours to create helper functions (called get_pcb and
+get_cur_pcb) and changed logic around to fix this
+
+Type of Error: algorithmic
+Symptom that drew attention: page faulting
+Difficulty finding bug (time and changes made): forgot to set the DPL to 0 in the IDT. Took us around 2 hours to figure out and was only a one line fix
+
+Type of Error: algorithmic
+Symptom that drew attention: page faulting
+Difficulty finding bug (time and changes made): forgot to set the DPL to 0 in the IDT. Took us around 2 hours to figure out and was only a one line fix
+
+Type of Error: algorithmic
+Symptom that drew attention: able to type more than 128 characters to the terminal buffer
+Difficulty finding bug (time and changes made): made changes in the keyboard handler to not fill the buffer with output after the 128th character
+
+Type of Error: algorithmic
+Symptom that drew attention: page faulting
+Difficulty finding bug (time and changes made): forgot to set the DPL to 0 in the IDT. Took us around 2 hours to figure out and was only a one line fix

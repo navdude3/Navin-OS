@@ -21,9 +21,9 @@ fd_ops_t terminal_ops = (fd_ops_t){
  *   DESCRIPTION: takes an input from the keyboard and fills the terminal buffer  
  *   INPUTS: input_char - takes a single charachter and put it in the terminal buffer
  *   OUTPUTS: update curr_size of terminal buffer
- *   RETURN VALUE: none
+ *   RETURN VALUE: 0 if character was successfully filled into buffer, -1 otherwise
 */
-void fill_buffer(char input_char){
+int32_t fill_buffer(char input_char){
     if(input_char == '\n' || input_char == '\e'){
         term_buffer[curr_size] = '\n';                          //set to 128 and always just check this location?
         read_flag = 1;                                          //clear buffer in read_terminal not here in case not ready
@@ -35,11 +35,17 @@ void fill_buffer(char input_char){
                 curr_size--;                                    //handle backspace sizing
             } 
         }
+    } else if (input_char == '\f'){
+        curr_size = 0;
     }
     else if(curr_size < BUFFER - 1){                            //otherwise fill in the buffer with requested data
         term_buffer[curr_size] = input_char;
         curr_size++;
     }
+    else { 
+        return -1;                                              // could not insert character
+    }
+    return 0;
 }
 
 /*
@@ -59,8 +65,8 @@ void fill_buffer(char input_char){
 int32_t terminal_write(uint32_t fd, uint8_t* user_buffer, uint32_t bytes){  //doesnt really need locking since only end of buffer can be modified
     int i;
     if(bytes <= 0) return 0;                                    /* If nothing to be written, return immediately */
-    else if(bytes > 128){                                       //overflow checking
-        bytes = 128;        
+    else if(bytes > BUFFER){                                    //overflow checking
+        bytes = BUFFER;        
     }
     for(i = 0; i < bytes; i++){
         if(((char*)user_buffer)[i] != '\0'){                    // empty in C
@@ -90,8 +96,12 @@ int32_t terminal_read(uint32_t fd, uint8_t* user_buffer, uint32_t bytes){
         sti();
         return 0;
     }
-    else if(bytes > 128){                                       //overflow checking
-        bytes = 128;
+    // else if(bytes > BUFFER){                                       //overflow checking
+    //     bytes = BUFFER;
+    // }
+
+    if (bytes > curr_size){
+        bytes = curr_size; // do not read beyond end pointer of termbuffer
     }
     for(i = 0; i < bytes; i++){
         ((char*)user_buffer)[i] = term_buffer[i];       
@@ -106,19 +116,19 @@ int32_t terminal_read(uint32_t fd, uint8_t* user_buffer, uint32_t bytes){
         }
     }
 
-    for(j = i; j < 128; j++){                                   //fill rest of buffer with empty spaces
-        ((char*)user_buffer)[j] = ' ';
+    for(j = i; j < BUFFER; j++){                                   //fill rest of buffer with empty spaces
+        ((char*)user_buffer)[j] = '\0';
     }
 
     //check for newline and add one at end otherwise
-    for(i = 0; i < 128; i++){
+    for(i = 0; i < BUFFER; i++){
         if(((char*)user_buffer)[i] == '\n'){
             contains_nl = 1;                                    //newline detected
             break;
         }
     }
     if(contains_nl == 0){
-        ((char*)user_buffer)[128] = '\n';                       //if no newline detected, add one at the end of the buffer
+        ((char*)user_buffer)[BUFFER] = '\n';                       //if no newline detected, add one at the end of the buffer
     }
 
     curr_size = 0;

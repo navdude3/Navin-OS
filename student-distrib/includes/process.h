@@ -15,7 +15,6 @@ typedef struct{
     // uint32_t active;
 } pcb_t;
 
-pcb_t* cur_process;              // currently active process
-uint32_t curr_pid;
-extern pcb_t* get_curr_pcb();
-extern pcb_t* get_pcb(uint32_t pid);
+pcb_t* cur_process;                     /* Current active process */             
+extern pcb_t* get_curr_pcb();           /* Returns pointer to current PCB */
+extern pcb_t* get_pcb(uint32_t pid);    /* Returns pointer for specified PCB */

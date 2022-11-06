@@ -15,7 +15,6 @@
 #include "mp3fs.h"
 #include "vfs.h"
 #include "paging.h"
-#include "tests_assem.h"
 #include "process.h"
 #include "loader.h"
 
@@ -30,7 +29,7 @@
 void entry(unsigned long magic, unsigned long addr) {
 
     multiboot_info_t *mbi;
-    curr_pid = -1;
+
 
     /* Clear the screen. */
     clear();
@@ -189,7 +188,6 @@ void entry(unsigned long magic, unsigned long addr) {
     launch_tests();
 
     clear();
-    //hellothere_test();
 
 #endif
     /* Execute the first program ("shell") ... */

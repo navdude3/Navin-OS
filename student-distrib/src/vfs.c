@@ -13,7 +13,6 @@
  *   SIDE EFFECTS: Initializes stdout to fd entry 1
  */
 int32_t init_vfs(){
-    init_fd_array(global_fd_array);
     return 0;
 }
 

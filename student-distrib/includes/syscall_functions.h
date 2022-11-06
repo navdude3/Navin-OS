@@ -1,6 +1,7 @@
 #include "lib.h"
 #include "types.h"
 
+/* Function headers for all system calls */
 extern int32_t sys_halt(uint8_t status);
 extern int32_t sys_execute(const uint8_t* command);
 extern int32_t sys_read(uint32_t fd, uint8_t* buf, uint32_t length);

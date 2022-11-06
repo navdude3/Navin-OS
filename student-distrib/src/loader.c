@@ -8,12 +8,20 @@ static int num_active_procs;                                                    
 static int pid_array[6];
 int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args);
 
+
+
+/* 
+ * setup_user_page
+ *   DESCRIPTION: sets up 4MB page for user program
+ *   INPUTS: pid - which program 
+ *   OUTPUTS: None
+ *   RETURN VALUE: void
+*/
 void setup_user_page(int pid){
     pde_desc_t user_page;
 
     int start_mem_index = PROGRAM_VMEM_BASE >> 22;                                  /* Page Directory Bits = 10 MSB */
     
-
     uint32_t user_addr = (pid * 0x400000) + USER_MEMORY_BASE;
 
     user_page.pde_p = 1;                                                            /* Mark as preset */
@@ -34,16 +42,23 @@ void setup_user_page(int pid){
 }       
  
 
+/* 
+ * sys_execute
+ *   DESCRIPTION: Loads program, allocated the space for it, and executes if successful 
+ *   INPUTS: const uint8_t* command - command to be executed 
+ *   OUTPUTS: 0 if successful, -1 if not
+ *   SIDE EFFECT: Executes user program to the screen 
+*/
 int32_t sys_execute(const uint8_t* command) {
-    uint8_t fname[32];                                                              // max filesize name
-    uint8_t args[32];                                                               // store args here
+    uint8_t fname[MAXSIZE];                                                              /* max filesize name */ 
+    uint8_t args[MAXSIZE];                                                               // store args here
     int i,j;
     uint32_t esp;
     uint32_t ebp;
     int active_processes = 0;
-    uint8_t eip_buffer[4];
+    uint8_t eip_buffer[SIZE_OF_ADDR];                                                   /* Holds entry point to function (Bytes 24-27 of command)*/                                              
     uint32_t entry;
-    int8_t exe_check_buf[4];
+    uint8_t exe_check_buf[EXEC_IDENT_SIZE];                                             /* Holds first four bytes of command to check if executable */
     int8_t* exe_check_str = "\x7f""ELF";
     dentry_t dentry;   
     inode_t* inode;
@@ -53,59 +68,52 @@ int32_t sys_execute(const uint8_t* command) {
 
     asm volatile(
         "movl %%ebp, %0" : "=r"(ebp) 
-    );                                                                                            //immediately get ebp, get esp just before IRET 
+    );                                                                                   /* Immediately get ebp, get esp just before IRET */
     
 
     if(command == NULL) return -1;
-    if(command[0] == '\0') return -1;                                                              // file non existent
+    if(command[0] == '\0') return -1;                                                    /* File or command non-existent */
 
 
-   for(i = 0; i < MAX_PROCESS; i++){                                                               // check which pids are open 
-        if(pid_array[i] == 0){
+   for(i = 0; i < MAX_PROCESS; i++){                                                     /* check which pids are open */ 
+        if(pid_array[i] == 0){                                                           /* If not in use, assign new process to this pid*/
             new_pid = i;
             pid_array[i] = 1;
-            active_processes++;
+            active_processes++;                                                          /* Increment nyumber of active processes */
             break;
         }
         if(pid_array[i] == 1){
             active_processes++;
         }
-        if(i == 5 && pid_array[5] == 1){                                                            //every pid is used
+        if(i == MAX_PROCESS && pid_array[MAX_PROCESS] == 1){                                                  /* Every PID is used */
             return -1;
         }
    }
 
-   for(i = 0; i < 4; i++) eip_buffer[i] = 0;
-   for(j = 0; j < 32; j++) fname[j] = NULL;
+   for(i = 0; i < SIZE_OF_ADDR; i++) eip_buffer[i] = 0;                                             /* Clearing fname and eip_buffer before populating */
+   for(j = 0; j < MAXSIZE; j++) fname[j] = NULL;
    
-   num_active_procs = active_processes;                                                             //always check to see how many active processes we have
+   num_active_procs = active_processes;                                                  
 
 
     /* 1. Parse args and name */
     parse_fname_args(command, fname, args);
-    
 
     /* 2. Executable check */
-    read_dentry_by_name(fname, &dentry);
-    read_data(dentry.inode_idx, 0, exe_check_buf, 4);                                                          /* Writes first four bytes of data to buf */                                                  
-    if(strncmp(exe_check_buf, exe_check_str, 4) != 0){
+    if(read_dentry_by_name(fname, &dentry) != 0) return -1;                               /* If failed to read, return -1 */
+    read_data(dentry.inode_idx, 0, exe_check_buf, 4);                                     /* Writes first four bytes of data to buf */                                                  
+    if(strncmp((int8_t *)exe_check_buf, exe_check_str, 4) != 0){                          /* Checks if ezxecutable, if not clear pid and return -1*/
         pid_array[new_pid] = 0;
         return -1; 
     }
 
-
-    /* 3. Set up program paging */
-    setup_user_page(new_pid);                  /* Sets up page and flushes TLB */
-
-
-    //this might be needed for some more null checking later on?                                        
-    // if(read_dentry_by_name(fd, &entry) == -1) return -1;  
+    /* 3. Set up program paging and flushes TLB */
+    setup_user_page(new_pid);               
                    
-    
     /* 4. User Level Program Loader */                                                     
     /* At this point, we have verified that the file exists and is a valid executable. Can now copy the program into address */
-    read_data(dentry.inode_idx, 24, eip_buffer, 4);                               /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */ 
-    entry = *((uint32_t*)eip_buffer);                                             /* Return entry point at bit 24 */
+    read_data(dentry.inode_idx, 24, eip_buffer, SIZE_OF_ADDR);                                      /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */ 
+    entry = *((uint32_t*)eip_buffer);                                                    /* Return entry point at bit 24 */
 	
 
     inode = &init_inode[dentry.inode_idx];
@@ -118,18 +126,14 @@ int32_t sys_execute(const uint8_t* command) {
 
     new_process->pid = new_pid;
 
-    if(new_pid == 0){
-        new_process->parent_pid = -1;
-    }else{
-        new_process->parent_pid = cur_process->pid;
-    }
+    if(new_pid == 0) new_process->parent_pid = -1;                                          /* Base program */
+    else new_process->parent_pid = cur_process->pid;                                        /* Setting parent process info */
+    
     init_fd_array(new_process->fd_array);
 
     /* 6. Create it’s own context switch stack */
-
     tss.ss0 = KERNEL_DS;
     tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * new_pid);
-    //tss.esp = PROGRAM_VMEM_STACK;
 
     /* Save current ESP and EBP before context switch*/
     asm volatile(
@@ -137,15 +141,12 @@ int32_t sys_execute(const uint8_t* command) {
     );   
 
     if(cur_process){
-        cur_process->saved_ebp = ebp;
+        cur_process->saved_ebp = ebp;                                                       /* Saving EBP/ESP */
         cur_process->saved_esp = esp;
     }
-    
-   
     cur_process = new_process;
 
     /* Context Switch */
-
     asm volatile(
         "pushl %0                           \n"
         "pushl %1                           \n"
@@ -164,32 +165,37 @@ int32_t sys_execute(const uint8_t* command) {
     return 0;
 }
 
-
+/* 
+ * sys_halt
+ *   DESCRIPTION: Halts current program. If program is base (shell), it reboots after halting
+ *   INPUTS: const uint8_t* status - status of program that finished execution 
+ *   OUTPUTS: 0 if successful, -1 if not
+ *   SIDE EFFECT: Halts program
+*/
 int32_t sys_halt(uint8_t status) {
     if(cur_process == NULL) {return -1;}
-
-   /* Restore Parent Data */
+    uint32_t esp, ebp;
     uint32_t statusval = (uint32_t) status;
-    
 
-    /* Close any relevant FDs */ 
+    /* Close any open FDs */ 
     int i;
     for(i = 0; i < 8; i++){
         if(cur_process->fd_array[i].flags.present == 1) sys_close(i);
     }
     
+    /* If parent pid = -1, this is the base program */
     if(cur_process->parent_pid == -1) {
-        pid_array[cur_process->pid] = 0;
+        pid_array[cur_process->pid] = 0;                        /* Sets pid to 0 */
         cur_process = NULL;
-	    sys_execute((uint8_t*) "shell");
+	    sys_execute((uint8_t*) "shell");                        /* Reboots shell */
         return 0;
     }
 
-
+    /* Getting parent process info */
     pid_array[cur_process->pid] = 0;
     pcb_t* parent_process = get_pcb(cur_process->parent_pid);
 
-    uint32_t esp, ebp;
+    /* Restore Parent Data */
     esp = parent_process->saved_esp;
     ebp = parent_process->saved_ebp;
 
@@ -199,8 +205,8 @@ int32_t sys_halt(uint8_t status) {
     
 
     /* Jump to Execute Return */
-    asm volatile("                   \n\  
-            mov %0, %%esp;           \n\
+    asm volatile(
+            "mov %0, %%esp;           \n\
             mov %1, %%ebp;           \n\
             mov %2, %%eax;           \n\
             jmp BACK_TO_EXECUTE      \n\
@@ -212,17 +218,25 @@ int32_t sys_halt(uint8_t status) {
     return 0;
 }
 
+/* 
+ * parse_fname_args
+ *   DESCRIPTION: Parses command for names and argument 
+ *   INPUTS: const uint8_t* input, uint8_t* fname, uint8_t* args
+ *   OUTPUTS: None
+ *   RETURNS: 0 always 
+*/
 int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
     int i,j;
-    int fname_indexer, args_indexer;
-    int file_flag, args_flag;
+    /* Needed for next checkpoint */
+    // int file_flag, args_flag;
+    // file_flag = 0;
+    // args_flag = 0;
 
-    file_flag = 0;
-    args_flag = 0;
+    /* Parsing for command */
     for(i = 0; i < 32; i++){
         if(input[i] == '\n') return 0;
         if(input[i] == ' '){
-            fname[i] = '\0'; // terminate fname string
+            fname[i] = '\0';                // terminate fname string
             ++i;
             break;
         } 
@@ -230,6 +244,7 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
         if(input[i] == '\0') return 0;
 
     }
+    /* Parsing for arguments */
     for(j = 0; j+i < 128; ++j){
         if(input[j + i] == '\n' 
             || input[j + i] == ' ' 
@@ -238,19 +253,6 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
                 return 0;
             }
             args[j] = input[j + i];
-        
-        
     }
-    // for(i = fname_indexer; i < 128; i++){
-    //     if(input[i] != ' ' && args_flag == 0){
-    //         for(args_indexer = i; args_indexer < 128; args_indexer++){                                     //put arguments into args
-    //             if(input[args_indexer] == ' '|| input[args_indexer] == '\0'){                          //NOT NEEDED UNTIL AFTER 3.3
-    //                 args_flag = 1;
-    //                 break;
-    //             }
-    //             args[args_indexer] = input[args_indexer];
-    //         }
-    //     }
-    // }
     return 0;
 }

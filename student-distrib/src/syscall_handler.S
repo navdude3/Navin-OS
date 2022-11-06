@@ -19,7 +19,7 @@ jumptable:
 
 
 syscall_linkage:
-    cmpl $10, %eax
+    cmpl $10, %eax                 # checking that argument is valud 
     ja oob_error
     cmpl $1, %eax
     jb oob_error

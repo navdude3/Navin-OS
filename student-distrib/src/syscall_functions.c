@@ -4,15 +4,6 @@
 #include "terminal.h"
 #include "process.h"
 
-// int32_t sys_halt(uint8_t status){
-
-//     return 10;
-// }
-
-// int32_t sys_execute(const uint8_t* command){
-
-//     return 0;
-// }
 
 /* 
  * open
@@ -97,10 +88,39 @@ int32_t sys_write (uint32_t fd, uint8_t* buf, uint32_t length){
 }
 
 
+/* 
+ * sys_getargs
+ *   DESCRIPTION: Not implemented for this CP
+ *   INPUTS: uint8_t* buf - buffer to read into, uint32_t nbytes - number of bytes to copy
+ *   OUTPUTS: None for now
+ *   RETURN VALUE: 0 always for now
+ */
 int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {return 0;}
 
+/* 
+ * sys_vidmap
+ *   DESCRIPTION: Not implemented for this CP
+ *   INPUTS: uint8_t** screen_start
+ *   OUTPUTS: None for now
+ *   RETURN VALUE: 0 always for now
+ */
 int32_t sys_vidmap(uint8_t** screen_start) {return 0;}
 
+/* 
+ * sys_set_handler
+ *   DESCRIPTION: Not implemented for this CP
+ *   INPUTS: uint32_t signum, void* handler_address
+ *   OUTPUTS: None for now
+ *   RETURN VALUE: 0 always for now
+ */
 int32_t sys_set_handler(uint32_t signum, void* handler_address) {return 0;}
 
+/* 
+ * sys_sigreturn
+ *   DESCRIPTION: Not implemented for this CP
+ *   INPUTS: None
+ *   OUTPUTS: None for now
+ *   RETURN VALUE: 0 always for now
+ */
 int32_t sys_sigreturn(void) {return 0;}
+

@@ -505,15 +505,13 @@ int rtc_read_write_test() {
 
 /* Checkpoint 3 tests */
 
-// int execute_test(){
-//     TEST_HEADER;
-// 	int result = PASS;
-
-// 	char * command = "testprint";
-// 	sys_execute((uint8_t*) command);
-// 	return result;
-// }
-
+/* 
+ * execute_syscall_test
+ *   DESCRIPTION: Executes the testprint system call
+ *   INPUTS: none
+ *   OUTPUTS: Sentence to screen 
+ *   RETURN VALUE: PASS/FAIL
+*/
 int execute_syscall_test(){
     TEST_HEADER;
 	int result = PASS;

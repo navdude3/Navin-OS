@@ -1,7 +1,6 @@
 #define ASM     1
 
 .global keyboard_linkage, rtc_linkage
-# DONE
 /* Assembly linkage for keyboard and RTC */
 
 keyboard_linkage:
@@ -21,4 +20,3 @@ rtc_linkage:
     popal
     iret
 
-//end

@@ -6,13 +6,13 @@ set_paging_params:
     push %ebp
     movl %esp, %ebp
     mov %cr4, %eax
-    or $0x10, %eax
-    mov %eax, %cr4
+    or $0x10, %eax                  
+    mov %eax, %cr4                  # sets page size extension bit in CR 4
     mov 8(%ebp), %eax
-    mov %eax, %cr3
+    mov %eax, %cr3                  # sets CR3 register to PDBR
     mov %cr0, %eax
-    or $0x80000000, %eax
-    mov %eax, %cr0
+    or $0x80000000, %eax            
+    mov %eax, %cr0                  # sets paging bit in CR0
     leave
     ret
 

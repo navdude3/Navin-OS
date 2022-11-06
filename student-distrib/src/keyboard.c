@@ -92,11 +92,12 @@ void keyboard_link_handler(){
         }
     }
     send_eoi(1);                                                                                                   //send eoi signal
-    if(output != -1){                                                                                              //if not invalid
+    if(output != -1){                                                                                              //if not invalid 
+        if(fill_buffer(output) == -1){
+            return; // could not write to buffer, so do not print to screen
+        };
+        
         putc(output); 
-        if(output != '\f'){             //do not send to terminal buffer
-            fill_buffer(output);
-        }
     }                                 
 }
 

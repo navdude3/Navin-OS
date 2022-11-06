@@ -72,13 +72,7 @@ void idt_init(){
     SET_IDT_ENTRY(idt[40], rtc_linkage);
     lidt(idt_desc_ptr);
 
-
-    //syscall setting
-
-
     SET_IDT_ENTRY(idt[0x80], syscall_linkage);    //128 in decimal
-
-
 
 }
 

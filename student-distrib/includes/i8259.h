@@ -3,7 +3,6 @@
  * vim:ts=4 noexpandtab
  */
 
- // DONE
 
 #ifndef _I8259_H
 #define _I8259_H

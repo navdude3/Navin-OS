@@ -1,4 +1,3 @@
-// TO DO
 #ifndef MP3FS_H
 #define MP3FS_H
 #include "types.h"
@@ -16,12 +15,13 @@ typedef struct __attribute__((packed)) dblock {
     char data[BLK_SIZE];
 } dblock_t;
 
-
+/* All attributes required for an inode */
 typedef struct __attribute__((packed)) inode {
     uint32_t file_size; // in bytes
     uint32_t dblock_idxs[BLK_PTR_INC - 1];
 } inode_t;
 
+/* All attributes required for a data entry */
 typedef struct __attribute__((packed)) dentry
 {
     char file_name[32];
@@ -30,6 +30,7 @@ typedef struct __attribute__((packed)) dentry
     char reserved[24];
 } dentry_t;
 
+/* All attributes required for the boot block */
 typedef struct __attribute__((packed)) boot_block {
     uint32_t num_dirs;
     uint32_t num_inodes;
