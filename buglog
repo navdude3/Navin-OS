@@ -99,13 +99,5 @@ Symptom that drew attention: page faulting
 Difficulty finding bug (time and changes made): forgot to set the DPL to 0 in the IDT. Took us around 2 hours to figure out and was only a one line fix
 
 Type of Error: algorithmic
-Symptom that drew attention: page faulting
-Difficulty finding bug (time and changes made): forgot to set the DPL to 0 in the IDT. Took us around 2 hours to figure out and was only a one line fix
-
-Type of Error: algorithmic
 Symptom that drew attention: able to type more than 128 characters to the terminal buffer
 Difficulty finding bug (time and changes made): made changes in the keyboard handler to not fill the buffer with output after the 128th character
-
-Type of Error: algorithmic
-Symptom that drew attention: page faulting
-Difficulty finding bug (time and changes made): forgot to set the DPL to 0 in the IDT. Took us around 2 hours to figure out and was only a one line fix
