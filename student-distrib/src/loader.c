@@ -219,29 +219,38 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
 
     file_flag = 0;
     args_flag = 0;
-    for(i = 0; i < 128; i++){
-        if(input[i] == "\n") break;
-        if(input[i] != ' ' && file_flag == 0){
-            for(fname_indexer = i; fname_indexer < 128; fname_indexer++){                             //put file name into fname
-                if(input[fname_indexer] == ' ' || input[fname_indexer] == '\0'){
-                    file_flag = 1;
-                    break;
-                }
-                fname[fname_indexer] = input[fname_indexer];
-            }
-        }
-    }
+    for(i = 0; i < 32; i++){
+        if(input[i] == '\n') return 0;
+        if(input[i] == ' '){
+            fname[i] = '\0'; // terminate fname string
+            ++i;
+            break;
+        } 
+        fname[i] = input[i];
+        if(input[i] == '\0') return 0;
 
-    for(i = fname_indexer; i < 128; i++){
-        if(input[i] != ' ' && args_flag == 0){
-            for(args_indexer = i; args_indexer < 128; args_indexer++){                                     //put arguments into args
-                if(input[args_indexer] == ' '|| input[args_indexer] == '\0'){                          //NOT NEEDED UNTIL AFTER 3.3
-                    args_flag = 1;
-                    break;
-                }
-                args[args_indexer] = input[args_indexer];
-            }
-        }
     }
+    for(j = 0; j+i < 128; ++j){
+        if(input[j + i] == '\n' 
+            || input[j + i] == ' ' 
+            || input[j + i] == '\0'){
+                args[j] = '\0';
+                return 0;
+            }
+            args[j] = input[j + i];
+        
+        
+    }
+    // for(i = fname_indexer; i < 128; i++){
+    //     if(input[i] != ' ' && args_flag == 0){
+    //         for(args_indexer = i; args_indexer < 128; args_indexer++){                                     //put arguments into args
+    //             if(input[args_indexer] == ' '|| input[args_indexer] == '\0'){                          //NOT NEEDED UNTIL AFTER 3.3
+    //                 args_flag = 1;
+    //                 break;
+    //             }
+    //             args[args_indexer] = input[args_indexer];
+    //         }
+    //     }
+    // }
     return 0;
 }
