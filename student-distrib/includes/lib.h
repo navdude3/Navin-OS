@@ -28,6 +28,9 @@ int8_t* strncpy(int8_t* dest, const int8_t*src, uint32_t n);
 int32_t bad_userspace_addr(const void* addr, int32_t len);
 int32_t safe_strncpy(int8_t* dest, const int8_t* src, int32_t n);
 
+/* Cursor related functions. Adapted from https://wiki.osdev.org/Text_Mode_Cursor */
+void update_cursor(int x, int y);
+
 void test_interrupts(void);
 
 /* Port read functions */

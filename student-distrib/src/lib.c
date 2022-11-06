@@ -7,6 +7,12 @@
 #define NUM_COLS    80
 #define NUM_ROWS    25
 #define ATTRIB      0x7
+#define MASK        0xFF
+#define VGA_ONE     0x3D4
+#define VGA_TWO     0x3D5
+#define COL_MASK    0x0F
+#define ROW_MASK    0x0E
+#define ROW_OFFSET  8
 
 static int screen_x;
 static int screen_y;
@@ -185,12 +191,13 @@ int32_t puts(int8_t* s) {
 /* void putc(uint8_t c);
  * Inputs: uint_8* c = character to print
  * Return Value: void
- *  Function: Output a character to the console */
+ *  Function: Output a character to the console 
+ Cursor info from https://wiki.osdev.org/Text_Mode_Cursor */
 void putc(uint8_t c) {
     int i;
     int j;
     if(c == '\n' || c == '\r') {                   /* If character is new line */
-        if(screen_y == (NUM_ROWS - 1)){ //replace row with row below it
+        if(screen_y == (NUM_ROWS - 1)){ //replace row with row below it (scrolling)
             for(j = 1; j < NUM_ROWS; j++){
                 for(i = 0; i < NUM_COLS; i++){
                     *(uint8_t *)(video_mem + ((NUM_COLS * (j - 1)+ i) << 1)) = *(uint8_t *)(video_mem + ((NUM_COLS * j + i) << 1)); 
@@ -272,6 +279,7 @@ void putc(uint8_t c) {
         }
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;                           //update row ptr
     }
+    update_cursor(screen_x, screen_y);
 }
 
 
@@ -558,6 +566,20 @@ int8_t* strncpy(int8_t* dest, const int8_t* src, uint32_t n) {
         i++;
     }
     return dest;
+}
+
+/*  Cursor info from https://wiki.osdev.org/Text_Mode_Cursor */
+/* update_cursor
+ * Inputs: x and y coordinates for the cursor
+ * Return Value: void
+ * Function: implements the cursor for the terminal buffer (called in putc) */
+void update_cursor(int x, int y){
+    uint16_t position = y * NUM_COLS + x;
+ 
+	outb(COL_MASK, VGA_ONE);                                        /* Column Offset */
+	outb((uint8_t) (position & MASK), VGA_TWO);
+	outb(ROW_MASK, VGA_ONE);
+	outb((uint8_t) ((position >> ROW_OFFSET) & MASK), VGA_TWO);     /* Shift by 8 for row information and output */
 }
 
 /* void test_interrupts(void)
