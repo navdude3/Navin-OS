@@ -6,6 +6,7 @@
 
 static int num_active_procs;                                                        /* Reads bytes from an executable file into this address */
 static int pid_array[6];
+int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args);
 
 void setup_user_page(int pid){
     pde_desc_t user_page;
@@ -37,16 +38,15 @@ int32_t sys_execute(const uint8_t* command) {
     uint8_t fname[32];                                                              // max filesize name
     uint8_t args[32];                                                               // store args here
     int i,j;
-    int fname_indexer, args_indexer;
-    int file_flag, args_flag;
     uint32_t esp;
     uint32_t ebp;
     int active_processes = 0;
     uint8_t eip_buffer[4];
     uint32_t entry;
-    uint8_t exe_check[4];
+    int8_t exe_check_buf[4];
+    int8_t* exe_check_str = "\x7f""ELF";
     dentry_t dentry;   
-    inode_t inode;
+    inode_t* inode;
     uint32_t size;
     uint32_t new_pid;
 
@@ -82,42 +82,17 @@ int32_t sys_execute(const uint8_t* command) {
 
 
     /* 1. Parse args and name */
-    file_flag = 0;
-    args_flag = 0;
-    for(i = 0; i < 128; i++){
-        if(command[i] == "\n") break;
-        if(command[i] != ' ' && file_flag == 0){
-            for(fname_indexer = i; fname_indexer < 128; fname_indexer++){                             //put file name into fname
-                if(command[fname_indexer] == ' ' || command[fname_indexer] == '\0'){
-                    file_flag = 1;
-                    break;
-                }
-                fname[fname_indexer] = command[fname_indexer];
-            }
-        }
-    }
-
-    for(i = fname_indexer; i < 128; i++){
-        if(command[i] != ' ' && args_flag == 0){
-            for(args_indexer = i; args_indexer < 128; args_indexer++){                                     //put arguments into args
-                if(command[args_indexer] == ' '|| command[args_indexer] == '\0'){                          //NOT NEEDED UNTIL AFTER 3.3
-                    args_flag = 1;
-                    break;
-                }
-                args[args_indexer] = command[args_indexer];
-            }
-        }
-    }
+    parse_fname_args(command, fname, args);
     
 
     /* 2. Executable check */
     read_dentry_by_name(fname, &dentry);
-     
-    read_data(dentry.inode_idx, 0, exe_check, 4);                                                          /* Writes first four bytes of data to buf */                                                 
-    if(exe_check[3] != 0x46 || exe_check[2] != 0x4C || exe_check[1] != 0x45 || exe_check[0] != 0x7f){      /* Not an executable */
+    read_data(dentry.inode_idx, 0, exe_check_buf, 4);                                                          /* Writes first four bytes of data to buf */                                                  
+    if(strncmp(exe_check_buf, exe_check_str, 4) != 0){
         pid_array[new_pid] = 0;
-        return -1;        
-    }           
+        return -1; 
+    }
+
 
     /* 3. Set up program paging */
     setup_user_page(new_pid);                  /* Sets up page and flushes TLB */
@@ -133,8 +108,8 @@ int32_t sys_execute(const uint8_t* command) {
     entry = *((uint32_t*)eip_buffer);                                             /* Return entry point at bit 24 */
 	
 
-    inode = init_inode[dentry.inode_idx];
-    size = inode.file_size;
+    inode = &init_inode[dentry.inode_idx];
+    size = inode->file_size;
     read_data(dentry.inode_idx, 0, (uint8_t*)PROGRAM_VMEM_START, size);                     /* Copying entire file to memory */
 
     /* 5. Create PCB */
@@ -198,11 +173,10 @@ int32_t sys_halt(uint8_t status) {
     
 
     /* Close any relevant FDs */ 
-    // int i;
-    // for(i = 0; i < 8; i++){
-    //     if(cur_process->fd_array[i].flags.present == 1) sys_close(i);
-    //     //cur_process->fd_array[i].flags.present == 0;
-    // }
+    int i;
+    for(i = 0; i < 8; i++){
+        if(cur_process->fd_array[i].flags.present == 1) sys_close(i);
+    }
     
     if(cur_process->parent_pid == -1) {
         pid_array[cur_process->pid] = 0;
@@ -220,7 +194,6 @@ int32_t sys_halt(uint8_t status) {
     ebp = parent_process->saved_ebp;
 
     /* Restore Paging */
-    // setup_user_page(curr_pid);
     setup_user_page(parent_process->pid);
     cur_process = parent_process;
     
@@ -236,5 +209,39 @@ int32_t sys_halt(uint8_t status) {
             : "r"(esp), "r" (ebp), "r"(statusval)
             : "eax"
     );
+    return 0;
+}
+
+int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
+    int i,j;
+    int fname_indexer, args_indexer;
+    int file_flag, args_flag;
+
+    file_flag = 0;
+    args_flag = 0;
+    for(i = 0; i < 128; i++){
+        if(input[i] == "\n") break;
+        if(input[i] != ' ' && file_flag == 0){
+            for(fname_indexer = i; fname_indexer < 128; fname_indexer++){                             //put file name into fname
+                if(input[fname_indexer] == ' ' || input[fname_indexer] == '\0'){
+                    file_flag = 1;
+                    break;
+                }
+                fname[fname_indexer] = input[fname_indexer];
+            }
+        }
+    }
+
+    for(i = fname_indexer; i < 128; i++){
+        if(input[i] != ' ' && args_flag == 0){
+            for(args_indexer = i; args_indexer < 128; args_indexer++){                                     //put arguments into args
+                if(input[args_indexer] == ' '|| input[args_indexer] == '\0'){                          //NOT NEEDED UNTIL AFTER 3.3
+                    args_flag = 1;
+                    break;
+                }
+                args[args_indexer] = input[args_indexer];
+            }
+        }
+    }
     return 0;
 }
