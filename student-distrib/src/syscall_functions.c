@@ -3,7 +3,7 @@
 #include "mp3fs.h"
 #include "terminal.h"
 #include "process.h"
-
+#include "rtc.h"
 
 /* 
  * open
@@ -29,6 +29,8 @@ int32_t sys_open (const uint8_t* filename) {
 
     switch (f_dentry.file_type){
         // ADD CASE 0 ONCE FD OPERATIONS IMPLEMENTED FOR RTC
+        case 0 :
+            entry->j_tbl = &rtc_ops;
         case 1 :
             entry->j_tbl = &dir_ops;
             break;

@@ -1,5 +1,6 @@
 #include "lib.h"
 #include "i8259.h"
+#include "vfs.h"
 
 /* Ports that RTC utilizes for registers A/B and to read/write */
 #define REG_A_DATA  0x8A
@@ -20,8 +21,10 @@ volatile int rtc_count;
 /* RTC Fucntions */
 void    rtc_init();
 int32_t rtc_open(const uint8_t* filename);
-int32_t rtc_close(int fd);
-int32_t rtc_read(int fd, void* buf, int nbytes);
-int32_t rtc_write(int fd, const void* buf, int nbytes);
+int32_t rtc_close(uint32_t fd);
+int32_t rtc_read(uint32_t fd, uint8_t* buf, uint32_t length);
+int32_t rtc_write(uint32_t fd, uint8_t* buf, uint32_t length);
 void rtc_link_handler();
 void set_rate(int freq);
+
+extern fd_ops_t rtc_ops;

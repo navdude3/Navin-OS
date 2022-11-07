@@ -482,7 +482,7 @@ int rtc_read_write_test() {
     check += rtc_open(NULL);							// call rtc_open
     
 	for(i = MIN; i <= MAX; i = i * MIN) {
-        check += rtc_write(NULL, &i, sizeof(int)); 		// call rtc_write with each frequency
+        check += rtc_write(NULL, (uint8_t *) &i, sizeof(int)); 		// call rtc_write with each frequency
 		printf("%d", i);
 		for(j = 0; j < i/MIN; j++) {
             check += rtc_read(NULL, NULL, NULL); 		

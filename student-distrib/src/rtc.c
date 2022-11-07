@@ -5,7 +5,12 @@ static int rtc_rate;
 static int flag;
 static int rtc_int_count = 512;
 
-
+fd_ops_t rtc_ops = (fd_ops_t){
+    rtc_open,
+    rtc_close,
+    rtc_read,
+    rtc_write
+};
 /* 
  * rtc_init
  *  DESCRIPTION: Turns on IRQ 8 with default 1024 Hz Rate
@@ -46,7 +51,7 @@ int32_t rtc_open(const uint8_t* filename){
  *  RETURN VALUE: 0
  *  SIDE EFFECTS: none
  */
-int32_t rtc_close(int fd){
+int32_t rtc_close(uint32_t fd){
     return 0;                                       // function does nothing but return 0
 }
 
@@ -58,8 +63,9 @@ int32_t rtc_close(int fd){
  *  RETURN VALUE: 0
  *  SIDE EFFECTS: Enables interrupts on IRQ 8
  */
-int32_t rtc_read(int fd, void* buf, int nbytes){
+int32_t rtc_read(uint32_t fd, uint8_t* buf, uint32_t length){
     flag = 1;
+    sti();
     while(flag) continue;                           // infinite loop until flag is changed
     return 0;                                       // return 0
 }
@@ -72,8 +78,8 @@ int32_t rtc_read(int fd, void* buf, int nbytes){
  *  RETURN VALUE: -1 or 0
  *  SIDE EFFECTS: frequency must be power of 2 and between 2 and 1024
  */
-int32_t rtc_write(int fd, const void* buf, int nbytes){
-    if((buf == NULL ) || (nbytes != sizeof(int32_t))) return -1;
+int32_t rtc_write(uint32_t fd, uint8_t* buf, uint32_t length){
+    if((buf == NULL ) || (length != sizeof(uint32_t))) return -1;
     
     int freq = *(int *) buf; // set the frequency based on the buffer number
     int temp = freq;
