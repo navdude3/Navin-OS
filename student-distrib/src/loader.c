@@ -121,7 +121,7 @@ int32_t sys_execute(const uint8_t* command) {
     read_data(dentry.inode_idx, 0, (uint8_t*)PROGRAM_VMEM_START, size);                     /* Copying entire file to memory */
 
     /* 5. Create PCB */
-    pcb_t* new_process = (pcb_t *) (USER_MEMORY_BASE - ((new_pid + 1) * PCB_SIZE));        //+1 because curr_pid goes from 0 to 5
+    pcb_t* new_process = (pcb_t *) (USER_MEMORY_BASE - ((new_pid + 1) * PCB_SIZE));        //+1 because pcb resides on top of 8kb block
 
 
     new_process->pid = new_pid;
@@ -198,6 +198,7 @@ int32_t sys_halt(uint8_t status) {
     /* Restore Parent Data */
     esp = parent_process->saved_esp;
     ebp = parent_process->saved_ebp;
+    tss.esp0 = esp;
 
     /* Restore Paging */
     setup_user_page(parent_process->pid);
