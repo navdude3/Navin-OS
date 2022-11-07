@@ -44,6 +44,8 @@ syscall_linkage:
     popal
 
     movl error_seen, %eax
-   
+    jmp done
 oob_error:
+    movl $-1, %eax
+done:
     iret
