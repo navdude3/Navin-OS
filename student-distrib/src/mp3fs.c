@@ -169,10 +169,10 @@ int32_t d_close (uint32_t fd){
 
 /* 
  * d_read
- *   DESCRIPTION: Reads one directory entry into buffer
+ *   DESCRIPTION: Reads one directory entry filename into buffer
  *   INPUTS: fd- file descriptor entry corresponding to directory to read from; buf- pointer to byte buffer to write directory entry to; length- number of bytes to read into (should match the size of dentry_t)
- *   OUTPUTS: Writes exactly one directory entry into buffer
- *   RETURN VALUE: returns 0 if reached end of directory entries, -1 if length is not large enough to fit directory entry
+ *   OUTPUTS: Writes exactly one directory entry filename into buffer
+ *   RETURN VALUE: returns 0 if reached end of directory entries, otherwise number of bytes written to buf
 */
 int32_t d_read(uint32_t fd, uint8_t *buf, uint32_t length){
     pcb_t* cur_process = get_curr_pcb();
@@ -180,10 +180,10 @@ int32_t d_read(uint32_t fd, uint8_t *buf, uint32_t length){
     
     if (*d_offset >= boot_blk->num_dirs) return 0;
     // if (length < sizeof(dentry_t)) return -1;
-    if (length > sizeof(dentry_t)) length = sizeof(dentry_t);
-    memcpy(buf, &boot_blk->d_entries[*d_offset], length);
+    if (length > FNAME_LIMIT) length = FNAME_LIMIT;
+    strncpy(buf, &boot_blk->d_entries[*d_offset], length);
     (*d_offset)++;
-    return sizeof(dentry_t);
+    return length;
 }
 
 /* 
