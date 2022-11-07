@@ -181,7 +181,7 @@ int32_t d_read(uint32_t fd, uint8_t *buf, uint32_t length){
     if (*d_offset >= boot_blk->num_dirs) return 0;
     // if (length < sizeof(dentry_t)) return -1;
     if (length > FNAME_LIMIT) length = FNAME_LIMIT;
-    strncpy(buf, &boot_blk->d_entries[*d_offset], length);
+    strncpy((int8_t *)buf, (int8_t *) &boot_blk->d_entries[*d_offset], length);
     (*d_offset)++;
     return length;
 }
