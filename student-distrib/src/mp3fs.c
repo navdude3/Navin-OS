@@ -179,8 +179,9 @@ int32_t d_read(uint32_t fd, uint8_t *buf, uint32_t length){
     uint32_t* d_offset = &cur_process->fd_array[fd].file_position;
     
     if (*d_offset >= boot_blk->num_dirs) return 0;
-    if (length < sizeof(dentry_t)) return -1;
-    memcpy(buf, &boot_blk->d_entries[*d_offset], sizeof(dentry_t));
+    // if (length < sizeof(dentry_t)) return -1;
+    if (length > sizeof(dentry_t)) length = sizeof(dentry_t);
+    memcpy(buf, &boot_blk->d_entries[*d_offset], length);
     (*d_offset)++;
     return sizeof(dentry_t);
 }
