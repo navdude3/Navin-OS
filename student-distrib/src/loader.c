@@ -92,7 +92,7 @@ int32_t sys_execute(const uint8_t* command) {
 
    for(i = 0; i < SIZE_OF_ADDR; i++) eip_buffer[i] = 0;                                             /* Clearing fname and eip_buffer before populating */
    for(j = 0; j < MAXSIZE; j++) fname[j] = NULL;
-   for(k = 0; k < MAX_ARG_SIZE; k++) args[k] == NULL;
+   for(k = 0; k < MAX_ARG_SIZE; k++) args[k] = NULL;
    
    
    num_active_procs = active_processes;                                                  
@@ -232,7 +232,7 @@ int32_t sys_halt(uint8_t status) {
 */
 int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
     int i,j;
-    int count;
+    int count = 0;
 
     /* Parsing for command */
     for(i = 0; i < MAXSIZE; i++){
@@ -252,7 +252,7 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
             || input[j+i] == ' ' 
             || input[j+i] == '\0'){
                 args[j] = '\0';
-                return 0;
+                return count;
             }
             args[j] = input[j + i];
             count++;
