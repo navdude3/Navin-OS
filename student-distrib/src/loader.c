@@ -22,7 +22,7 @@ void setup_user_page(int pid){
 
     int start_mem_index = PROGRAM_VMEM_BASE >> 22;                                  /* Page Directory Bits = 10 MSB */
     
-    uint32_t user_addr = (pid * 0x400000) + USER_MEMORY_BASE;
+    uint32_t user_addr = (pid * PROGRAM_SIZE) + USER_MEMORY_BASE;
 
     user_page.pde_p = 1;                                                            /* Mark as preset */
     user_page.pde_rw = 1;                                                           /* Enable Read/Write */

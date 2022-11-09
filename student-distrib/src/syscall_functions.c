@@ -4,6 +4,8 @@
 #include "terminal.h"
 #include "process.h"
 #include "rtc.h"
+#include "paging.h"
+#include "loader.h"
 
 /* 
  * open
@@ -99,7 +101,7 @@ int32_t sys_write (uint32_t fd, uint8_t* buf, uint32_t length){
  *   OUTPUTS: None for now
  *   RETURN VALUE: 0 always for now
  */
-int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {return 0;}
+int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {return -1;}
 
 /* 
  * sys_vidmap
@@ -108,7 +110,18 @@ int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {return 0;}
  *   OUTPUTS: None for now
  *   RETURN VALUE: 0 always for now
  */
-int32_t sys_vidmap(uint8_t** screen_start) {return 0;}
+int32_t sys_vidmap(uint8_t** screen_start) {
+    /* Fail if address is outside current process address space*/
+
+    uint32_t user_addr_base = PROGRAM_VMEM_BASE;
+    if (    (uint32_t) screen_start < user_addr_base
+        ||  (uint32_t) screen_start >= user_addr_base + PROGRAM_SIZE){
+            return -1;
+        }
+    
+    *screen_start =  (uint8_t*) VIDMAP_TABLE_BASE;
+    return 0;
+}
 
 /* 
  * sys_set_handler
