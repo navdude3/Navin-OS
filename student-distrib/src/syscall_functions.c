@@ -102,10 +102,10 @@ int32_t sys_write (uint32_t fd, uint8_t* buf, uint32_t length){
 int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {
    if(buf == NULL) return -1;
    pcb_t* current = get_curr_pcb();
-   if(current's size < nbytes') return -1;
+   if(current->arg_size > nbytes) return -1;
    int i;
    for(i = 0; i < 128; i++) buf[i] = '\0';
-   for(i = 0; i < currents size(?); i++) buf[i] = currents info; 
+   for(i = 0; i < current->arg_size; i++) buf[i] = current->args[i];
    return 0;
 }
 
