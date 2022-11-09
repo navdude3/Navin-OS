@@ -12,7 +12,8 @@ typedef struct{
     int32_t parent_pid;
     uint32_t saved_esp;
     uint32_t saved_ebp;
-    // uint32_t active;
+    char args[128];
+    uint32_t arg_size;
 } pcb_t;
 
 pcb_t* cur_process;                     /* Current active process */             

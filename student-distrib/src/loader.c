@@ -51,8 +51,8 @@ void setup_user_page(int pid){
 */
 int32_t sys_execute(const uint8_t* command) {
     uint8_t fname[MAXSIZE];                                                              /* max filesize name */ 
-    uint8_t args[MAXSIZE];                                                               // store args here
-    int i,j;
+    uint8_t args[MAX_ARG_SIZE];                                                               // store args here
+    int i,j,k;
     uint32_t esp;
     uint32_t ebp;
     int active_processes = 0;
@@ -64,7 +64,7 @@ int32_t sys_execute(const uint8_t* command) {
     inode_t* inode;
     uint32_t size;
     uint32_t new_pid;
-
+    int arg_size_count;
 
     asm volatile(
         "movl %%ebp, %0" : "=r"(ebp) 
@@ -85,19 +85,21 @@ int32_t sys_execute(const uint8_t* command) {
         if(pid_array[i] == 1){
             active_processes++;
         }
-        if(i == MAX_PROCESS && pid_array[MAX_PROCESS] == 1){                                                  /* Every PID is used */
-            return -1;
+        if(active_processes == MAX_PROCESS){                                                  /* Every PID is used */
+            return 256;
         }
    }
 
    for(i = 0; i < SIZE_OF_ADDR; i++) eip_buffer[i] = 0;                                             /* Clearing fname and eip_buffer before populating */
    for(j = 0; j < MAXSIZE; j++) fname[j] = NULL;
+   for(k = 0; k < MAX_ARG_SIZE; k++) args[k] = NULL;
+   
    
    num_active_procs = active_processes;                                                  
 
 
     /* 1. Parse args and name */
-    parse_fname_args(command, fname, args);
+    arg_size_count = parse_fname_args(command, fname, args);
 
     /* 2. Executable check */
     if(read_dentry_by_name(fname, &dentry) != 0) return -1;                               /* If failed to read, return -1 */
@@ -145,6 +147,8 @@ int32_t sys_execute(const uint8_t* command) {
         cur_process->saved_esp = esp;
     }
     cur_process = new_process;
+    for(i = 0; i < 128; i++) new_process->args[i] = args[i];
+    new_process->arg_size = arg_size_count;
 
     /* Context Switch */
     asm volatile(
@@ -228,17 +232,14 @@ int32_t sys_halt(uint8_t status) {
  *   DESCRIPTION: Parses command for names and argument 
  *   INPUTS: const uint8_t* input, uint8_t* fname, uint8_t* args
  *   OUTPUTS: None
- *   RETURNS: 0 always 
+ *   RETURNS: Returns number of arguments 
 */
 int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
     int i,j;
-    /* Needed for next checkpoint */
-    // int file_flag, args_flag;
-    // file_flag = 0;
-    // args_flag = 0;
+    int count = 0;
 
     /* Parsing for command */
-    for(i = 0; i < 32; i++){
+    for(i = 0; i < MAXSIZE; i++){
         if(input[i] == '\n') return 0;
         if(input[i] == ' '){
             fname[i] = '\0';                // terminate fname string
@@ -250,14 +251,15 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
 
     }
     /* Parsing for arguments */
-    for(j = 0; j+i < 128; ++j){
-        if(input[j + i] == '\n' 
-            || input[j + i] == ' ' 
-            || input[j + i] == '\0'){
+    for(j = 0; j+i < MAX_ARG_SIZE; ++j){
+        if(input[j+i] == '\n' 
+            || input[j+i] == ' ' 
+            || input[j+i] == '\0'){
                 args[j] = '\0';
-                return 0;
+                return count;
             }
             args[j] = input[j + i];
+            count++;
     }
-    return 0;
+    return count;
 }

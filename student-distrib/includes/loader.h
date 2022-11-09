@@ -13,6 +13,7 @@
 #define MAXSIZE             32                               /* Max file size */
 #define EXEC_IDENT_SIZE     4
 #define SIZE_OF_ADDR        4
+#define MAX_ARG_SIZE        128 
 
 
 extern void setup_user_page(int pid);                       
