@@ -99,7 +99,14 @@ int32_t sys_write (uint32_t fd, uint8_t* buf, uint32_t length){
  *   OUTPUTS: None for now
  *   RETURN VALUE: 0 always for now
  */
-int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {return 0;}
+int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {
+   if((buf == NULL)|| (get_curr_pcb()->arg_size > nbytes)) return -1;
+   pcb_t* current = get_curr_pcb();
+   int i;
+   for(i = 0; i < 128; i++) buf[i] = '\0';
+   for(i = 0; i < current->arg_size; i++) buf[i] = current->args[i];
+   return 0;
+}
 
 /* 
  * sys_vidmap
@@ -108,7 +115,9 @@ int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {return 0;}
  *   OUTPUTS: None for now
  *   RETURN VALUE: 0 always for now
  */
-int32_t sys_vidmap(uint8_t** screen_start) {return 0;}
+int32_t sys_vidmap(uint8_t** screen_start) {
+    return 0;
+}
 
 /* 
  * sys_set_handler
@@ -117,7 +126,7 @@ int32_t sys_vidmap(uint8_t** screen_start) {return 0;}
  *   OUTPUTS: None for now
  *   RETURN VALUE: 0 always for now
  */
-int32_t sys_set_handler(uint32_t signum, void* handler_address) {return 0;}
+int32_t sys_set_handler(uint32_t signum, void* handler_address) {return -1;}
 
 /* 
  * sys_sigreturn
@@ -126,5 +135,5 @@ int32_t sys_set_handler(uint32_t signum, void* handler_address) {return 0;}
  *   OUTPUTS: None for now
  *   RETURN VALUE: 0 always for now
  */
-int32_t sys_sigreturn(void) {return 0;}
+int32_t sys_sigreturn(void) {return -1;}
 
