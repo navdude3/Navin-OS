@@ -190,6 +190,9 @@ int32_t sys_halt(uint8_t status) {
 	    sys_execute((uint8_t*) "shell");                        /* Reboots shell */
         return 0;
     }
+    /* Teardown vidmap entry */
+    uint32_t* usr_vidmap_table_base = (uint32_t *) usr_vidmap_table_desc.addr;
+    usr_vidmap_table_base[cur_process->pid] = 0x0; // 0x0 to set video memory as not present
 
     /* Getting parent process info */
     pid_array[cur_process->pid] = 0;
@@ -203,6 +206,7 @@ int32_t sys_halt(uint8_t status) {
     /* Restore Paging */
     setup_user_page(parent_process->pid);
     cur_process = parent_process;
+    
     
 
     /* Jump to Execute Return */

@@ -14,8 +14,7 @@ void init_paging(){
 
     /* Initialize video map table and directory entry */
     init_page_table(usr_vidmap_table_desc.addr, VIDMAP_TABLE_BASE);
-    ((uint32_t *) usr_vidmap_table_desc.addr)[0] = (0xB8000 | 0x7); // 0x7 to set video memory as present for user
-    ((uint32_t *) cr3_desc.addr)[VIDMAP_TABLE_BASE>>22] = usr_vidmap_table_desc.addr | 0x00000007;
+    ((uint32_t *) cr3_desc.addr)[(VIDMAP_TABLE_BASE >> 22)] = (usr_vidmap_table_desc.addr | 0x00000007);
 
     set_paging_params(cr3_desc.addr);
 }
