@@ -212,22 +212,23 @@ typedef struct pde_desc {
 /* Page Table entry descriptor */
 typedef struct pte_desc{
     // Page Entry (4mb)
-    uint32_t pte_p : 1;
-    uint32_t pte_rw : 1;
-    uint32_t pte_us : 1;
-    uint32_t pte_pwt : 1;
-    uint32_t pte_pcd : 1;
-    uint32_t pte_a : 1;
-    uint32_t pte_d : 1;
-    uint32_t pte_pat : 1;
-    uint32_t pte_g : 1;
+    uint32_t present : 1;
+    uint32_t rw : 1;
+    uint32_t user : 1;
+    uint32_t write_through : 1;
+    uint32_t cache_disabled : 1;
+    uint32_t accessed : 1;
+    uint32_t dirty : 1;
+    uint32_t pt_attr_idx : 1;
+    uint32_t global : 1;
     uint32_t pte_avail : 3;
-    uint32_t pte_pba : 20;
+    uint32_t page_base_addr : 20;
 } pte_desc_t;
 
 /* Paging Related declarations */
 extern x86_desc_t cr3_desc;     // PDBR
 extern x86_desc_t first_4_desc; // Page table descriptor for first 4Mb
+extern x86_desc_t usr_vidmap_table_desc; // Page table descriptor for user vidmap table
 
 /* Sets runtime parameters for an IDT entry */
 #define SET_IDT_ENTRY(str, handler)                              \

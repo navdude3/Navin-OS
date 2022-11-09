@@ -12,8 +12,7 @@
 .globl gdt_ptr
 .globl idt_desc_ptr, idt
 .globl cr3_desc
-.globl first_4_desc
-.globl set_paging_params
+.globl first_4_desc, usr_vidmap_table_desc
 
 .align 4
 
@@ -137,6 +136,22 @@ first_4_desc:
 
 .align 4096
 
+/* allocate user video memory mapping table */
+usr_vidmap_pt:
+    .rept 1024
+    .quad 0
+    .endr
+usr_vidmap_pt_bottom:
+
+.align 4
+
+usr_vidmap_table_desc:
+    .word 0
+    .word usr_vidmap_pt_bottom - usr_vidmap_pt - 1
+    .long usr_vidmap_pt
+
+
+.align 4096
 p_dir:
 
     .rept 1024

@@ -2,7 +2,7 @@
 #include "init_helpers.h"
 
 void init_paging(){
-    init_page_table(first_4_desc, 0x0); // initialize table for memory 0-4mb
+    init_page_table(first_4_desc.addr, 0x0); // initialize table for memory 0-4mb
     ((uint32_t *) first_4_desc.addr)[0xB8] = (0xB8000 | 0x3);       /* 0x3 to set video memory as present for supervisor */
 
     /* Initialize first two entries in page directory */
@@ -10,22 +10,27 @@ void init_paging(){
     ((uint32_t *) cr3_desc.addr)[0] = (first_4_desc.addr & 0xFFFFF000) | 0x3; 
     ((uint32_t *) cr3_desc.addr)[1] = 0x00400083;
 
+    /* Initialize video map table and directory entry */
+    init_page_table(usr_vidmap_table_desc.addr, VIDMAP_TABLE_BASE);
+    ((uint32_t *) usr_vidmap_table_desc.addr)[0] = (0xB8000 | 0x7); // 0x7 to set video memory as present for user
+
     set_paging_params(cr3_desc.addr);
 }
 
 /* 
  * init_first_page_table
- *   DESCRIPTION: Initializes page table at the address passed mapping to the base physical address based in.
- *   INPUTS: first_table_desc
- *   RETURN VALUE: None
- *   SIDE EFFECTS: Full page table entry (4096kb) initialized. Any data in the range gets overwritten
+ *   DESCRIPTION:   Initializes page table at the address passed mapping to the base physical address based in.
+ *   INPUTS:        table_base_addr, phys_base_addr- starting location of physical memory
+ *   RETURN VALUE:  None
+ *   SIDE EFFECTS:  Full page table entry (4096kb) initialized.
+ *                  Any data in the range gets overwritten. All entries marked as NOT present
 */
-int32_t init_page_table(x86_desc_t table_desc, uint32_t phys_base_addr){
+int32_t init_page_table(uint32_t table_base_addr, uint32_t phys_base_addr){
     unsigned i;
-    uint32_t* table_base_addr; 
+    uint32_t* table_base_ptr; 
 
     // page table addr alignment check
-    if(table_desc.addr & (PAGE_TABLE_SIZE - 1)){
+    if(table_base_addr & (PAGE_TABLE_SIZE - 1)){
         return -1; // table not aligned to 4kb
     }
 
@@ -33,10 +38,10 @@ int32_t init_page_table(x86_desc_t table_desc, uint32_t phys_base_addr){
     if(phys_base_addr & PAGE_ENTRY_SIZE - 1){
         return -1; // physical memory not aligned to 4MB (0x400000)
     }
-    table_base_addr = (uint32_t *) table_desc.addr;
+    table_base_ptr = (uint32_t *) table_base_addr;
 
     for(i = 0; i < NUM_PTE; ++i){
-        table_base_addr[i] = phys_base_addr + (i << 12);            /* Left shifting by 2 to find index. Leftshifting by 12 for start of address  */
+        table_base_ptr[i] = phys_base_addr + (i << 12);            /* Left shifting by 2 to find index. Leftshifting by 12 for start of address  */
     }
 
     return 0;
