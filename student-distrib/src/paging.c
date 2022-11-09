@@ -1,6 +1,8 @@
 #include "paging.h"
 #include "init_helpers.h"
 
+int32_t init_page_table(uint32_t table_base_addr, uint32_t phys_base_addr);
+
 void init_paging(){
     init_page_table(first_4_desc.addr, 0x0); // initialize table for memory 0-4mb
     ((uint32_t *) first_4_desc.addr)[0xB8] = (0xB8000 | 0x3);       /* 0x3 to set video memory as present for supervisor */
@@ -13,6 +15,7 @@ void init_paging(){
     /* Initialize video map table and directory entry */
     init_page_table(usr_vidmap_table_desc.addr, VIDMAP_TABLE_BASE);
     ((uint32_t *) usr_vidmap_table_desc.addr)[0] = (0xB8000 | 0x7); // 0x7 to set video memory as present for user
+    ((uint32_t *) cr3_desc.addr)[VIDMAP_TABLE_BASE>>22] = usr_vidmap_table_desc.addr | 0x00000007;
 
     set_paging_params(cr3_desc.addr);
 }
@@ -35,7 +38,7 @@ int32_t init_page_table(uint32_t table_base_addr, uint32_t phys_base_addr){
     }
 
     // physical memory aligned to 4MB check
-    if(phys_base_addr & PAGE_ENTRY_SIZE - 1){
+    if(phys_base_addr & (PAGE_ENTRY_SIZE - 1)){
         return -1; // physical memory not aligned to 4MB (0x400000)
     }
     table_base_ptr = (uint32_t *) table_base_addr;
