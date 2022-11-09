@@ -535,10 +535,10 @@ int execute_syscall_test(){
 /* Test suite entry point */
 void launch_tests(){
 	/* CP1 Tests */
-	// TEST_OUTPUT("idt_test", idt_test());
-	// TEST_OUTPUT("div_0_test", div_0_test());
+	//TEST_OUTPUT("idt_test", idt_test());
+	//TEST_OUTPUT("div_0_test", div_0_test());
 	//TEST_OUTPUT("invalid_address_test", invalid_address_test());
-	// TEST_OUTPUT("deref null", deref_null_test());
+	TEST_OUTPUT("deref null", deref_null_test());
 	// TEST_OUTPUT("rtc test", rtc_test());
 	// TEST_OUTPUT("Keyboard test", keyboard_test());
 
@@ -556,6 +556,6 @@ void launch_tests(){
 
 	/* CP3 Tests*/
 	// TEST_OUTPUT("execute", execute_test());
-	TEST_OUTPUT("syscall_linkage", execute_syscall_test());
+	//TEST_OUTPUT("syscall_linkage", execute_syscall_test());
 	// launch your tests here
 }
