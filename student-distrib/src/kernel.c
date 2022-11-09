@@ -172,9 +172,7 @@ void entry(unsigned long magic, unsigned long addr) {
      * PIC, any other initialization stuff... */
 
     /* Init the Paging */
-    init_first_page_table(first_4_desc);
-    init_page_directory(cr3_desc, first_4_desc);
-    set_paging_params(cr3_desc.addr);
+    init_paging();
     
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
