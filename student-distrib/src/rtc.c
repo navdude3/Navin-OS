@@ -24,9 +24,14 @@ void rtc_init(){
     outb(REG_B_DATA, REG_PORT);                      // Disable NMI 
     char prev = inb(RW_PORT);                        // Read the current val of register B
     outb(REG_B_DATA, REG_PORT);                      // Reset index
-    outb(prev | 0x40, RW_PORT);                      // Turn on bit 6 of reg B by OR-ing previous with 0x01000000   
+    outb(prev | 0x40, RW_PORT);                      // Turn on bit 6 of reg B by OR-ing previous with 0x01000000  
+
+    // outb(REG_A_DATA, REG_PORT);                      // Disable NMI 
+    // prev = inb(RW_PORT);                             // Read the current val of register A
+    // outb(REG_A_DATA, REG_PORT);                      // Reset index
+    // outb((prev&0xF0) | 15, RW_PORT);   
     enable_irq(RTC_IRQ);                             // Enable interrupts on IRQ 8
-    
+
     set_rate(MAX_FREQ);
 }
 
