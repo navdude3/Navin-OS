@@ -3,7 +3,7 @@
 
 #define KERNEL_AREA_SIZE 0x2000
 #define PROC_FD_ARRAY_SIZE 8
-#define MAX_PROCESS        6
+#define MAX_PROCESS        3
 #include "vfs.h"
 
 typedef struct{
