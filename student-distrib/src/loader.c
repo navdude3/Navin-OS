@@ -102,7 +102,10 @@ int32_t sys_execute(const uint8_t* command) {
     arg_size_count = parse_fname_args(command, fname, args);
 
     /* 2. Executable check */
-    if(read_dentry_by_name(fname, &dentry) != 0) return -1;                               /* If failed to read, return -1 */
+    if(read_dentry_by_name(fname, &dentry) != 0) {
+        pid_array[new_pid] = 0;
+        return -1;                               /* If failed to read, return -1 */
+    }
     read_data(dentry.inode_idx, 0, exe_check_buf, 4);                                     /* Writes first four bytes of data to buf */                                                  
     if(strncmp((int8_t *)exe_check_buf, exe_check_str, 4) != 0){                          /* Checks if ezxecutable, if not clear pid and return -1*/
         pid_array[new_pid] = 0;
