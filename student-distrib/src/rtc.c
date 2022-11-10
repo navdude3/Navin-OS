@@ -31,7 +31,6 @@ void rtc_init(){
     // outb(REG_A_DATA, REG_PORT);                      // Reset index
     // outb((prev&0xF0) | 15, RW_PORT);   
     enable_irq(RTC_IRQ);                             // Enable interrupts on IRQ 8
-
     set_rate(MAX_FREQ);
 }
 
@@ -86,19 +85,19 @@ int32_t rtc_read(uint32_t fd, uint8_t* buf, uint32_t length){
 int32_t rtc_write(uint32_t fd, uint8_t* buf, uint32_t length){
     if((buf == NULL ) || (length != sizeof(uint32_t))) return -1;
     
-    int freq = *(int *) buf; // set the frequency based on the buffer number
+    int freq = *(int *) buf;                // set the frequency based on the buffer number
     int temp = freq;
 
     if(freq < MIN_FREQ || freq > MAX_FREQ) return -1;
     
     while(temp != 1) {
         if(temp % MIN_FREQ == 1) return -1;
-        temp = temp / MIN_FREQ;          // check to make sure function is a power of 2
+        temp = temp / MIN_FREQ;             // check to make sure function is a power of 2
     }                                
     
-    rtc_int_count = MAX_FREQ / freq;  // update the interrupt count
+    rtc_int_count = MAX_FREQ / freq;        // update the interrupt count
     
-    set_rate(freq); // set the rtc_rate to the new frequency
+    set_rate(freq);                         // set the rtc_rate to the new frequency
     
     return 0;
 }

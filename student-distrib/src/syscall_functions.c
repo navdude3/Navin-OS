@@ -33,6 +33,7 @@ int32_t sys_open (const uint8_t* filename) {
         // ADD CASE 0 ONCE FD OPERATIONS IMPLEMENTED FOR RTC
         case 0 :
             entry->j_tbl = &rtc_ops;
+            break;
         case 1 :
             entry->j_tbl = &dir_ops;
             break;
@@ -125,6 +126,7 @@ int32_t sys_vidmap(uint8_t** screen_start) {
         ||  (uint32_t) screen_start >= user_addr_base + PROGRAM_SIZE){
             return -1;
         }
+    
     uint32_t* usr_vidmap_table_base = (uint32_t *) usr_vidmap_table_desc.addr;
     int32_t cur_pid = get_curr_pcb()->pid;
     usr_vidmap_table_base[cur_pid] = (0xB8000 | 0x7); // 0x7 to set video memory as present for user
