@@ -34,6 +34,8 @@ int32_t fill_buffer(char input_char){
                 term_buffer[curr_size - 1] = ' ';
                 curr_size--;                                    //handle backspace sizing
             } 
+        } else{
+            return -1; // prevent backspace from flowing into already written parts
         }
     } else if (input_char == '\f'){
         curr_size = 0;
