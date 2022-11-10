@@ -67,9 +67,9 @@ int32_t fill_buffer(char input_char){
 int32_t terminal_write(uint32_t fd, uint8_t* user_buffer, uint32_t bytes){  //doesnt really need locking since only end of buffer can be modified
     int i;
     if(bytes <= 0) return 0;                                    /* If nothing to be written, return immediately */
-    else if(bytes > BUFFER){                                    //overflow checking
-        bytes = BUFFER;        
-    }
+    // else if(bytes > BUFFER){                                    //overflow checking
+    //     bytes = BUFFER;        
+    // }
     for(i = 0; i < bytes; i++){
         if(((char*)user_buffer)[i] != '\0'){                    // empty in C
             putc(((char*)user_buffer)[i]);                      //place the specific charachter to screen
