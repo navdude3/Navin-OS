@@ -113,10 +113,10 @@ int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {
 
 /* 
  * sys_vidmap
- *   DESCRIPTION:
- *   INPUTS: uint8_t** screen_start
- *   OUTPUTS: 
- *   RETURN VALUE: 0 always 
+ *   DESCRIPTION: Setup page entry for user video memory 
+ *   INPUTS: uint8_t** screen_start - pointer to pass user video memory location to
+ *   SIDE EFFECTS: *screen_start modified, video memory page table entry pertaining to process modified
+ *   RETURN VALUE: 0 if successful, -1 if screen_start is not within user memory space 
  */
 int32_t sys_vidmap(uint8_t** screen_start) {
     /* Fail if address is outside current process address space*/
