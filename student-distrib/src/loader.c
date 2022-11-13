@@ -198,9 +198,10 @@ int32_t sys_halt(uint8_t status) {
         return 0;
     }
     /* Teardown vidmap entry */
-    uint32_t* usr_vidmap_table_base = (uint32_t *) usr_vidmap_table_desc.addr;
-    usr_vidmap_table_base[cur_process->pid] = 0x0; // 0x0 to set video memory as not present
-
+    pte_desc_t vidmap;
+    vidmap.val = 0x0;
+    set_ptentry(usr_vidmap_table_desc.addr, cur_process->pid, vidmap);
+    
     /* Getting parent process info */
     pid_array[cur_process->pid] = 0;
     pcb_t* parent_process = get_pcb(cur_process->parent_pid);
@@ -235,11 +236,10 @@ int32_t sys_halt(uint8_t status) {
  *   DESCRIPTION: Parses command for names and argument 
  *   INPUTS: const uint8_t* input, uint8_t* fname, uint8_t* args
  *   OUTPUTS: None
- *   RETURNS: Returns number of arguments 
+ *   RETURNS: Returns length of arguments 
 */
 int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
     int i,j;
-    int count = 0;
 
     /* Parsing for command */
     for(i = 0; i < MAXSIZE; i++){
@@ -253,16 +253,23 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
         if(input[i] == '\0') return 0;
 
     }
+    int leading_ws_flag = 0;
+    int arg_idx = 0;
     /* Parsing for arguments */
     for(j = 0; j+i < MAX_ARG_SIZE; ++j){    /* Checks rest of string (after command) for arguments*/
-        if(input[j+i] == '\n' 
+        if(leading_ws_flag == 0 && input[j+i] == ' ') continue;
+        else{
+            if(input[j+i] == '\n' 
             || input[j+i] == ' ' 
             || input[j+i] == '\0'){
-                args[j] = '\0';
-                return count;               /* Returns number of arguments */
+                args[arg_idx] = '\0';
+                return arg_idx;               /* Returns number of arguments */
             }
-            args[j] = input[j + i];
-            count++;
+            args[arg_idx] = input[j + i];
+            leading_ws_flag = 1;
+            ++arg_idx;
+        }
+        
     }
-    return count;
+    return arg_idx;
 }
