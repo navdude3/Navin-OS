@@ -15,18 +15,12 @@ typedef struct fd_flags{
 
 typedef struct fd_entry{
     fd_ops_t*   j_tbl;
-    // union{
-    //     struct{
-    //         uint32_t    inode_idx;
-    //         uint32_t    file_position;
-    //     }; // file type = 2 (files)
-    //     uint32_t rtc_freq; // file type = 0 (rtc)
-    // }
-    uint32_t    inode_idx;
+    union{
+        uint32_t    inode_idx; // file type = 2 (files)
+        uint32_t    rtc_freq; // file type = 0 (rtc)
+    };
     uint32_t    file_position;
-    struct{
-        uint32_t    freq;
-    }rtc;
+    
     
     fd_flags_t  flags;
 } fd_entry_t;

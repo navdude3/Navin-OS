@@ -49,7 +49,7 @@ void rtc_init(){
  *  SIDE EFFECTS: none
  */
 int32_t rtc_open(fd_entry_t* fd_entry){
-    fd_entry->rtc.freq = MIN_FREQ;                 
+    fd_entry->rtc_freq = MIN_FREQ;                 
     return 0;
 }
 
@@ -75,7 +75,7 @@ int32_t rtc_close(fd_entry_t* fd_entry){
  */
 int32_t rtc_read(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
     //flag = 1;
-    int32_t interval = MAX_FREQ/fd_entry->rtc.freq;
+    int32_t interval = MAX_FREQ/fd_entry->rtc_freq;
     sti();
     while(!(rtc_count % interval)) continue;                           // infinite loop until rtc_count is a multiple of desired interval
     return 0;                                       // return 0
@@ -105,7 +105,7 @@ int32_t rtc_write(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
     // rtc_int_count = MAX_FREQ / freq;        // update the interrupt count
     
     // freqs[cur_process->pid] = freq;
-    fd_entry->rtc.freq = freq;
+    fd_entry->rtc_freq = freq;
     set_rate(freq);                         // set the rtc_rate to the new frequency
     
     return 0;
