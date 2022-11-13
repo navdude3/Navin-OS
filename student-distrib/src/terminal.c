@@ -161,7 +161,6 @@ int32_t terminal_close(uint32_t fd) {
 */
 int32_t terminal_open(const uint8_t* fname) {
     int i;
-    //clear();
     for (i = 0; i < BUFFER; i++) term_buffer[i] = ' ';              //clean the buffer
     return 0;
 }

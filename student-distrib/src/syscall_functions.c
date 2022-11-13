@@ -97,30 +97,29 @@ int32_t sys_write (uint32_t fd, uint8_t* buf, uint32_t length){
 
 /* 
  * sys_getargs
- *   DESCRIPTION: Not implemented for this CP
+ *   DESCRIPTION: Obtains the arguments for a command
  *   INPUTS: uint8_t* buf - buffer to read into, uint32_t nbytes - number of bytes to copy
- *   OUTPUTS: None for now
- *   RETURN VALUE: 0 always for now
+ *   OUTPUTS: None
+ *   RETURN VALUE: 0 always 
  */
 int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {
-   if((buf == NULL)|| (get_curr_pcb()->arg_size > nbytes)) return -1;
+   if((buf == NULL) || (get_curr_pcb()->arg_size > nbytes)) return -1;          /* If buffer is null or size is larger than number of bytes, return -1*/
    pcb_t* current = get_curr_pcb();
    int i;
-   for(i = 0; i < 128; i++) buf[i] = '\0';
-   for(i = 0; i < current->arg_size; i++) buf[i] = current->args[i];
+   for(i = 0; i < 128; i++) buf[i] = '\0';                                      /* Fills buffer will null terminators*/
+   for(i = 0; i < current->arg_size; i++) buf[i] = current->args[i];            /* Places arguments at the beginning of buffer */
    return 0;
 }
 
 /* 
  * sys_vidmap
- *   DESCRIPTION: Not implemented for this CP
+ *   DESCRIPTION:
  *   INPUTS: uint8_t** screen_start
- *   OUTPUTS: None for now
- *   RETURN VALUE: 0 always for now
+ *   OUTPUTS: 
+ *   RETURN VALUE: 0 always 
  */
 int32_t sys_vidmap(uint8_t** screen_start) {
     /* Fail if address is outside current process address space*/
-
     uint32_t user_addr_base = PROGRAM_VMEM_BASE;
     if (    (uint32_t) screen_start < user_addr_base
         ||  (uint32_t) screen_start >= user_addr_base + PROGRAM_SIZE){

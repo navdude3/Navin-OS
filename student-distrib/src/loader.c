@@ -5,7 +5,7 @@
 #include "vfs.h"
 
 static int num_active_procs;                                                        /* Reads bytes from an executable file into this address */
-static int pid_array[6];
+static int pid_array[6];                                                            /* Keeps track of which processes are open */
 int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args);
 
 
@@ -85,12 +85,12 @@ int32_t sys_execute(const uint8_t* command) {
         if(pid_array[i] == 1){
             active_processes++;
         }
-        if(active_processes == MAX_PROCESS){                                                  /* Every PID is used */
+        if(active_processes == MAX_PROCESS){                                              /* Every PID is used */
             return 256;
         }
    }
 
-   for(i = 0; i < SIZE_OF_ADDR; i++) eip_buffer[i] = 0;                                             /* Clearing fname and eip_buffer before populating */
+   for(i = 0; i < SIZE_OF_ADDR; i++) eip_buffer[i] = 0;                                   /* Clearing fname and eip_buffer before populating */
    for(j = 0; j < MAXSIZE; j++) fname[j] = NULL;
    for(k = 0; k < MAX_ARG_SIZE; k++) args[k] = NULL;
    
@@ -117,8 +117,8 @@ int32_t sys_execute(const uint8_t* command) {
                    
     /* 4. User Level Program Loader */                                                     
     /* At this point, we have verified that the file exists and is a valid executable. Can now copy the program into address */
-    read_data(dentry.inode_idx, 24, eip_buffer, SIZE_OF_ADDR);                                      /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */ 
-    entry = *((uint32_t*)eip_buffer);                                                    /* Return entry point at bit 24 */
+    read_data(dentry.inode_idx, 24, eip_buffer, SIZE_OF_ADDR);                              /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */ 
+    entry = *((uint32_t*)eip_buffer);                                                       /* Return entry point at bit 24 */
 	
 
     inode = &init_inode[dentry.inode_idx];
@@ -126,7 +126,7 @@ int32_t sys_execute(const uint8_t* command) {
     read_data(dentry.inode_idx, 0, (uint8_t*)PROGRAM_VMEM_START, size);                     /* Copying entire file to memory */
 
     /* 5. Create PCB */
-    pcb_t* new_process = (pcb_t *) (USER_MEMORY_BASE - ((new_pid + 1) * PCB_SIZE));        //+1 because pcb resides on top of 8kb block
+    pcb_t* new_process = (pcb_t *) (USER_MEMORY_BASE - ((new_pid + 1) * PCB_SIZE));         //+1 because pcb resides on top of 8kb block
 
 
     new_process->pid = new_pid;
@@ -249,17 +249,17 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
             ++i;
             break;
         } 
-        fname[i] = input[i];
+        fname[i] = input[i];                /* Copy over name */
         if(input[i] == '\0') return 0;
 
     }
     /* Parsing for arguments */
-    for(j = 0; j+i < MAX_ARG_SIZE; ++j){
+    for(j = 0; j+i < MAX_ARG_SIZE; ++j){    /* Checks rest of string (after command) for arguments*/
         if(input[j+i] == '\n' 
             || input[j+i] == ' ' 
             || input[j+i] == '\0'){
                 args[j] = '\0';
-                return count;
+                return count;               /* Returns number of arguments */
             }
             args[j] = input[j + i];
             count++;
