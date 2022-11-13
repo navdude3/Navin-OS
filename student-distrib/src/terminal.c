@@ -118,7 +118,7 @@ int32_t fill_buffer(char input_char){
  *   OUTPUTS: modifies the screen with putc
  *   RETURN VALUE: number of bytes wrote
 */
-int32_t terminal_write(uint32_t fd, uint8_t* user_buffer, uint32_t bytes){  //doesnt really need locking since only end of buffer can be modified
+int32_t terminal_write(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes){  //doesnt really need locking since only end of buffer can be modified
     int i;
     if(bytes <= 0) return 0;                                    /* If nothing to be written, return immediately */
     // else if(bytes > BUFFER){                                    //overflow checking
@@ -139,7 +139,7 @@ int32_t terminal_write(uint32_t fd, uint8_t* user_buffer, uint32_t bytes){  //do
  *   OUTPUTS: modify the user buffer
  *   RETURN VALUE: number of bytes read
 */
-int32_t terminal_read(uint32_t fd, uint8_t* user_buffer, uint32_t bytes){
+int32_t terminal_read(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes){
     int i;
     int j;
     int contains_nl = 0;                                        //newline checker, starts at 0
@@ -201,7 +201,7 @@ int32_t terminal_read(uint32_t fd, uint8_t* user_buffer, uint32_t bytes){
  *   OUTPUTS: none
  *   RETURN VALUE: return 0
 */
-int32_t terminal_close(uint32_t fd) {
+int32_t terminal_close(fd_entry_t* fd_entry) {
     return 0;
 }
 
@@ -213,7 +213,7 @@ int32_t terminal_close(uint32_t fd) {
  *   OUTPUTS: none
  *   RETURN VALUE: return 0
 */
-int32_t terminal_open(uint32_t fd) {
+int32_t terminal_open(fd_entry_t* fd_entry) {
     int i;
     //clear();
     char* proc_term_buffer = terminals[cur_process->term_id].term_buffer;

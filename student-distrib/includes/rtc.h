@@ -20,10 +20,10 @@ volatile int rtc_count;
 
 /* RTC Fucntions */
 void    rtc_init();
-int32_t rtc_open(uint32_t fd);
-int32_t rtc_close(uint32_t fd);
-int32_t rtc_read(uint32_t fd, uint8_t* buf, uint32_t length);
-int32_t rtc_write(uint32_t fd, uint8_t* buf, uint32_t length);
+int32_t rtc_open(fd_entry_t* fd_entry);
+int32_t rtc_close(fd_entry_t* fd_entry);
+int32_t rtc_read(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length);
+int32_t rtc_write(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length);
 void rtc_link_handler();
 void set_rate(int freq);
 

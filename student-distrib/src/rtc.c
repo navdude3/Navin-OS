@@ -48,8 +48,8 @@ void rtc_init(){
  *  RETURN VALUE: 0
  *  SIDE EFFECTS: none
  */
-int32_t rtc_open(uint32_t fd){
-    cur_process->fd_array[fd].rtc.freq = MIN_FREQ;                 
+int32_t rtc_open(fd_entry_t* fd_entry){
+    fd_entry->rtc.freq = MIN_FREQ;                 
     return 0;
 }
 
@@ -61,7 +61,7 @@ int32_t rtc_open(uint32_t fd){
  *  RETURN VALUE: 0
  *  SIDE EFFECTS: none
  */
-int32_t rtc_close(uint32_t fd){
+int32_t rtc_close(fd_entry_t* fd_entry){
     return 0;                                       // function does nothing but return 0
 }
 
@@ -73,9 +73,9 @@ int32_t rtc_close(uint32_t fd){
  *  RETURN VALUE: 0
  *  SIDE EFFECTS: Enables interrupts on IRQ 8
  */
-int32_t rtc_read(uint32_t fd, uint8_t* buf, uint32_t length){
+int32_t rtc_read(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
     //flag = 1;
-    int32_t interval = MAX_FREQ/freqs[cur_process->pid];
+    int32_t interval = MAX_FREQ/fd_entry->rtc.freq;
     sti();
     while(!(rtc_count % interval)) continue;                           // infinite loop until rtc_count is a multiple of desired interval
     return 0;                                       // return 0
@@ -89,7 +89,7 @@ int32_t rtc_read(uint32_t fd, uint8_t* buf, uint32_t length){
  *  RETURN VALUE: -1 or 0
  *  SIDE EFFECTS: frequency must be power of 2 and between 2 and 1024
  */
-int32_t rtc_write(uint32_t fd, uint8_t* buf, uint32_t length){
+int32_t rtc_write(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
     if((buf == NULL ) || (length != sizeof(uint32_t))) return -1;
     
     int freq = *(int *) buf;                // set the frequency based on the buffer number
@@ -104,7 +104,8 @@ int32_t rtc_write(uint32_t fd, uint8_t* buf, uint32_t length){
     
     // rtc_int_count = MAX_FREQ / freq;        // update the interrupt count
     
-    freqs[cur_process->pid] = freq;
+    // freqs[cur_process->pid] = freq;
+    fd_entry->rtc.freq = freq;
     set_rate(freq);                         // set the rtc_rate to the new frequency
     
     return 0;

@@ -110,7 +110,8 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length
  *   INPUTS: fname- filename that is to be opened. Note that the system open call has a wrapper that handles the actual file lookup, so we don't use fname here. Strictly for adhering to abstraction interface
  *   RETURN VALUE: 0
 */
-int32_t f_open              (uint32_t fd){
+int32_t f_open              (fd_entry_t* fd_entry){
+    fd_entry->file_position = 0;
     return 0;
 }
 
@@ -120,7 +121,7 @@ int32_t f_open              (uint32_t fd){
  *   INPUTS: fd- corresponding file descriptor entry to close. Note that system close call wrapper handles the fd entry cleanup, so nothing is done here. Strictly for adhering to abstraction interface.
  *   RETURN VALUE: 0
 */
-int32_t f_close (uint32_t fd){
+int32_t f_close (fd_entry_t* fd_entry){
     return 0;
 }
 
@@ -131,10 +132,9 @@ int32_t f_close (uint32_t fd){
  *   OUTPUTS: Writes length bytes or until EOF into buf, whichever is shorter
  *   RETURN VALUE: number of bytes written to buffer, 0 if EOF is reacehd, -1 if any error in reading file data (buffer might still have been written into at this point)
 */
-int32_t f_read (uint32_t fd, uint8_t* buf, uint32_t length){
-    pcb_t* cur_process = get_curr_pcb();
-    uint32_t bytes_read = read_data(cur_process->fd_array[fd].inode_idx, cur_process->fd_array[fd].file_position, buf, length);
-    cur_process->fd_array[fd].file_position += bytes_read;
+int32_t f_read (fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
+    uint32_t bytes_read = read_data(fd_entry->inode_idx, fd_entry->file_position, buf, length);
+    fd_entry->file_position += bytes_read;
     return bytes_read;
 }
 
@@ -143,7 +143,7 @@ int32_t f_read (uint32_t fd, uint8_t* buf, uint32_t length){
  *   DESCRIPTION: Does not do anything, file system is read-only
  *   RETURN VALUE: -1 because write is an error case
 */
-int32_t f_write (uint32_t fd, uint8_t* buf, uint32_t length){
+int32_t f_write (fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
     return -1;
 }
 
@@ -153,7 +153,8 @@ int32_t f_write (uint32_t fd, uint8_t* buf, uint32_t length){
  *   INPUTS: fname- filename that is to be opened. Note that the system open call has a wrapper that handles the actual file lookup, so we don't use fname here. Strictly for adhering to abstraction interface
  *   RETURN VALUE: 0
 */
-int32_t d_open (uint32_t fd){
+int32_t d_open (fd_entry_t* fd_entry){
+    fd_entry->file_position = 0;
     return 0;
 }
 
@@ -163,7 +164,7 @@ int32_t d_open (uint32_t fd){
  *   INPUTS: fd- corresponding file descriptor entry to close. Note that system close call wrapper handles the fd entry cleanup, so nothing is done here. Strictly for adhering to abstraction interface.
  *   RETURN VALUE: 0
 */
-int32_t d_close (uint32_t fd){
+int32_t d_close (fd_entry_t* fd_entry){
     return 0;
 }
 
@@ -174,9 +175,8 @@ int32_t d_close (uint32_t fd){
  *   OUTPUTS: Writes exactly one directory entry filename into buffer
  *   RETURN VALUE: returns 0 if reached end of directory entries, otherwise number of bytes written to buf
 */
-int32_t d_read(uint32_t fd, uint8_t *buf, uint32_t length){
-    pcb_t* cur_process = get_curr_pcb();
-    uint32_t* d_offset = &cur_process->fd_array[fd].file_position;
+int32_t d_read(fd_entry_t* fd_entry, uint8_t *buf, uint32_t length){
+    uint32_t* d_offset = fd_entry->file_position;
     
     if (*d_offset >= boot_blk->num_dirs) return 0;
     // if (length < sizeof(dentry_t)) return -1;
@@ -191,6 +191,6 @@ int32_t d_read(uint32_t fd, uint8_t *buf, uint32_t length){
  *   DESCRIPTION: Does not do anything, file system is read-only
  *   RETURN VALUE: -1 because write is an error case
 */
-int32_t d_write             (uint32_t fd, uint8_t* buf, uint32_t length){
+int32_t d_write             (fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
     return -1;
 }

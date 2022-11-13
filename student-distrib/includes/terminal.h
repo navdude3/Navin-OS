@@ -22,10 +22,10 @@ term_t* get_term(int8_t term_id);
 void    init_terms();
 void    switch_term(int8_t new_term_id);
 /* Functions for the terminal driver */
-extern int32_t terminal_write(uint32_t fd, uint8_t* user_buffer, uint32_t bytes);
-extern int32_t terminal_read(uint32_t fd, uint8_t* user_buffer, uint32_t bytes);
-extern int32_t terminal_close(uint32_t fd);
-extern int32_t terminal_open(uint32_t fd);
+extern int32_t terminal_write(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes);
+extern int32_t terminal_read(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes);
+extern int32_t terminal_close(fd_entry_t* fd_entry);
+extern int32_t terminal_open(fd_entry_t* fd_entry);
 
 extern int32_t fill_buffer(char input_char);
 

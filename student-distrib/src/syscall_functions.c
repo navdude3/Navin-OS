@@ -43,8 +43,8 @@ int32_t sys_open (const uint8_t* filename) {
             break;
     }
     entry->flags.type = f_dentry.file_type;
-    entry->file_position = 0;
-    entry->j_tbl->open(fd);
+    
+    entry->j_tbl->open(entry);
     
     return fd;
 }

@@ -4,15 +4,7 @@
 
 
 #define FD_ARRAY_SIZE 8
-
-
-typedef struct fd_ops {
-    int32_t (*open)     (uint32_t fd);
-    int32_t (*close)    (uint32_t fd);
-    int32_t (*read)     (uint32_t fd, uint8_t* buf, uint32_t length);
-    int32_t (*write)    (uint32_t fd, uint8_t* buf, uint32_t length);
-} fd_ops_t;
-
+typedef struct fd_ops fd_ops_t;
 
 typedef struct fd_flags{
     uint32_t    present    : 1; // : is called bitfield
@@ -38,6 +30,14 @@ typedef struct fd_entry{
     
     fd_flags_t  flags;
 } fd_entry_t;
+
+struct fd_ops {
+    int32_t (*open)     (fd_entry_t* fd_entry);
+    int32_t (*close)    (fd_entry_t* fd_entry);
+    int32_t (*read)     (fd_entry_t* fd_entry, uint8_t* buf, uint32_t length);
+    int32_t (*write)    (fd_entry_t* fd_entry, uint8_t* buf, uint32_t length);
+};
+
 
 int32_t init_vfs();
 int32_t init_fd_array(fd_entry_t* fd_array);
