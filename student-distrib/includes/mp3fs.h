@@ -50,7 +50,7 @@ uint32_t         f_offset;
 
 
 
-int32_t f_open              (const uint8_t* fname);
+int32_t f_open              (uint32_t fd);
 int32_t f_close             (uint32_t fd);
 int32_t f_read              (uint32_t fd, uint8_t* buf, uint32_t length);
 int32_t f_write             (uint32_t fd, uint8_t* buf, uint32_t length); //readonly fs
@@ -60,7 +60,7 @@ uint32_t         d_offset;
 
 
 
-int32_t d_open              (const uint8_t* fname);
+int32_t d_open              (uint32_t fd);
 int32_t d_close             (uint32_t fd);
 int32_t d_read              (uint32_t fd, uint8_t* buf, uint32_t length);
 int32_t d_write             (uint32_t fd, uint8_t* buf, uint32_t length); //readonly fs

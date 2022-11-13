@@ -110,7 +110,7 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length
  *   INPUTS: fname- filename that is to be opened. Note that the system open call has a wrapper that handles the actual file lookup, so we don't use fname here. Strictly for adhering to abstraction interface
  *   RETURN VALUE: 0
 */
-int32_t f_open              (const uint8_t* fname){
+int32_t f_open              (uint32_t fd){
     return 0;
 }
 
@@ -153,7 +153,7 @@ int32_t f_write (uint32_t fd, uint8_t* buf, uint32_t length){
  *   INPUTS: fname- filename that is to be opened. Note that the system open call has a wrapper that handles the actual file lookup, so we don't use fname here. Strictly for adhering to abstraction interface
  *   RETURN VALUE: 0
 */
-int32_t d_open (const uint8_t* fname){
+int32_t d_open (uint32_t fd){
     return 0;
 }
 

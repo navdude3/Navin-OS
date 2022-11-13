@@ -48,9 +48,8 @@ void rtc_init(){
  *  RETURN VALUE: 0
  *  SIDE EFFECTS: none
  */
-int32_t rtc_open(const uint8_t* filename){
-    
-    rtc_int_count = MAX_FREQ / MIN_FREQ;            // vrtualized RTC count                     
+int32_t rtc_open(uint32_t fd){
+    cur_process->fd_array[fd].rtc.freq = MIN_FREQ;                 
     return 0;
 }
 

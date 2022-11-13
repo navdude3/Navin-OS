@@ -7,7 +7,7 @@
 
 
 typedef struct fd_ops {
-    int32_t (*open)     (const uint8_t* fname);
+    int32_t (*open)     (uint32_t fd);
     int32_t (*close)    (uint32_t fd);
     int32_t (*read)     (uint32_t fd, uint8_t* buf, uint32_t length);
     int32_t (*write)    (uint32_t fd, uint8_t* buf, uint32_t length);
@@ -23,9 +23,19 @@ typedef struct fd_flags{
 
 typedef struct fd_entry{
     fd_ops_t*   j_tbl;
+    // union{
+    //     struct{
+    //         uint32_t    inode_idx;
+    //         uint32_t    file_position;
+    //     }; // file type = 2 (files)
+    //     uint32_t rtc_freq; // file type = 0 (rtc)
+    // }
     uint32_t    inode_idx;
     uint32_t    file_position;
-    uint32_t    rtc_freq;
+    struct{
+        uint32_t    freq;
+    }rtc;
+    
     fd_flags_t  flags;
 } fd_entry_t;
 

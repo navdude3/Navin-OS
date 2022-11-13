@@ -66,8 +66,6 @@ memmove(cur_term->vid_page, (void*) vid_mem, 4096);
 usr_vidmap_table_base[new_term_id] = (vid_mem | 0x7);
 memmove((void*) vid_mem, new_term->term_buffer, 4096);
 
-
-
 cur_term_id = new_term_id;
 
 }
@@ -215,10 +213,11 @@ int32_t terminal_close(uint32_t fd) {
  *   OUTPUTS: none
  *   RETURN VALUE: return 0
 */
-int32_t terminal_open(const uint8_t* fname) {
+int32_t terminal_open(uint32_t fd) {
     int i;
     //clear();
-    for (i = 0; i < BUFFER; i++) term_buffer[i] = ' ';              //clean the buffer
+    char* proc_term_buffer = terminals[cur_process->term_id].term_buffer;
+    for (i = 0; i < BUFFER; i++) proc_term_buffer[i] = ' ';              //clean the buffer
     return 0;
 }
 

@@ -20,7 +20,7 @@ volatile int rtc_count;
 
 /* RTC Fucntions */
 void    rtc_init();
-int32_t rtc_open(const uint8_t* filename);
+int32_t rtc_open(uint32_t fd);
 int32_t rtc_close(uint32_t fd);
 int32_t rtc_read(uint32_t fd, uint8_t* buf, uint32_t length);
 int32_t rtc_write(uint32_t fd, uint8_t* buf, uint32_t length);

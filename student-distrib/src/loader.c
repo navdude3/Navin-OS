@@ -135,8 +135,7 @@ int32_t sys_execute(const uint8_t* command) {
 
     if(new_pid == 0) new_process->parent_pid = -1;                                          /* Base program */
     else new_process->parent_pid = cur_process->pid;                                        /* Setting parent process info */
-    
-    init_fd_array(new_process->fd_array);
+ 
 
     /* 6. Create it’s own context switch stack */
     tss.ss0 = KERNEL_DS;
@@ -154,6 +153,7 @@ int32_t sys_execute(const uint8_t* command) {
     cur_process = new_process;
     for(i = 0; i < 128; i++) new_process->args[i] = args[i];
     new_process->arg_size = arg_size_count;
+    init_fd_array(new_process->fd_array);
 
     /* Context Switch */
     asm volatile(
