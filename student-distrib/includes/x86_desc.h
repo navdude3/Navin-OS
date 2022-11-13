@@ -177,6 +177,7 @@ extern x86_desc_t idt_desc_ptr;
 /* Page directory entry descriptor*/
 typedef struct pde_desc {
     union{
+        uint32_t val;
         struct{ // Page Entry (4mb)
             uint32_t pde_p : 1;
             uint32_t pde_rw : 1;
@@ -191,7 +192,7 @@ typedef struct pde_desc {
             uint32_t pde_pat : 1;
             uint32_t pde_reserved : 9;
             uint32_t pde_pba : 10;
-        };
+        }__attribute__ ((packed));
         struct{ // Page Table Entry (4kb)
             uint32_t pde_p : 1;
             uint32_t pde_rw : 1;
@@ -204,7 +205,7 @@ typedef struct pde_desc {
             uint32_t pde_g : 1;
             uint32_t pde_avail : 3;
             uint32_t pde_ptba : 20;
-        };
+        }__attribute__ ((packed));
     };
     
 } pde_desc_t;
@@ -212,17 +213,23 @@ typedef struct pde_desc {
 /* Page Table entry descriptor */
 typedef struct pte_desc{
     // Page Entry (4mb)
-    uint32_t present : 1;
-    uint32_t rw : 1;
-    uint32_t user : 1;
-    uint32_t write_through : 1;
-    uint32_t cache_disabled : 1;
-    uint32_t accessed : 1;
-    uint32_t dirty : 1;
-    uint32_t pt_attr_idx : 1;
-    uint32_t global : 1;
-    uint32_t pte_avail : 3;
-    uint32_t page_base_addr : 20;
+    union {
+        uint32_t val;
+        struct{
+            uint32_t present : 1;
+            uint32_t rw : 1;
+            uint32_t user : 1;
+            uint32_t write_through : 1;
+            uint32_t cache_disabled : 1;
+            uint32_t accessed : 1;
+            uint32_t dirty : 1;
+            uint32_t pt_attr_idx : 1;
+            uint32_t global : 1;
+            uint32_t pte_avail : 3;
+            uint32_t page_base_addr : 20;
+        }__attribute__ ((packed));
+    };
+    
 } pte_desc_t;
 
 /* Paging Related declarations */

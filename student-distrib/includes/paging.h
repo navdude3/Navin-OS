@@ -21,4 +21,5 @@ extern void init_paging();
 /* Sets the page directory entry and calls flush_tlb */
 uint32_t set_pdentry(uint32_t index, pde_desc_t pdentry);
 
+uint32_t set_ptentry(uint32_t table_base_addr, uint32_t idx, pte_desc_t ptentry);
 #endif
