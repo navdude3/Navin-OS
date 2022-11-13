@@ -33,6 +33,11 @@ void update_cursor(int x, int y);
 
 void test_interrupts(void);
 
+int get_term_x(void);
+int get_term_y(void);
+
+void update_term_xy(int x, int y);
+
 /* Port read functions */
 /* Inb reads a byte and returns its value as a zero-extended 32-bit
  * unsigned int */

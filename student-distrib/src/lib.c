@@ -594,3 +594,31 @@ void test_interrupts(void) {
         video_mem[i << 1]++;
     }
 }
+
+/* void update_term_xy
+ * Inputs: int x, terminals x value, int y, terminals y value
+ * Return Value: void
+ * Function: sets state of screen back to specific terminals state */
+
+void update_term_xy(int x, int y){
+    screen_x = x;
+    screen_y = y;
+    update_cursor(x, y);
+}
+
+/* void get_term_x
+ * Inputs: void
+ * Return Value: current x state of terminal
+ * Function: access the current x state of terminal */
+int get_term_x(void){
+    return screen_x;
+}
+
+
+/* void get_term_y
+ * Inputs: void
+ * Return Value: current y state of terminal
+ * Function: access the current y state of terminal */
+int get_term_y(void){
+    return screen_y;
+}

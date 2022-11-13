@@ -1,4 +1,5 @@
 #include "keyboard.h"
+#include "terminal.h"
 
 /* array that holds the character corresponding to each scancode */
 static char let_num [OPTION_SIZE] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '-', '=', '[', ']', ';', '`', ',', '.', '/', ' ', '\\', '\'', '\t', '\b', '\n'};
@@ -65,6 +66,37 @@ void shift_check(int key) {
     }
 }
 
+
+/* 
+ * terminal_check
+ *   DESCRIPTION: checker to see which terminal should be switched
+ *   INPUTS: key
+ *   OUTPUTS: none
+ *   RETURN VALUE: terminal to switch to 0 indexed
+*/
+
+int terminal_check(int key){
+    if(ctrl == 1){    
+        if(key == F1_PRESS){
+            return 0;
+        }
+        else if(key == F2_PRESS){
+            return 1;
+        }
+        else if(key == F3_PRESS){
+            return 2;
+        }
+    }
+    else{
+        return -1;
+    }
+
+
+}
+
+
+
+
 /* 
  * keyboard_link_handler
  *   DESCRIPTION: print the value to screen based on the scancode, send an EOI to master pic irq 1 
@@ -76,10 +108,17 @@ void keyboard_link_handler(){
     int key = inb(0x60);                                                                                           // port for keyboard
     int i;
     char output = -1;  
+    int terminal_switch;
+
     shift_check(key);                       
     shift_en = lshift | rshift; 
     capital_letters = shift_en ^ caps_en;                                                                          // xor so they negate
-   
+    terminal_switch = terminal_check(key);
+    if(terminal_switch != -1){
+        switch_terms(terminal_switch);
+        send_eoi(1); 
+        return;
+    }
     for(i = 0; i < OPTION_SIZE; i++) {
         if(key == scancode_pressed[i]) {                                                                           // check if the key is in scancode_pressed
             if(capital_letters == 0) output = let_num[i]; 

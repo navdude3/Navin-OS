@@ -1,9 +1,11 @@
 #include "rtc.h"
+#include "process.h"
 
 /* info from wiki.osdev.org/RTC */
 static int rtc_rate;
-static int flag;
+// static int flag;
 static int rtc_int_count = 512;
+static int freqs[MAX_PROCESS + 1]; // 0-5 for processes, last one for scheduler
 
 fd_ops_t rtc_ops = (fd_ops_t){
     rtc_open,
@@ -31,6 +33,10 @@ void rtc_init(){
     // outb(REG_A_DATA, REG_PORT);                      // Reset index
     // outb((prev&0xF0) | 15, RW_PORT);   
     enable_irq(RTC_IRQ);                             // Enable interrupts on IRQ 8
+    int i;
+    for(i = 0; i < 7; ++i){
+        freqs[i] = MIN_FREQ;
+    }
     set_rate(MAX_FREQ);
 }
 
@@ -43,6 +49,7 @@ void rtc_init(){
  *  SIDE EFFECTS: none
  */
 int32_t rtc_open(const uint8_t* filename){
+    
     rtc_int_count = MAX_FREQ / MIN_FREQ;            // vrtualized RTC count                     
     return 0;
 }
@@ -68,9 +75,10 @@ int32_t rtc_close(uint32_t fd){
  *  SIDE EFFECTS: Enables interrupts on IRQ 8
  */
 int32_t rtc_read(uint32_t fd, uint8_t* buf, uint32_t length){
-    flag = 1;
+    //flag = 1;
+    int32_t interval = MAX_FREQ/freqs[cur_process->pid];
     sti();
-    while(flag) continue;                           // infinite loop until flag is changed
+    while(!(rtc_count % interval)) continue;                           // infinite loop until rtc_count is a multiple of desired interval
     return 0;                                       // return 0
 }
 
@@ -95,8 +103,9 @@ int32_t rtc_write(uint32_t fd, uint8_t* buf, uint32_t length){
         temp = temp / MIN_FREQ;             // check to make sure function is a power of 2
     }                                
     
-    rtc_int_count = MAX_FREQ / freq;        // update the interrupt count
+    // rtc_int_count = MAX_FREQ / freq;        // update the interrupt count
     
+    freqs[cur_process->pid] = freq;
     set_rate(freq);                         // set the rtc_rate to the new frequency
     
     return 0;
@@ -153,8 +162,8 @@ void set_rate(int freq){
 void rtc_link_handler(){
     cli();
     // test_interrupts();
-    rtc_count = rtc_count + 1;              //count to static variable every interrupt call
-    flag = 0;
+    ++rtc_count;              //count to static variable every interrupt call
+    //flag = 0;
     outb(0x8C, 0x70);	                    // choose register C
     inb(0x71);		                        // remove contents
     send_eoi(8);                            // send eoi to irq 8, (slave pic irq 0)

@@ -3,7 +3,7 @@
 
 #define KERNEL_AREA_SIZE 0x2000
 #define PROC_FD_ARRAY_SIZE 8
-#define MAX_PROCESS        3
+#define MAX_PROCESS        6
 #include "vfs.h"
 
 typedef struct{
@@ -14,6 +14,7 @@ typedef struct{
     uint32_t saved_ebp;
     char args[128];
     uint32_t arg_size;
+    int8_t term_id;
 } pcb_t;
 
 pcb_t* cur_process;                     /* Current active process */             

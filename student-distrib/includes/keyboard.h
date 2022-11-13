@@ -12,6 +12,9 @@
 #define RCTRL_PRESS        0xE0         //right control pressed
 #define LCTRL_RELEASE      0x9D         //left control release
 #define RCTRL_RELEASE      0x9D         //right control release
+#define F1_PRESS           0x3B
+#define F2_PRESS           0x3C
+#define F3_PRESS           0x3D
 
 
 /* Initialization function */

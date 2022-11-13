@@ -25,6 +25,7 @@ typedef struct fd_entry{
     fd_ops_t*   j_tbl;
     uint32_t    inode_idx;
     uint32_t    file_position;
+    uint32_t    rtc_freq;
     fd_flags_t  flags;
 } fd_entry_t;
 

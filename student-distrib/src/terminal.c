@@ -1,5 +1,7 @@
 #include "terminal.h"
-
+#include "loader.h"
+#include "process.h"
+#include "lib.h"
 //make the terminal buffer
 static char term_buffer[BUFFER];
 
@@ -15,6 +17,60 @@ fd_ops_t terminal_ops = (fd_ops_t){
     terminal_read,
     terminal_write
 };
+
+term_t* get_term(int8_t term_id){
+    return &terminals[term_id];
+}
+term_t* get_cur_term(){
+    return get_term(cur_term_id);
+}
+
+
+void init_terms(){
+    int i;
+    //ask TA if we need to call shell on boot or on switch
+    for(i = 0; i < 3; i++){
+        terminals[i].scr_x = 0;
+        terminals[i].scr_y = 0;
+        terminals[i].curr_size = 0;
+    }
+    cur_term_id = 0;
+    return;
+}
+
+void switch_terms(int8_t new_term_id){
+uint32_t vid_mem = 0xB8000;
+uint32_t* usr_vidmap_table_base = (uint32_t *) usr_vidmap_table_desc.addr;
+term_t* new_term = get_term(new_term_id);
+term_t* cur_term = get_cur_term();
+
+/* Save current cursor and restore new cursor */
+cur_term->scr_x = get_term_x();
+cur_term->scr_y = get_term_y();
+update_term_xy(new_term->scr_x, new_term->scr_y);
+
+/* Save and restore term_buffer and curr_size */
+cur_term->curr_size = curr_size;
+curr_size = new_term->curr_size;
+int i;
+for(i = 0; i < BUFFER; ++i){
+    cur_term->term_buffer[i] = term_buffer[i];
+    term_buffer[i] = new_term->term_buffer[i];
+}
+
+
+
+/* Save current screen and restore new screen*/
+usr_vidmap_table_base[cur_term_id] = ((uint32_t) cur_term | 0x7);
+memmove(cur_term->vid_page, (void*) vid_mem, 4096);
+usr_vidmap_table_base[new_term_id] = (vid_mem | 0x7);
+memmove((void*) vid_mem, new_term->term_buffer, 4096);
+
+
+
+cur_term_id = new_term_id;
+
+}
 
 /* 
  * fill_buffer

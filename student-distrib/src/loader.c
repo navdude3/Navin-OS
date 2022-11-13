@@ -3,6 +3,7 @@
 #include "process.h"
 #include "mp3fs.h"
 #include "vfs.h"
+#include "terminal.h"
 
 static int num_active_procs;                                                        /* Reads bytes from an executable file into this address */
 static int pid_array[6];
@@ -130,6 +131,7 @@ int32_t sys_execute(const uint8_t* command) {
 
 
     new_process->pid = new_pid;
+    new_process->term_id = cur_term_id;
 
     if(new_pid == 0) new_process->parent_pid = -1;                                          /* Base program */
     else new_process->parent_pid = cur_process->pid;                                        /* Setting parent process info */
