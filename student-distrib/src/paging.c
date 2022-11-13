@@ -51,9 +51,6 @@ int32_t init_page_table(uint32_t table_base_addr, uint32_t phys_base_addr){
 }
 
 
-
-
-
 /* 
  * set_pdentry
  *   DESCRIPTION: Sets the page directory entry and flushes TLB

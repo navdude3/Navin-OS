@@ -14,7 +14,7 @@
 void divide_error(void){
     cli();
     clear();
-    printf(" divide error :(");
+    printf("divide error :(\n");
     sys_halt(-1);
 }
 
@@ -29,7 +29,7 @@ void divide_error(void){
 void RESERVED_1(void){
     cli();
     clear();
-    printf(" reserved 1 :(");
+    printf("reserved 1 :(\n");
     sys_halt(-1);
 }
 
@@ -43,7 +43,7 @@ void RESERVED_1(void){
 void nmi_int(void){
     cli();
     clear();
-    printf(" nmi error :(");
+    printf("nmi error :(\n");
     sys_halt(-1);
 }
 
@@ -57,7 +57,7 @@ void nmi_int(void){
 void breakpoint(void){
     cli();
     clear();
-    printf(" breakpoint error:(");
+    printf("breakpoint error:(\n");
     sys_halt(-1);
 }
 
@@ -71,7 +71,7 @@ void breakpoint(void){
 void overflow(void){
     cli();
     clear();
-    printf(" overflow error:(");
+    printf("overflow error:(\n");
     sys_halt(-1);
 }
 
@@ -85,7 +85,7 @@ void overflow(void){
 void bound_range(void){
     cli();
     clear();
-    printf(" bound_range error :(");
+    printf("bound_range error :(\n");
     sys_halt(-1);
 }
 
@@ -100,7 +100,7 @@ void bound_range(void){
 void invalid_opcode(void){
     cli();
     clear();
-    printf(" invalid_opcode error :(");
+    printf("invalid_opcode error :(\n");
     sys_halt(-1);
 }
 
@@ -114,7 +114,7 @@ void invalid_opcode(void){
 void device_not_available(void){
     cli();
     clear();
-    printf(" device_not_available error :(");
+    printf("device_not_available error :(\n");
     sys_halt(-1);
 }
 
@@ -128,7 +128,7 @@ void device_not_available(void){
 void double_fault(void){
     cli();
     clear();
-    printf(" double_fault error :(");
+    printf("double_fault error :(\n");
     sys_halt(-1);
 }
 
@@ -143,7 +143,7 @@ void double_fault(void){
 void segment_overrun(void){
     cli();
     clear();
-    printf(" segment_overrun error :(");
+    printf("segment_overrun error :(\n");
     sys_halt(-1);
 }
 
@@ -158,7 +158,7 @@ void segment_overrun(void){
 void invalid_tss(void){
     cli();
     clear();
-    printf(" invalid_tss error :(");
+    printf("invalid_tss error :(\n");
     sys_halt(-1);
 }
 
@@ -172,7 +172,7 @@ void invalid_tss(void){
 void seg_not_present(void){
     cli();
     clear();
-    printf(" seg_not_present error :(");
+    printf("seg_not_present error :(\n");
     sys_halt(-1);
 }
 
@@ -187,7 +187,7 @@ void seg_not_present(void){
 void seg_fault(void){
     cli();
     clear();
-    printf(" seg_fault error :(");
+    printf("seg_fault error :(\n");
     sys_halt(-1);
 }
 
@@ -201,7 +201,7 @@ void seg_fault(void){
 void general_protection(void){
     cli();
     clear();
-    printf(" general_protection error :(");
+    printf("general_protection error :(\n");
     sys_halt(-1);
 }
 
@@ -215,7 +215,7 @@ void general_protection(void){
 void page_fault(void){
     cli();
     clear();
-    printf(" page_fault error :(");
+    printf("page_fault error :(\n");
     sys_halt(-1);
 }
 
@@ -230,7 +230,7 @@ void page_fault(void){
 void floating_point_error(void){
     cli();
     clear();
-    printf(" floating_point_error error :(");
+    printf("floating_point_error error :(\n");
     sys_halt(-1);
 }
 
@@ -245,7 +245,7 @@ void floating_point_error(void){
 void alignment_check(void){
     cli();
     clear();
-    printf(" alignment_check error :(");
+    printf("alignment_check error :(\n");
     sys_halt(-1);
 }
 
@@ -260,7 +260,7 @@ void alignment_check(void){
 void machine_check(void){
     cli();
     clear();
-    printf(" machine_check error :(");
+    printf("machine_check error :(\n");
     sys_halt(-1);
 }
 
@@ -274,6 +274,6 @@ void machine_check(void){
 void simd_floating_point_exception(void){
     cli();
     clear();
-    printf(" simd_floating_point_exception error :(");
+    printf("simd_floating_point_exception error :(\n");
     sys_halt(-1);
 }
