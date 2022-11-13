@@ -6,7 +6,7 @@
 #include "terminal.h"
 
 static int num_active_procs;                                                        /* Reads bytes from an executable file into this address */
-static int pid_array[6];
+static int pid_array[6];                                                            /* Keeps track of which processes are open */
 int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args);
 
 
@@ -86,12 +86,12 @@ int32_t sys_execute(const uint8_t* command) {
         if(pid_array[i] == 1){
             active_processes++;
         }
-        if(active_processes == MAX_PROCESS){                                                  /* Every PID is used */
+        if(active_processes == MAX_PROCESS){                                              /* Every PID is used */
             return 256;
         }
    }
 
-   for(i = 0; i < SIZE_OF_ADDR; i++) eip_buffer[i] = 0;                                             /* Clearing fname and eip_buffer before populating */
+   for(i = 0; i < SIZE_OF_ADDR; i++) eip_buffer[i] = 0;                                   /* Clearing fname and eip_buffer before populating */
    for(j = 0; j < MAXSIZE; j++) fname[j] = NULL;
    for(k = 0; k < MAX_ARG_SIZE; k++) args[k] = NULL;
    
@@ -118,8 +118,8 @@ int32_t sys_execute(const uint8_t* command) {
                    
     /* 4. User Level Program Loader */                                                     
     /* At this point, we have verified that the file exists and is a valid executable. Can now copy the program into address */
-    read_data(dentry.inode_idx, 24, eip_buffer, SIZE_OF_ADDR);                                      /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */ 
-    entry = *((uint32_t*)eip_buffer);                                                    /* Return entry point at bit 24 */
+    read_data(dentry.inode_idx, 24, eip_buffer, SIZE_OF_ADDR);                              /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */ 
+    entry = *((uint32_t*)eip_buffer);                                                       /* Return entry point at bit 24 */
 	
 
     inode = &init_inode[dentry.inode_idx];
@@ -127,7 +127,7 @@ int32_t sys_execute(const uint8_t* command) {
     read_data(dentry.inode_idx, 0, (uint8_t*)PROGRAM_VMEM_START, size);                     /* Copying entire file to memory */
 
     /* 5. Create PCB */
-    pcb_t* new_process = (pcb_t *) (USER_MEMORY_BASE - ((new_pid + 1) * PCB_SIZE));        //+1 because pcb resides on top of 8kb block
+    pcb_t* new_process = (pcb_t *) (USER_MEMORY_BASE - ((new_pid + 1) * PCB_SIZE));         //+1 because pcb resides on top of 8kb block
 
 
     new_process->pid = new_pid;
@@ -200,9 +200,10 @@ int32_t sys_halt(uint8_t status) {
         return 0;
     }
     /* Teardown vidmap entry */
-    uint32_t* usr_vidmap_table_base = (uint32_t *) usr_vidmap_table_desc.addr;
-    usr_vidmap_table_base[cur_process->pid] = 0x0; // 0x0 to set video memory as not present
-
+    pte_desc_t vidmap;
+    vidmap.val = 0x0;
+    set_ptentry(usr_vidmap_table_desc.addr, cur_process->pid, vidmap);
+    
     /* Getting parent process info */
     pid_array[cur_process->pid] = 0;
     pcb_t* parent_process = get_pcb(cur_process->parent_pid);
@@ -237,11 +238,10 @@ int32_t sys_halt(uint8_t status) {
  *   DESCRIPTION: Parses command for names and argument 
  *   INPUTS: const uint8_t* input, uint8_t* fname, uint8_t* args
  *   OUTPUTS: None
- *   RETURNS: Returns number of arguments 
+ *   RETURNS: Returns length of arguments 
 */
 int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
     int i,j;
-    int count = 0;
 
     /* Parsing for command */
     for(i = 0; i < MAXSIZE; i++){
@@ -251,20 +251,27 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
             ++i;
             break;
         } 
-        fname[i] = input[i];
+        fname[i] = input[i];                /* Copy over name */
         if(input[i] == '\0') return 0;
 
     }
+    int leading_ws_flag = 0;
+    int arg_idx = 0;
     /* Parsing for arguments */
-    for(j = 0; j+i < MAX_ARG_SIZE; ++j){
-        if(input[j+i] == '\n' 
+    for(j = 0; j+i < MAX_ARG_SIZE; ++j){    /* Checks rest of string (after command) for arguments*/
+        if(leading_ws_flag == 0 && input[j+i] == ' ') continue;
+        else{
+            if(input[j+i] == '\n' 
             || input[j+i] == ' ' 
             || input[j+i] == '\0'){
-                args[j] = '\0';
-                return count;
+                args[arg_idx] = '\0';
+                return arg_idx;               /* Returns number of arguments */
             }
-            args[j] = input[j + i];
-            count++;
+            args[arg_idx] = input[j + i];
+            leading_ws_flag = 1;
+            ++arg_idx;
+        }
+        
     }
-    return count;
+    return arg_idx;
 }

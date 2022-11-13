@@ -215,7 +215,6 @@ int32_t terminal_close(fd_entry_t* fd_entry) {
 */
 int32_t terminal_open(fd_entry_t* fd_entry) {
     int i;
-    //clear();
     char* proc_term_buffer = terminals[cur_process->term_id].term_buffer;
     for (i = 0; i < BUFFER; i++) proc_term_buffer[i] = ' ';              //clean the buffer
     return 0;
