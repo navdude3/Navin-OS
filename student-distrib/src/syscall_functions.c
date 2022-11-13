@@ -127,9 +127,10 @@ int32_t sys_vidmap(uint8_t** screen_start) {
             return -1;
         }
     
-    uint32_t* usr_vidmap_table_base = (uint32_t *) usr_vidmap_table_desc.addr;
     int32_t cur_pid = get_curr_pcb()->pid;
-    usr_vidmap_table_base[cur_pid] = (0xB8000 | 0x7); // 0x7 to set video memory as present for user
+    pte_desc_t vidmap_entry;
+    vidmap_entry.val = (0xB8000 | 0x7);
+    set_ptentry(usr_vidmap_table_desc.addr, cur_pid, vidmap_entry);
     
     *screen_start =  (uint8_t *) VIDMAP_TABLE_BASE + (cur_pid << 12);
     return 0;

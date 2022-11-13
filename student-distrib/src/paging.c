@@ -20,7 +20,7 @@ void init_paging(){
 }
 
 /* 
- * init_first_page_table
+ * init_page_table
  *   DESCRIPTION:   Initializes page table at the address passed mapping to the base physical address based in.
  *   INPUTS:        table_base_addr, phys_base_addr- starting location of physical memory
  *   RETURN VALUE:  None
@@ -63,6 +63,20 @@ int32_t init_page_table(uint32_t table_base_addr, uint32_t phys_base_addr){
 uint32_t set_pdentry(uint32_t index, pde_desc_t pdentry){
     pde_desc_t* entry_loc = (pde_desc_t *)cr3_desc.addr + index;
     *entry_loc = pdentry;
+
+    flush_tlb();
+    return 0;
+}
+
+/* 
+ * set_ptentry
+ *   DESCRIPTION: Sets the page table entry of the specified page table and flushes TLB
+ *   INPUTS: uint32_t table_base_addr- address of the first entry of table, uint32_t index- index of entry in table, pte_desc_t pdentry
+ *   RETURN VALUE: 0
+*/
+uint32_t set_ptentry(uint32_t table_base_addr, uint32_t idx, pte_desc_t ptentry){
+    pte_desc_t* entry_loc = (pte_desc_t *)table_base_addr + idx;
+    *entry_loc = ptentry;
 
     flush_tlb();
     return 0;
