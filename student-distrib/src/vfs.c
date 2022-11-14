@@ -60,8 +60,9 @@ int32_t get_free_fd_entry_idx(){
  *   RETURN VALUE: none
  *   SIDE EFFECTS: marks entry as not present (might need to implement race condition handling), does not clear contents (for now)
  */
-void free_fd_entry(uint32_t idx){
-    pcb_t* cur_process = get_curr_pcb();
-    cur_process->fd_array[idx].flags.present = 0;
+void free_fd_entry(fd_entry_t* fd_entry){
+    fd_entry->flags.present = 0;
+    // pcb_t* cur_process = get_curr_pcb();
+    // cur_process->fd_array[idx].flags.present = 0;
 }
 

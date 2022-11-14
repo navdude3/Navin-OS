@@ -39,7 +39,7 @@ int32_t init_fd_array(fd_entry_t* fd_array);
 
 /* Utility functions for file descriptor table*/
 int32_t      get_free_fd_entry_idx();
-void    free_fd_entry(uint32_t idx);
+void    free_fd_entry(fd_entry_t* fd_entry);
 void    refresh_cur_fd_array();
 
 
