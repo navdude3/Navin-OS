@@ -101,3 +101,34 @@ Difficulty finding bug (time and changes made): forgot to set the DPL to 0 in th
 Type of Error: algorithmic
 Symptom that drew attention: able to type more than 128 characters to the terminal buffer
 Difficulty finding bug (time and changes made): made changes in the keyboard handler to not fill the buffer with output after the 128th character
+
+
+//Checkpoint 4
+Type of Error: algorithmic
+Symptom that drew attention: args were not parsing correctly
+Difficulty finding bug (time and changes made): made changes in how we check for spaces after the file name
+
+
+Type of Error: semantic
+Symptom that drew attention: args array being initialized with jibberish
+Difficulty finding bug (time and changes made): iniital for loop to clear the args array so all jibberish is gone
+
+
+Type of Error: semantic
+Symptom that drew attention: fish program was not running after the first frame
+Difficulty finding bug (time and changes made): the rtc was not being set properly, we forgot to add a break in our case statement 
+
+
+Type of Error: algorithmic
+Symptom that drew attention: non real programs would cause machine to use up a tcb slot
+Difficulty finding bug (time and changes made): rewrote the order of execute to account for incorrect words
+
+
+Type of Error: algorithmic
+Symptom that drew attention: cat printout would only display first 128 bytes
+Difficulty finding bug (time and changes made): we had a 128 charachter cap on our write buffer which should not have been there
+
+
+Type of Error: algorithmic
+Symptom that drew attention: newlines was not being displayed after cat on certain programs
+Difficulty finding bug (time and changes made): remove the 128 charachter cap allowed program to display a \n at end of program for cat
