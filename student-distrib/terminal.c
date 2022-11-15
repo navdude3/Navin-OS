@@ -62,7 +62,7 @@ void switch_terms(int8_t new_term_id){
     usr_vidmap_table_base[cur_term_id] = ((uint32_t) cur_term | 0x7);
     memmove(cur_term->vid_page, (void*) vid_mem, 4096);
     usr_vidmap_table_base[(unsigned int)new_term_id] = (vid_mem | 0x7);
-    memmove((void*) vid_mem, new_term->term_buffer, 4096);
+    memmove((void*) vid_mem, new_term->vid_page, 4096);
 
     cur_term_id = new_term_id;
 }
