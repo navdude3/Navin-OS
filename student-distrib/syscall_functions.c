@@ -63,7 +63,7 @@ int32_t sys_close(uint32_t fd){
     fd_entry_t* fd_e = &cur_process->fd_array[fd];
     if(fd_e->flags.present == 0) return -1;
     if(fd_e->j_tbl->close(fd_e) < 0) return -1;
-    free_fd_entry(fd);
+    free_fd_entry((fd_entry_t*)fd);
     return 0;
 }
 

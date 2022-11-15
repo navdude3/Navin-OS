@@ -15,12 +15,12 @@ typedef struct term{
     
 }__attribute__((aligned (4096))) term_t;
 
-static term_t terminals[MAX_TERMS];
 int cur_term_id;
+term_t terminals[MAX_TERMS];
 term_t* get_cur_term();
 term_t* get_term(int8_t term_id);
-void    init_terms();
-void    switch_term(int8_t new_term_id);
+extern void init_terms();
+extern void switch_terms(int8_t new_term_id);
 /* Functions for the terminal driver */
 extern int32_t terminal_write(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes);
 extern int32_t terminal_read(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes);

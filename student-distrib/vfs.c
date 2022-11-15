@@ -25,7 +25,7 @@ int32_t init_fd_array(fd_entry_t* fd_array){
         stdout_fd->file_position = 0;
         stdout_fd->flags.present = 1;
         stdout_fd->j_tbl = &terminal_ops; // both stdin and stdout use terminal driver
-        stdout_fd->j_tbl->open((uint8_t*)"garbage"); // initialize terminal driver
+        stdout_fd->j_tbl->open((fd_entry_t*)"garbage"); // initialize terminal driver
     }
     
     return 0;

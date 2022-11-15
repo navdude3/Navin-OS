@@ -1,6 +1,7 @@
 #include "lib.h"
 #include "i8259.h"
 #include "terminal.h"
+
 #define OPTION_SIZE         52         // Number of keyboard options
 #define CAPS_PRESSED       0x3A        // Caps lock pressed
 #define CAPS_RELEASED      0xBA        // Caps lock released

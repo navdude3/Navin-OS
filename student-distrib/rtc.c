@@ -4,7 +4,7 @@
 /* info from wiki.osdev.org/RTC */
 static int rtc_rate;
 // static int flag;
-static int rtc_int_count = 512;
+//static int rtc_int_count = 512;
 static int freqs[MAX_PROCESS + 1]; // 0-5 for processes, last one for scheduler
 
 fd_ops_t rtc_ops = (fd_ops_t){

@@ -19,7 +19,7 @@ fd_ops_t terminal_ops = (fd_ops_t){
 };
 
 term_t* get_term(int8_t term_id){
-    return &terminals[term_id];
+    return &terminals[(unsigned int)term_id];
 }
 term_t* get_cur_term(){
     return get_term(cur_term_id);
@@ -39,35 +39,32 @@ void init_terms(){
 }
 
 void switch_terms(int8_t new_term_id){
-uint32_t vid_mem = 0xB8000;
-uint32_t* usr_vidmap_table_base = (uint32_t *) usr_vidmap_table_desc.addr;
-term_t* new_term = get_term(new_term_id);
-term_t* cur_term = get_cur_term();
+    uint32_t vid_mem = 0xB8000;
+    uint32_t* usr_vidmap_table_base = (uint32_t *) usr_vidmap_table_desc.addr;
+    term_t* new_term = get_term(new_term_id);
+    term_t* cur_term = get_cur_term();
 
-/* Save current cursor and restore new cursor */
-cur_term->scr_x = get_term_x();
-cur_term->scr_y = get_term_y();
-update_term_xy(new_term->scr_x, new_term->scr_y);
+    /* Save current cursor and restore new cursor */
+    cur_term->scr_x = get_term_x();
+    cur_term->scr_y = get_term_y();
+    update_term_xy(new_term->scr_x, new_term->scr_y);
 
-/* Save and restore term_buffer and curr_size */
-cur_term->curr_size = curr_size;
-curr_size = new_term->curr_size;
-int i;
-for(i = 0; i < BUFFER; ++i){
-    cur_term->term_buffer[i] = term_buffer[i];
-    term_buffer[i] = new_term->term_buffer[i];
-}
+    /* Save and restore term_buffer and curr_size */
+    cur_term->curr_size = curr_size;
+    curr_size = new_term->curr_size;
+    int i;
+    for(i = 0; i < BUFFER; ++i){
+        cur_term->term_buffer[i] = term_buffer[i];
+        term_buffer[i] = new_term->term_buffer[i];
+    }
 
+    /* Save current screen and restore new screen*/
+    usr_vidmap_table_base[cur_term_id] = ((uint32_t) cur_term | 0x7);
+    memmove(cur_term->vid_page, (void*) vid_mem, 4096);
+    usr_vidmap_table_base[(unsigned int)new_term_id] = (vid_mem | 0x7);
+    memmove((void*) vid_mem, new_term->term_buffer, 4096);
 
-
-/* Save current screen and restore new screen*/
-usr_vidmap_table_base[cur_term_id] = ((uint32_t) cur_term | 0x7);
-memmove(cur_term->vid_page, (void*) vid_mem, 4096);
-usr_vidmap_table_base[new_term_id] = (vid_mem | 0x7);
-memmove((void*) vid_mem, new_term->term_buffer, 4096);
-
-cur_term_id = new_term_id;
-
+    cur_term_id = new_term_id;
 }
 
 /* 
@@ -215,7 +212,7 @@ int32_t terminal_close(fd_entry_t* fd_entry) {
 */
 int32_t terminal_open(fd_entry_t* fd_entry) {
     int i;
-    char* proc_term_buffer = terminals[cur_process->term_id].term_buffer;
+    char* proc_term_buffer = terminals[(unsigned int)cur_process->term_id].term_buffer;
     for (i = 0; i < BUFFER; i++) proc_term_buffer[i] = ' ';              //clean the buffer
     return 0;
 }
