@@ -176,7 +176,7 @@ int32_t d_close (fd_entry_t* fd_entry){
  *   RETURN VALUE: returns 0 if reached end of directory entries, otherwise number of bytes written to buf
 */
 int32_t d_read(fd_entry_t* fd_entry, uint8_t *buf, uint32_t length){
-    uint32_t* d_offset = (uint32_t*)fd_entry->file_position;
+    uint32_t* d_offset = (uint32_t*) &(fd_entry->file_position);
     if (*d_offset >= boot_blk->num_dirs) return 0;
     // if (length < sizeof(dentry_t)) return -1;
     if (length > FNAME_LIMIT) length = FNAME_LIMIT;

@@ -39,6 +39,7 @@ void init_terms(){
 }
 
 void switch_terms(int8_t new_term_id){
+    if(new_term_id == cur_term_id) return;
     uint32_t vid_mem = 0xB8000;
     uint32_t* usr_vidmap_table_base = (uint32_t *) usr_vidmap_table_desc.addr;
     term_t* new_term = get_term(new_term_id);
