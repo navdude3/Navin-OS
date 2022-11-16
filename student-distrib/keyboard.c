@@ -82,7 +82,7 @@ int terminal_check(int key){
         else if(key == 0x03){
             return 1;
         }
-        else if(key == F3_PRESS){
+        else if(key == 0x04){
             return 2;
         }
     }
