@@ -40,7 +40,7 @@ void idt_init(){
             idt[i].seg_selector = KERNEL_CS;    /* Enables kernel code segment */
             idt[i].dpl = 0;                     /* Kernel has descriptor level priviledge */
     }
-    
+    idt[32].reserved3 = 1;                      /* Enabling trap gate for PIT */
     idt[33].reserved3 = 1;                      /* Enabling trap gate for keyboard */
     idt[128].dpl = 3;                           /* Setting DPL for SYS CALLS*/
 
@@ -68,6 +68,7 @@ void idt_init(){
 
 
     /* Setting the corresponding IDT entry with the linkage for devices */
+    SET_IDT_ENTRY(idt[32], pit_linkage);
     SET_IDT_ENTRY(idt[33], keyboard_linkage);
     SET_IDT_ENTRY(idt[40], rtc_linkage);
     lidt(idt_desc_ptr);

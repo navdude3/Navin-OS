@@ -17,6 +17,7 @@
 #include "paging.h"
 #include "process.h"
 #include "loader.h"
+#include "pit.h"
 
 // #define RUN_TESTS
 
@@ -173,6 +174,10 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Init the Paging */
     init_paging();
+
+    init_terms();
+
+    sys_startup((uint8_t*)"shell");
     
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
@@ -189,12 +194,12 @@ void entry(unsigned long magic, unsigned long addr) {
 
 #endif
     /* Execute the first program ("shell") ... */
-    sys_execute((uint8_t*)"shell");
-    cur_term_id++;
-    sys_execute((uint8_t*)"shell");
-    cur_term_id++;
-    sys_execute((uint8_t*)"shell");
-    cur_term_id = 0;
+    // sys_execute((uint8_t*)"shell");
+    // switch_terms(1);
+    // sys_execute((uint8_t*)"shell");
+    // switch_terms(2);
+    // sys_execute((uint8_t*)"shell");
+    // switch_terms(0);
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");
 }
