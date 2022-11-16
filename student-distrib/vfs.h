@@ -18,6 +18,7 @@ typedef struct fd_entry{
     union{
         uint32_t    inode_idx; // file type = 2 (files)
         uint32_t    rtc_freq; // file type = 0 (rtc)
+        uint32_t    term_id;  // for stdio files
     };
     uint32_t    file_position;
     
@@ -34,7 +35,7 @@ struct fd_ops {
 
 
 int32_t init_vfs();
-int32_t init_fd_array(fd_entry_t* fd_array);
+
 /* Main file descriptor functions */
 
 /* Utility functions for file descriptor table*/
