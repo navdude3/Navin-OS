@@ -1,6 +1,7 @@
 #include "lib.h"
 #include "i8259.h"
 #include "vfs.h"
+#include "terminal.h"
 
 /* Ports that RTC utilizes for registers A/B and to read/write */
 #define REG_A_DATA  0x8A

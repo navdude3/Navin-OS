@@ -133,7 +133,7 @@ int32_t sys_execute(const uint8_t* command) {
 
     new_process->pid = new_pid;
 
-    if(new_pid == 0){ /* Base program */
+    if(new_pid == 0 || new_pid == 1 || new_pid == 2){ /* Base program */
         new_process->parent_pid = -1;
         new_process->term_id = cur_term_id; 
     }                                         

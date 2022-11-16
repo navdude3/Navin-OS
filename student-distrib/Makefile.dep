@@ -1,34 +1,34 @@
-boot.o: boot.S includes/multiboot.h includes/x86_desc.h includes/types.h
-init_helpers.o: src/init_helpers.S
-intr_link.o: src/intr_link.S
-x86_desc.o: src/x86_desc.S includes/x86_desc.h includes/types.h
-handle.o: src/handle.c includes/handle.h includes/lib.h includes/types.h \
-  includes/i8259.h includes/rtc.h includes/lib.h includes/i8259.h
-i8259.o: src/i8259.c includes/i8259.h includes/types.h includes/lib.h
-idt.o: src/idt.c includes/idt.h includes/x86_desc.h includes/types.h \
-  includes/handle.h includes/intr_link.h includes/keyboard.h \
-  includes/lib.h includes/i8259.h includes/terminal.h includes/vfs.h \
-  includes/rtc.h
-kernel.o: src/kernel.c includes/multiboot.h includes/types.h \
-  includes/x86_desc.h includes/lib.h includes/i8259.h includes/debug.h \
-  includes/tests.h includes/init_helpers.h includes/idt.h \
-  includes/x86_desc.h includes/handle.h includes/intr_link.h \
-  includes/keyboard.h includes/lib.h includes/i8259.h includes/terminal.h \
-  includes/vfs.h includes/rtc.h includes/keyboard.h includes/rtc.h \
-  includes/mp3fs.h includes/multiboot.h includes/vfs.h
-keyboard.o: src/keyboard.c includes/keyboard.h includes/lib.h \
-  includes/types.h includes/i8259.h includes/terminal.h includes/vfs.h
-lib.o: src/lib.c includes/lib.h includes/types.h
-mp3fs.o: src/mp3fs.c includes/mp3fs.h includes/types.h \
-  includes/multiboot.h includes/vfs.h includes/lib.h
-rtc.o: src/rtc.c includes/rtc.h includes/lib.h includes/types.h \
-  includes/i8259.h
-terminal.o: src/terminal.c includes/terminal.h includes/lib.h \
-  includes/types.h includes/vfs.h
-tests.o: src/tests.c includes/tests.h includes/x86_desc.h \
-  includes/types.h includes/lib.h includes/rtc.h includes/lib.h \
-  includes/i8259.h includes/handle.h includes/i8259.h includes/mp3fs.h \
-  includes/multiboot.h includes/vfs.h includes/vfs.h includes/terminal.h
-vfs.o: src/vfs.c includes/vfs.h includes/types.h includes/lib.h \
-  includes/mp3fs.h includes/multiboot.h includes/vfs.h \
-  includes/terminal.h includes/lib.h
+boot.o: boot.S multiboot.h x86_desc.h types.h
+init_helpers.o: init_helpers.S
+intr_link.o: intr_link.S
+syscall_handler.o: syscall_handler.S
+tests_assem.o: tests_assem.S
+x86_desc.o: x86_desc.S x86_desc.h types.h
+handle.o: handle.c handle.h lib.h types.h i8259.h rtc.h vfs.h terminal.h \
+  syscall_functions.h
+i8259.o: i8259.c i8259.h types.h lib.h
+idt.o: idt.c idt.h x86_desc.h types.h handle.h intr_link.h keyboard.h \
+  lib.h i8259.h terminal.h vfs.h rtc.h syscall_handler.h \
+  syscall_functions.h
+kernel.o: kernel.c multiboot.h types.h x86_desc.h lib.h i8259.h debug.h \
+  tests.h init_helpers.h idt.h handle.h intr_link.h keyboard.h terminal.h \
+  vfs.h rtc.h syscall_handler.h syscall_functions.h mp3fs.h paging.h \
+  process.h loader.h
+keyboard.o: keyboard.c keyboard.h lib.h types.h i8259.h terminal.h vfs.h
+lib.o: lib.c lib.h types.h
+loader.o: loader.c loader.h types.h mp3fs.h multiboot.h vfs.h \
+  syscall_functions.h lib.h x86_desc.h paging.h process.h terminal.h
+mp3fs.o: mp3fs.c mp3fs.h types.h multiboot.h vfs.h lib.h process.h
+paging.o: paging.c paging.h x86_desc.h types.h init_helpers.h
+process.o: process.c process.h vfs.h types.h loader.h mp3fs.h multiboot.h \
+  syscall_functions.h lib.h x86_desc.h
+rtc.o: rtc.c rtc.h lib.h types.h i8259.h vfs.h terminal.h process.h
+syscall_functions.o: syscall_functions.c syscall_functions.h lib.h \
+  types.h vfs.h mp3fs.h multiboot.h terminal.h process.h rtc.h i8259.h \
+  paging.h x86_desc.h loader.h
+terminal.o: terminal.c terminal.h vfs.h types.h loader.h mp3fs.h \
+  multiboot.h syscall_functions.h lib.h x86_desc.h process.h
+tests.o: tests.c tests.h x86_desc.h types.h lib.h rtc.h i8259.h vfs.h \
+  terminal.h handle.h mp3fs.h multiboot.h loader.h syscall_functions.h \
+  syscall_handler.h
+vfs.o: vfs.c vfs.h types.h lib.h mp3fs.h multiboot.h terminal.h process.h

@@ -190,6 +190,11 @@ void entry(unsigned long magic, unsigned long addr) {
 #endif
     /* Execute the first program ("shell") ... */
     sys_execute((uint8_t*)"shell");
+    cur_term_id++;
+    sys_execute((uint8_t*)"shell");
+    cur_term_id++;
+    sys_execute((uint8_t*)"shell");
+    cur_term_id = 0;
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");
 }

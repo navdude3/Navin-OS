@@ -2,7 +2,7 @@
 #include "process.h"
 
 /* info from wiki.osdev.org/RTC */
-// static int flag;
+ static int flag[3];
 //static int rtc_int_count = 512;
 static int freqs[MAX_PROCESS + 1]; // 0-5 for processes, last one for scheduler
 
@@ -28,15 +28,16 @@ void rtc_init(){
     outb(REG_B_DATA, REG_PORT);                      // Reset index
     outb(prev | 0x40, RW_PORT);                      // Turn on bit 6 of reg B by OR-ing previous with 0x01000000  
 
-    // outb(REG_A_DATA, REG_PORT);                      // Disable NMI 
-    // prev = inb(RW_PORT);                             // Read the current val of register A
-    // outb(REG_A_DATA, REG_PORT);                      // Reset index
-    // outb((prev & 0xF0) | 0xF, RW_PORT);   
+    outb(REG_A_DATA, REG_PORT);                      // Disable NMI 
+    prev = inb(RW_PORT);                             // Read the current val of register A
+    outb(REG_A_DATA, REG_PORT);                      // Reset index
+    outb((prev & 0xF0) | 0xF, RW_PORT);   
     
     enable_irq(RTC_IRQ);                             // Enable interrupts on IRQ 8
     
     int i;
     for(i = 0; i < 7; ++i) freqs[i] = MAX_FREQ/MIN_FREQ;
+    
     set_rate(MAX_FREQ);  
 }
 
@@ -74,10 +75,10 @@ int32_t rtc_close(fd_entry_t* fd_entry){
  *  SIDE EFFECTS: Enables interrupts on IRQ 8
  */
 int32_t rtc_read(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
-    //flag = 1;
+    flag[cur_term_id] = 1;
     int32_t interval = MAX_FREQ / fd_entry->rtc_freq;
     sti();
-    while((rtc_count % interval) != 0);               // infinite loop until rtc_count is a multiple of desired interval
+    while(flag[cur_term_id]);               // infinite loop until rtc_count is a multiple of desired interval
     return 0;
 }
 
@@ -163,7 +164,7 @@ void set_rate(uint32_t freq){
 void rtc_link_handler(){
     cli();
     ++rtc_count;              //count to static variable every interrupt call
-    //flag = 0;
+    flag[cur_term_id] = 0;
     outb(0x8C, 0x70);	                    // choose register C
     inb(0x71);		                        // remove contents
     send_eoi(8);                            // send eoi to irq 8, (slave pic irq 0)
