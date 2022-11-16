@@ -25,6 +25,6 @@ int32_t rtc_close(fd_entry_t* fd_entry);
 int32_t rtc_read(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length);
 int32_t rtc_write(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length);
 void rtc_link_handler();
-void set_rate(int freq);
+void set_rate(uint32_t freq);
 
 extern fd_ops_t rtc_ops;

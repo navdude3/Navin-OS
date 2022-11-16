@@ -2,7 +2,6 @@
 #include "process.h"
 
 /* info from wiki.osdev.org/RTC */
-static int rtc_rate;
 // static int flag;
 //static int rtc_int_count = 512;
 static int freqs[MAX_PROCESS + 1]; // 0-5 for processes, last one for scheduler
@@ -13,6 +12,7 @@ fd_ops_t rtc_ops = (fd_ops_t){
     rtc_read,
     rtc_write
 };
+
 /* 
  * rtc_init
  *  DESCRIPTION: Turns on IRQ 8 with default 1024 Hz Rate
@@ -31,13 +31,13 @@ void rtc_init(){
     // outb(REG_A_DATA, REG_PORT);                      // Disable NMI 
     // prev = inb(RW_PORT);                             // Read the current val of register A
     // outb(REG_A_DATA, REG_PORT);                      // Reset index
-    // outb((prev&0xF0) | 15, RW_PORT);   
+    // outb((prev & 0xF0) | 0xF, RW_PORT);   
+    
     enable_irq(RTC_IRQ);                             // Enable interrupts on IRQ 8
+    
     int i;
-    for(i = 0; i < 7; ++i){
-        freqs[i] = MIN_FREQ;
-    }
-    set_rate(MAX_FREQ);
+    for(i = 0; i < 7; ++i) freqs[i] = MAX_FREQ/MIN_FREQ;
+    set_rate(MAX_FREQ);  
 }
 
 /* 
@@ -49,7 +49,7 @@ void rtc_init(){
  *  SIDE EFFECTS: none
  */
 int32_t rtc_open(fd_entry_t* fd_entry){
-    fd_entry->rtc_freq = MIN_FREQ;                 
+    fd_entry->rtc_freq = MAX_FREQ / MIN_FREQ;                      
     return 0;
 }
 
@@ -75,10 +75,10 @@ int32_t rtc_close(fd_entry_t* fd_entry){
  */
 int32_t rtc_read(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
     //flag = 1;
-    int32_t interval = MAX_FREQ/fd_entry->rtc_freq;
+    int32_t interval = MAX_FREQ / fd_entry->rtc_freq;
     sti();
-    while((rtc_count % interval)) continue;                           // infinite loop until rtc_count is a multiple of desired interval
-    return 0;                                       // return 0
+    while((rtc_count % interval) != 0);               // infinite loop until rtc_count is a multiple of desired interval
+    return 0;
 }
 
 /* 
@@ -103,10 +103,10 @@ int32_t rtc_write(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
     }                                
     
     // rtc_int_count = MAX_FREQ / freq;        // update the interrupt count
-    
     // freqs[cur_process->pid] = freq;
+
     fd_entry->rtc_freq = freq;
-    // set_rate(freq);                         // set the rtc_rate to the new frequency
+    set_rate(fd_entry->rtc_freq);                         // set the rtc_rate to the new frequency
     
     return 0;
 }
@@ -119,8 +119,9 @@ int32_t rtc_write(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
  *  RETURN VALUE: none
  *  SIDE EFFECTS: rtc_rate updated
  */
-void set_rate(int freq){
-    
+void set_rate(uint32_t freq){
+    int rtc_rate;
+
     switch (freq){
         case 2:     rtc_rate = 0x0F;
                     break;
@@ -161,7 +162,6 @@ void set_rate(int freq){
 */
 void rtc_link_handler(){
     cli();
-    // test_interrupts();
     ++rtc_count;              //count to static variable every interrupt call
     //flag = 0;
     outb(0x8C, 0x70);	                    // choose register C
