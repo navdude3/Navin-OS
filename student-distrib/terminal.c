@@ -213,7 +213,7 @@ int32_t terminal_close(fd_entry_t* fd_entry) {
 */
 int32_t terminal_open(fd_entry_t* fd_entry) {
     int i;
-    char* proc_term_buffer = terminals[(unsigned int)cur_process->term_id].term_buffer;
+    char* proc_term_buffer = terminals[fd_entry->term_id].term_buffer;
     for (i = 0; i < BUFFER; i++) proc_term_buffer[i] = ' ';              //clean the buffer
     return 0;
 }

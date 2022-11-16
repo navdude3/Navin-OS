@@ -11,6 +11,7 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args);
 int32_t check_exec(dentry_t* file_dentry);
 
 
+int32_t setup_fd_array(pcb_t* proc);
 
 /* 
  * setup_user_page
@@ -104,14 +105,9 @@ int32_t sys_execute(const uint8_t* command) {
 
     /* 2. Executable check */
     if(read_dentry_by_name(fname, &dentry) != 0) {
-        pid_array[new_pid] = 0;
         return -1;                               /* If failed to read, return -1 */
     }
-    // read_data(dentry.inode_idx, 0, exe_check_buf, 4);                                                                                    
-    // if(strncmp((int8_t *)exe_check_buf, exe_check_str, 4) != 0){                          /* Checks if ezxecutable, if not clear pid and return -1*/
-    //     pid_array[new_pid] = 0;
-    //     return -1; 
-    // }
+    
     if(0 != check_exec(&dentry)) return -1;
 
     /* 3. Set up program paging and flushes TLB */
@@ -133,7 +129,7 @@ int32_t sys_execute(const uint8_t* command) {
 
     new_process->pid = new_pid;
 
-    if(new_pid == 0 || new_pid == 1 || new_pid == 2){ /* Base program */
+    if(cur_process == NULL){ /* Base program */
         new_process->parent_pid = -1;
         new_process->term_id = cur_term_id; 
     }                                         
@@ -141,7 +137,7 @@ int32_t sys_execute(const uint8_t* command) {
         new_process->parent_pid = cur_process->pid;    
         new_process->term_id = cur_process->term_id;
     }                                     
- 
+    setup_fd_array(new_process);
 
     /* 6. Create it’s own context switch stack */
     tss.ss0 = KERNEL_DS;
@@ -156,11 +152,12 @@ int32_t sys_execute(const uint8_t* command) {
         cur_process->saved_ebp = ebp;                                                       /* Saving EBP/ESP */
         cur_process->saved_esp = esp;
     }
-    cur_process = new_process;
-    pid_array[new_pid] = 1;
+    
     for(i = 0; i < 128; i++) new_process->args[i] = args[i];
     new_process->arg_size = arg_size_count;
-    init_fd_array(new_process->fd_array);
+    
+    cur_process = new_process;
+    pid_array[new_pid] = 1;
 
     /* Context Switch */
     asm volatile(
@@ -293,4 +290,18 @@ int32_t check_exec(dentry_t* file_dentry){
     //     return -1; 
     // }
     return strncmp((int8_t *)exe_check_buf, exe_check_str, 4);
+}
+
+int32_t setup_fd_array(pcb_t* proc){
+    int i;
+
+    for (i = 0; i < 2; ++i){
+        fd_entry_t* stdout_fd = &proc->fd_array[i]; // i = 0 initializes stdin , i = 1 initializes stdout
+        stdout_fd->file_position = 0;
+        stdout_fd->flags.present = 1;
+        stdout_fd->j_tbl = &terminal_ops; // both stdin and stdout use terminal driver
+        stdout_fd->term_id = proc->term_id;
+        stdout_fd->j_tbl->open(stdout_fd); // initialize terminal driver
+    }
+    return 0;
 }
