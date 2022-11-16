@@ -76,10 +76,10 @@ void shift_check(int key) {
 
 int terminal_check(int key){
     if(ctrl == 1){    
-        if(key == F1_PRESS){
+        if(key == 0x02){
             return 0;
         }
-        else if(key == F2_PRESS){
+        else if(key == 0x03){
             return 1;
         }
         else if(key == F3_PRESS){
