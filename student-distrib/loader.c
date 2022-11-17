@@ -309,142 +309,142 @@ int32_t setup_fd_array(pcb_t* proc){
     return 0;
 }
 
-int32_t sys_startup(const uint8_t* command) {
-    uint8_t fname[MAXSIZE];                                                              /* max filesize name */ 
-    uint8_t args[MAX_ARG_SIZE];                                                               // store args here
-    int i,j,k;
-    uint32_t esp;
-    uint32_t ebp;
-    int active_processes = 0;
-    uint8_t eip_buffer[SIZE_OF_ADDR];                                                   /* Holds entry point to function (Bytes 24-27 of command)*/                                              
-    uint32_t entry;
-    // uint8_t exe_check_buf[EXEC_IDENT_SIZE];                                             /* Holds first four bytes of command to check if executable */
-    // int8_t* exe_check_str = "\x7f""ELF";
-    dentry_t dentry;   
-    inode_t* inode;
-    uint32_t size;
-    uint32_t new_pid;
-    int arg_size_count;
-    pcb_t* new_process;
+// int32_t sys_startup(const uint8_t* command) {
+//     uint8_t fname[MAXSIZE];                                                              /* max filesize name */ 
+//     uint8_t args[MAX_ARG_SIZE];                                                               // store args here
+//     int i,j,k;
+//     uint32_t esp;
+//     uint32_t ebp;
+//     int active_processes = 0;
+//     uint8_t eip_buffer[SIZE_OF_ADDR];                                                   /* Holds entry point to function (Bytes 24-27 of command)*/                                              
+//     uint32_t entry;
+//     // uint8_t exe_check_buf[EXEC_IDENT_SIZE];                                             /* Holds first four bytes of command to check if executable */
+//     // int8_t* exe_check_str = "\x7f""ELF";
+//     dentry_t dentry;   
+//     inode_t* inode;
+//     uint32_t size;
+//     uint32_t new_pid;
+//     int arg_size_count;
+//     pcb_t* new_process;
 
-    int p;
+//     int p;
 
-    for(p = 0; p < 3; p++){
-    //switch_terms(p);
+//     for(p = 0; p < 3; p++){
+//     //switch_terms(p);
 
-        asm volatile(
-            "movl %%ebp, %0" : "=r"(ebp) 
-        );                                                                                   /* Immediately get ebp, get esp just before IRET */
+//         asm volatile(
+//             "movl %%ebp, %0" : "=r"(ebp) 
+//         );                                                                                   /* Immediately get ebp, get esp just before IRET */
         
 
-        if(command == NULL) return -1;
-        if(command[0] == '\0') return -1;                                                    /* File or command non-existent */
+//         if(command == NULL) return -1;
+//         if(command[0] == '\0') return -1;                                                    /* File or command non-existent */
 
 
-        for(i = 0; i < MAX_PROCESS; i++){                                                     /* check which pids are open */ 
-            if(pid_array[i] == 0){                                                           /* If not in use, assign new process to this pid*/
-                new_pid = i;
-                active_processes++;                                                          /* Increment nyumber of active processes */
-                break;
-            }
-            if(pid_array[i] == 1){
-                active_processes++;
-            }
-            if(active_processes == MAX_PROCESS){                                              /* Every PID is used */
-                return 256;
-            }
-        }
+//         for(i = 0; i < MAX_PROCESS; i++){                                                     /* check which pids are open */ 
+//             if(pid_array[i] == 0){                                                           /* If not in use, assign new process to this pid*/
+//                 new_pid = i;
+//                 active_processes++;                                                          /* Increment nyumber of active processes */
+//                 break;
+//             }
+//             if(pid_array[i] == 1){
+//                 active_processes++;
+//             }
+//             if(active_processes == MAX_PROCESS){                                              /* Every PID is used */
+//                 return 256;
+//             }
+//         }
 
-        for(i = 0; i < SIZE_OF_ADDR; i++) eip_buffer[i] = 0;                                   /* Clearing fname and eip_buffer before populating */
-        for(j = 0; j < MAXSIZE; j++) fname[j] = NULL;
-        for(k = 0; k < MAX_ARG_SIZE; k++) args[k] = NULL;
+//         for(i = 0; i < SIZE_OF_ADDR; i++) eip_buffer[i] = 0;                                   /* Clearing fname and eip_buffer before populating */
+//         for(j = 0; j < MAXSIZE; j++) fname[j] = NULL;
+//         for(k = 0; k < MAX_ARG_SIZE; k++) args[k] = NULL;
     
     
-        num_active_procs = active_processes;                                                  
+//         num_active_procs = active_processes;                                                  
 
 
-        /* 1. Parse args and name */
-        arg_size_count = parse_fname_args(command, fname, args);
+//         /* 1. Parse args and name */
+//         arg_size_count = parse_fname_args(command, fname, args);
 
-        /* 2. Executable check */
-        if(read_dentry_by_name(fname, &dentry) != 0) {
-            return -1;                               /* If failed to read, return -1 */
-        }
+//         /* 2. Executable check */
+//         if(read_dentry_by_name(fname, &dentry) != 0) {
+//             return -1;                               /* If failed to read, return -1 */
+//         }
         
-        if(0 != check_exec(&dentry)) return -1;
+//         if(0 != check_exec(&dentry)) return -1;
 
-        /* 3. Set up program paging and flushes TLB */
-        setup_user_page(new_pid);               
+//         /* 3. Set up program paging and flushes TLB */
+//         setup_user_page(new_pid);               
                     
-        /* 4. User Level Program Loader */                                                     
-        /* At this point, we have verified that the file exists and is a valid executable. Can now copy the program into address */
-        read_data(dentry.inode_idx, 24, eip_buffer, SIZE_OF_ADDR);                              /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */ 
-        entry = *((uint32_t*)eip_buffer);                                                       /* Return entry point at bit 24 */
+//         /* 4. User Level Program Loader */                                                     
+//         /* At this point, we have verified that the file exists and is a valid executable. Can now copy the program into address */
+//         read_data(dentry.inode_idx, 24, eip_buffer, SIZE_OF_ADDR);                              /* Read the four bytes from 24-27 that contain virtual address of first instruction to be executed */ 
+//         entry = *((uint32_t*)eip_buffer);                                                       /* Return entry point at bit 24 */
         
 
-        inode = &init_inode[dentry.inode_idx];
-        size = inode->file_size;
-        read_data(dentry.inode_idx, 0, (uint8_t*)PROGRAM_VMEM_START, size);                     /* Copying entire file to memory */
+//         inode = &init_inode[dentry.inode_idx];
+//         size = inode->file_size;
+//         read_data(dentry.inode_idx, 0, (uint8_t*)PROGRAM_VMEM_START, size);                     /* Copying entire file to memory */
 
-        /* 5. Create PCB */
-        new_process = (pcb_t *) (USER_MEMORY_BASE - ((new_pid + 1) * PCB_SIZE));         //+1 because pcb resides on top of 8kb block
+//         /* 5. Create PCB */
+//         new_process = (pcb_t *) (USER_MEMORY_BASE - ((new_pid + 1) * PCB_SIZE));         //+1 because pcb resides on top of 8kb block
 
 
-        new_process->pid = new_pid;
+//         new_process->pid = new_pid;
 
-        if(cur_process == NULL){ /* Base program */
-            new_process->parent_pid = -1;
-            new_process->term_id = cur_term_id; 
-        }                                         
-        else{ /* Setting parent process info */
-            new_process->parent_pid = cur_process->pid;    
-            new_process->term_id = cur_process->term_id;
-        }                                     
-        setup_fd_array(new_process);
+//         if(cur_process == NULL){ /* Base program */
+//             new_process->parent_pid = -1;
+//             new_process->term_id = cur_term_id; 
+//         }                                         
+//         else{ /* Setting parent process info */
+//             new_process->parent_pid = cur_process->pid;    
+//             new_process->term_id = cur_process->term_id;
+//         }                                     
+//         setup_fd_array(new_process);
 
-        pid_array[new_pid] = 1;
+//         pid_array[new_pid] = 1;
 
-        asm volatile(
-        "movl %%esp, %0" : "=r"(esp) 
-    );   
+//         asm volatile(
+//         "movl %%esp, %0" : "=r"(esp) 
+//     );   
 
-    if(cur_process){
-        cur_process->saved_ebp = ebp;                                                       /* Saving EBP/ESP */
-        cur_process->saved_esp = esp;
-    }
+//     if(cur_process){
+//         cur_process->saved_ebp = ebp;                                                       /* Saving EBP/ESP */
+//         cur_process->saved_esp = esp;
+//     }
     
-    for(i = 0; i < 128; i++) new_process->args[i] = args[i];
-    new_process->arg_size = arg_size_count;
+//     for(i = 0; i < 128; i++) new_process->args[i] = args[i];
+//     new_process->arg_size = arg_size_count;
     
-    cur_process = new_process;
+//     cur_process = new_process;
 
-        j = 1;
-    }
+//         j = 1;
+//     }
 
-    /* 6. Create it’s own context switch stack */
-    tss.ss0 = KERNEL_DS;
-    tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * 0);
+//     /* 6. Create it’s own context switch stack */
+//     tss.ss0 = KERNEL_DS;
+//     tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * 0);
 
-    /* Save current ESP and EBP before context switch*/
+//     /* Save current ESP and EBP before context switch*/
     
     
 
-    /* Context Switch */
-    asm volatile(
-        "pushl %0                           \n"
-        "pushl %1                           \n"
+//     /* Context Switch */
+//     asm volatile(
+//         "pushl %0                           \n"
+//         "pushl %1                           \n"
 
-        "pushfl                             \n"
-        "orl $0x200, (%%esp)                \n"
+//         "pushfl                             \n"
+//         "orl $0x200, (%%esp)                \n"
         
-        "pushl %2                           \n"
-        "pushl %3                           \n"
-        "iret                               \n"
-        : 
-        : "r"(USER_DS), "r"(PROGRAM_VMEM_STACK), "r" (USER_CS), "r" (entry)
-        );
-    asm volatile ("BACK_TO_EXECUTE_START:");
+//         "pushl %2                           \n"
+//         "pushl %3                           \n"
+//         "iret                               \n"
+//         : 
+//         : "r"(USER_DS), "r"(PROGRAM_VMEM_STACK), "r" (USER_CS), "r" (entry)
+//         );
+//     asm volatile ("BACK_TO_EXECUTE_START:");
 
-    return 0;
-}
+//     return 0;
+// }
 

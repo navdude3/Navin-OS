@@ -28,11 +28,15 @@ term_t* get_cur_term(){
 
 void init_terms(){
     int i;
+    int j;
     //ask TA if we need to call shell on boot or on switch
     for(i = 0; i < 3; i++){
+        //cur_term_id = i;
         terminals[i].scr_x = 0;
         terminals[i].scr_y = 0;
         terminals[i].curr_size = 0;
+        //sys_execute((uint8_t*)"shell");
+        //j = 1;
     }
     cur_term_id = 0;
     return;

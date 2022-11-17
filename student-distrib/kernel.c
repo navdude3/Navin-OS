@@ -18,7 +18,6 @@
 #include "process.h"
 #include "loader.h"
 #include "pit.h"
-
 // #define RUN_TESTS
 
 /* Macros. */
@@ -175,15 +174,21 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Init the Paging */
     init_paging();
 
+    process_array[0] = -1;
+    process_array[1] = -1;
+    process_array[2] = -1;
+
     init_terms();
 
-    sys_startup((uint8_t*)"shell");
+    pit_init();
+
+    //sys_startup((uint8_t*)"shell");
     
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
-    /*printf("Enabling Interrupts\n");*/
+    /* printf("Enabling Interrupts\n");*/
     sti();
 
 #ifdef RUN_TESTS
@@ -194,7 +199,7 @@ void entry(unsigned long magic, unsigned long addr) {
 
 #endif
     /* Execute the first program ("shell") ... */
-    // sys_execute((uint8_t*)"shell");
+    sys_execute((uint8_t*)"shell");
     // switch_terms(1);
     // sys_execute((uint8_t*)"shell");
     // switch_terms(2);
