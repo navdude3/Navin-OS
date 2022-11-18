@@ -31,7 +31,7 @@ void init_terms(){
     int j;
     //ask TA if we need to call shell on boot or on switch
     for(i = 0; i < 3; i++){
-        //cur_term_id = i;
+        cur_term_id = i;
         terminals[i].scr_x = 0;
         terminals[i].scr_y = 0;
         terminals[i].curr_size = 0;
@@ -68,6 +68,12 @@ void switch_terms(int8_t new_term_id){
     memmove(cur_term->vid_page, (void*) vid_mem, 4096);
     usr_vidmap_table_base[(unsigned int)new_term_id] = (vid_mem | 0x7);
     memmove((void*) vid_mem, new_term->vid_page, 4096);
+
+    if(process_array[new_term_id] == -1){
+        cur_term_id = new_term_id;
+        cli();
+        sys_execute((uint8_t*)"shell");
+    }
 
     cur_term_id = new_term_id;
 }

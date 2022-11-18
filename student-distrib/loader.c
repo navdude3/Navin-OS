@@ -330,7 +330,7 @@ int32_t setup_fd_array(pcb_t* proc){
 //     int p;
 
 //     for(p = 0; p < 3; p++){
-//     //switch_terms(p);
+//     //(p);
 
 //         asm volatile(
 //             "movl %%ebp, %0" : "=r"(ebp) 

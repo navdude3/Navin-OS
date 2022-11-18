@@ -110,8 +110,8 @@ void keyboard_link_handler(){
     capital_letters = shift_en ^ caps_en;                                                                          // xor so they negate
     terminal_switch = terminal_check(key);
     if(terminal_switch != -1){
-        switch_terms(terminal_switch);
         send_eoi(1); 
+        switch_terms(terminal_switch);
         return;
     }
     for(i = 0; i < OPTION_SIZE; i++) {
