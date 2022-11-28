@@ -18,6 +18,8 @@ static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
 void wipe_row(int row);
+
+
 /* void clear(void);
  * Inputs: void
  * Return Value: none
@@ -267,8 +269,8 @@ void putc(uint8_t c) {
     }
     else if(c == '\f'){             //reset cursor and screen
         clear();
-        screen_x = 0;
-        screen_y = 0;
+        // screen_x = 0;
+        // screen_y = 0;
     }
     else {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;              //if no specific key is seen, just place the char on the screen

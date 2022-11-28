@@ -25,7 +25,6 @@ term_t* get_cur_term(){
     return get_term(cur_term_id);
 }
 
-
 void init_terms(){
     int i;
     int j;
@@ -35,8 +34,8 @@ void init_terms(){
         terminals[i].scr_x = 0;
         terminals[i].scr_y = 0;
         terminals[i].curr_size = 0;
-        //sys_execute((uint8_t*)"shell");
-        //j = 1;
+        //for(j = 0; j < 4096; j++) terminals[i].vid_page[j] = '\0';  
+        process_array[i] = -1;
     }
     cur_term_id = 0;
     return;
@@ -65,17 +64,17 @@ void switch_terms(int8_t new_term_id){
 
     /* Save current screen and restore new screen*/
     usr_vidmap_table_base[cur_term_id] = ((uint32_t) cur_term | 0x7);
-    memmove(cur_term->vid_page, (void*) vid_mem, 4096);
+    memcpy(cur_term->vid_page, (void*) vid_mem, 4096);
+    // usr_vidmap_table_base[cur_term_id] = ((uint32_t) cur_term | 0x6);
     usr_vidmap_table_base[(unsigned int)new_term_id] = (vid_mem | 0x7);
-    memmove((void*) vid_mem, new_term->vid_page, 4096);
-
-    if(process_array[new_term_id] == -1){
-        cur_term_id = new_term_id;
+    memcpy((void*) vid_mem, new_term->vid_page, 4096);
+    
+    cur_term_id = new_term_id;
+    if(process_array[cur_term_id] == -1){
+        clear();
         cli();
         sys_execute((uint8_t*)"shell");
     }
-
-    cur_term_id = new_term_id;
 }
 
 /* 
@@ -224,7 +223,7 @@ int32_t terminal_close(fd_entry_t* fd_entry) {
 int32_t terminal_open(fd_entry_t* fd_entry) {
     int i;
     char* proc_term_buffer = terminals[fd_entry->term_id].term_buffer;
-    for (i = 0; i < BUFFER; i++) proc_term_buffer[i] = ' ';              //clean the buffer
+    for(i = 0; i < BUFFER; i++) proc_term_buffer[i] = ' ';              //clean the buffer
     return 0;
 }
 

@@ -174,10 +174,6 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Init the Paging */
     init_paging();
 
-    process_array[0] = -1;
-    process_array[1] = -1;
-    process_array[2] = -1;
-
     init_terms();
 
     pit_init();
