@@ -3,7 +3,7 @@
 #include "process.h"
 #include "lib.h"
 //make the terminal buffer
-static char term_buffer[BUFFER];
+// static char term_buffer[BUFFER];
 
 //size of the buffer
 static int curr_size = 0;
@@ -57,11 +57,11 @@ void switch_terms(int8_t new_term_id){
     /* Save and restore term_buffer and curr_size */
     cur_term->curr_size = curr_size;
     curr_size = new_term->curr_size;
-    int i;
-    for(i = 0; i < BUFFER; ++i){
-        cur_term->term_buffer[i] = term_buffer[i];
-        term_buffer[i] = new_term->term_buffer[i];
-    }
+    // int i;
+    // for(i = 0; i < BUFFER; ++i){
+    //     cur_term->term_buffer[i] = term_buffer[i];
+    //     term_buffer[i] = new_term->term_buffer[i];
+    // }
 
     /* Save current screen and restore new screen*/
     usr_vidmap_table_base[cur_term_id] = ((uint32_t) cur_term | 0x7);
@@ -89,25 +89,27 @@ void switch_terms(int8_t new_term_id){
  *   RETURN VALUE: 0 if character was successfully filled into buffer, -1 otherwise
 */
 int32_t fill_buffer(char input_char){
+    term_t* cur_term = get_cur_term();
+    char* term_buffer = cur_term->term_buffer;
     if(input_char == '\n' || input_char == '\e'){
-        term_buffer[curr_size] = '\n';                          //set to 128 and always just check this location?
+        term_buffer[cur_term->curr_size] = '\n';                          //set to 128 and always just check this location?
         read_flag = 1;                                          //clear buffer in read_terminal not here in case not ready
     }
     else if(input_char == '\b'){
-        if(curr_size != 0){
-            if(term_buffer[curr_size] != '\n'){                 //cant cancel a read w backspace, incase terminal read is slow
-                term_buffer[curr_size - 1] = ' ';
+        if(cur_term->curr_size != 0){
+            if(term_buffer[cur_term->curr_size] != '\n'){                 //cant cancel a read w backspace, incase terminal read is slow
+                term_buffer[cur_term->curr_size - 1] = ' ';
                 curr_size--;                                    //handle backspace sizing
             } 
         } else{
             return -1; // prevent backspace from flowing into already written parts
         }
     } else if (input_char == '\f'){
-        curr_size = 0;
+        cur_term->curr_size = 0;
     }
-    else if(curr_size < BUFFER - 1){                            //otherwise fill in the buffer with requested data
-        term_buffer[curr_size] = input_char;
-        curr_size++;
+    else if(cur_term->curr_size < BUFFER - 1){                            //otherwise fill in the buffer with requested data
+        term_buffer[cur_term->curr_size] = input_char;
+        cur_term->curr_size++;
     }
     else { 
         return -1;                                              // could not insert character
@@ -159,6 +161,8 @@ int32_t terminal_read(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes
     while(read_flag == 0);
 
     cli();                                                      // disable interrupts 
+    term_t* term = get_term(get_curr_pcb()->term_id);
+    
     if(bytes <= 0) {                                            /* If nothing to be read, return immediately */
         sti();
         return 0;
@@ -167,19 +171,19 @@ int32_t terminal_read(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes
     //     bytes = BUFFER;
     // }
 
-    if (bytes > curr_size){
-        bytes = curr_size; // do not read beyond end pointer of termbuffer
+    if (bytes > term->curr_size){
+        bytes = term->curr_size; // do not read beyond end pointer of termbuffer
     }
     for(i = 0; i < bytes; i++){
-        ((char*)user_buffer)[i] = term_buffer[i];       
-        if(term_buffer[i] == '\n'){                             //look for newline to end buffer
-             ((char*)user_buffer)[i] = term_buffer[i];
-            term_buffer[i] = ' ';
+        ((char*)user_buffer)[i] = term->term_buffer[i];       
+        if(term->term_buffer[i] == '\n'){                             //look for newline to end buffer
+             ((char*)user_buffer)[i] = term->term_buffer[i];
+            term->term_buffer[i] = ' ';
             break;
         }
         else{
-            ((char*)user_buffer)[i] = term_buffer[i];
-            term_buffer[i] = ' '; 
+            ((char*)user_buffer)[i] = term->term_buffer[i];
+            term->term_buffer[i] = ' '; 
         }
     }
 
@@ -198,7 +202,7 @@ int32_t terminal_read(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes
         ((char*)user_buffer)[BUFFER] = '\n';                       //if no newline detected, add one at the end of the buffer
     }
 
-    curr_size = 0;
+    term->curr_size = 0;
     read_flag = 0;
     sti();                                                      //enable interrupts 
     
@@ -226,7 +230,7 @@ int32_t terminal_close(fd_entry_t* fd_entry) {
 */
 int32_t terminal_open(fd_entry_t* fd_entry) {
     int i;
-    char* proc_term_buffer = terminals[fd_entry->term_id].term_buffer;
+    char* proc_term_buffer = get_term(fd_entry->term_id)->term_buffer;
     for(i = 0; i < BUFFER; i++) proc_term_buffer[i] = ' ';              //clean the buffer
     return 0;
 }
