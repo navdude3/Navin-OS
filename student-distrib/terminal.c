@@ -28,17 +28,20 @@ term_t* get_cur_term(){
 void init_terms(){
     int i;
     int j;
-    
+    pte_desc_t vidmap_init_entry;
     //ask TA if we need to call shell on boot or on switch
     for(i = 0; i < 3; i++){
         cur_term_id = i;
         terminals[i].scr_x = 0;
         terminals[i].scr_y = 0;
         terminals[i].curr_size = 0;
-        //for(j = 0; j < 4096; j++) terminals[i].vid_page[j] = '\0';  
+        //sys_execute((uint8_t*)"shell");
         process_array[i] = -1;
     }
     cur_term_id = 0;
+    vidmap_init_entry.val = (0xB8000 | 0x7);
+    set_ptentry(usr_vidmap_table_desc.addr, cur_term_id, vidmap_init_entry);
+
     return;
 }
 

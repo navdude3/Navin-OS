@@ -17,9 +17,10 @@ void pit_init() {
 void pit_link_handler() { /* aka scheduler */
     cli();
     pcb_t* current_pcb = get_pcb((int32_t)(process_array[term_id_parser]));
-    // pcb_t* current_pcb = cur_process;
+ 
     if(current_pcb == NULL) {
         send_eoi(PIT_IRQ);
+        sti();
         return;  
     }
 
@@ -35,6 +36,7 @@ void pit_link_handler() { /* aka scheduler */
 
     if(process_array[temp] == -1) {
         send_eoi(PIT_IRQ);
+        sti();
         return;       
     }
     term_id_parser = temp;
