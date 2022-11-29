@@ -43,6 +43,7 @@ void init_terms(){
 
 void switch_terms(int8_t new_term_id){
     if(new_term_id == cur_term_id) return;
+
     uint32_t vid_mem = 0xB8000;
     uint32_t* usr_vidmap_table_base = (uint32_t *) usr_vidmap_table_desc.addr;
     term_t* new_term = get_term(new_term_id);
@@ -64,11 +65,14 @@ void switch_terms(int8_t new_term_id){
 
     /* Save current screen and restore new screen*/
     usr_vidmap_table_base[cur_term_id] = ((uint32_t) cur_term | 0x7);
-    memcpy(cur_term->vid_page, (void*) vid_mem, 4096);
-    // usr_vidmap_table_base[cur_term_id] = ((uint32_t) cur_term | 0x6);
+    flush_tlb();
+    memcpy(cur_term->vid_page, (void*) vid_mem, FOUR_KB);
+
     usr_vidmap_table_base[(unsigned int)new_term_id] = (vid_mem | 0x7);
-    memcpy((void*) vid_mem, new_term->vid_page, 4096);
+    flush_tlb();
+    memcpy((void*) vid_mem, new_term->vid_page, FOUR_KB);
     
+
     cur_term_id = new_term_id;
     if(process_array[cur_term_id] == -1){
         clear();

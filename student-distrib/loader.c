@@ -35,7 +35,7 @@ void setup_user_page(int pid){
     user_page.pde_pcd = 0;
     user_page.pde_a = 0;
     user_page.pde_d = 0;
-    user_page.pde_ps = 1;                                                           /* Set to 4MB pages */
+    user_page.pde_ps = 1;           /* 4MB page */                                                /* Set to 4MB pages */
     user_page.pde_g = 0;
     user_page.pde_avail = 0;
     user_page.pde_pat = 0;

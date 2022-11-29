@@ -1,11 +1,12 @@
 #ifndef TERMINAL_H
 #define TERMINAL_H
 #include "vfs.h"
+#include "paging.h"
 
 /* Size of text buffer */
-#define BUFFER 128
-
-#define MAX_TERMS 3
+#define BUFFER      128
+#define FOUR_KB     4096
+#define MAX_TERMS   3
 
 typedef struct term{
     char vid_page[4096]; // Video memory is 80*25*2 = 4000. This allows us to save pages when aligning

@@ -12,6 +12,7 @@ typedef struct{
     int32_t parent_pid;
     uint32_t saved_esp;
     uint32_t saved_ebp;
+    uint32_t saved_esp0;
     char args[128];
     uint32_t arg_size;
     int8_t term_id;
@@ -19,4 +20,4 @@ typedef struct{
 
 pcb_t* cur_process;                     /* Current active process */             
 extern pcb_t* get_curr_pcb();           /* Returns pointer to current PCB */
-extern pcb_t* get_pcb(uint32_t pid);    /* Returns pointer for specified PCB */
+extern pcb_t* get_pcb(int32_t pid);    /* Returns pointer for specified PCB */
