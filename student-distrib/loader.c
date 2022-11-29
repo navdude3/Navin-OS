@@ -143,7 +143,7 @@ int32_t sys_execute(const uint8_t* command) {
     /* 6. Create it’s own context switch stack */
     tss.ss0 = KERNEL_DS;
     tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * new_pid);
-
+    cur_process->saved_esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * new_pid);
     /* Save current ESP and EBP before context switch*/
     asm volatile(
         "movl %%esp, %0" : "=r"(esp) 
