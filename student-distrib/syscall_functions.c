@@ -138,10 +138,9 @@ int32_t sys_vidmap(uint8_t** screen_start) {
         //uint32_t term_addr = (uint32_t) get_term(term_id);
         vidmap_entry.val = term_addr | 0x7;
     }
-    
     set_ptentry(usr_vidmap_table_desc.addr, term_id, vidmap_entry);
-    *screen_start = (VIDMAP_TABLE_BASE + term_id*4096);
 
+    *screen_start = (VIDMAP_TABLE_BASE + term_id*4096);
     return 0;
 }
 

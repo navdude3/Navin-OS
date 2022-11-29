@@ -17,6 +17,7 @@ void pit_init() {
 void pit_link_handler() { /* aka scheduler */
     cli();
     pcb_t* current_pcb = get_pcb((int32_t)(process_array[term_id_parser]));
+    // pcb_t* current_pcb = cur_process;
     if(current_pcb == NULL) {
         send_eoi(PIT_IRQ);
         return;  
@@ -28,7 +29,7 @@ void pit_link_handler() { /* aka scheduler */
         "movl %%ebp, %1       \n"
         : "=r" (current_pcb->saved_esp), "=r" (current_pcb->saved_ebp)
     );
-    current_pcb->saved_esp0 = tss.esp0;
+    
 
     int32_t temp = (term_id_parser + 1) % 3;
 
@@ -38,24 +39,23 @@ void pit_link_handler() { /* aka scheduler */
     }
     term_id_parser = temp;
     pcb_t* next_pcb = get_pcb((int32_t)(process_array[term_id_parser]));
-
   
     /* Save tss info for next process */
-    tss.ss0 = KERNEL_DS;
-    tss.esp0 = next_pcb->saved_esp0;          //USER_MEMORY_BASE - (KERNEL_AREA_SIZE * next_pcb->pid);
+    // tss.ss0 = KERNEL_DS;
+    // tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * next_pcb->pid);
     
-    /* Set up user page */
-    setup_user_page(process_array[term_id_parser]);
+    // /* Set up user page */
+    // setup_user_page(next_pcb->pid);
     send_eoi(PIT_IRQ);
-
-    /* Switch to next processes esp and ebp*/
-    asm volatile(
-        "movl %0, %%esp       \n"
-        "movl %1, %%ebp       \n"
-        :
-        : "r" (next_pcb->saved_esp), "r" (next_pcb->saved_ebp)
-        : "esp" , "ebp"
-    );
+    // cur_process = next_pcb;
+    // /* Switch to next processes esp and ebp*/
+    // asm volatile(
+    //     "movl %0, %%esp       \n"
+    //     "movl %1, %%ebp       \n"
+    //     :
+    //     : "r" (next_pcb->saved_esp), "r" (next_pcb->saved_ebp)
+    //     : "esp" , "ebp"
+    // );
     sti();
     return;
 }

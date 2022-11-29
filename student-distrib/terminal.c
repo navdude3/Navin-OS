@@ -28,6 +28,7 @@ term_t* get_cur_term(){
 void init_terms(){
     int i;
     int j;
+    
     //ask TA if we need to call shell on boot or on switch
     for(i = 0; i < 3; i++){
         cur_term_id = i;
