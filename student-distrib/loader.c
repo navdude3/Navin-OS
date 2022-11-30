@@ -160,10 +160,10 @@ int32_t sys_execute(const uint8_t* command) {
         "movl %%esp, %0" : "=r"(esp) 
     );   
 
-    // if(cur_process){
-    //     cur_process->saved_ebp = ebp;                                                       /* Saving EBP/ESP */
-    //     cur_process->saved_esp = esp;
-    // }
+    if(new_process->parent_pid != -1){
+        cur_process->saved_ebp = ebp;                                                       /* Saving EBP/ESP */
+        cur_process->saved_esp = esp;
+    }
     
     for(i = 0; i < 128; i++) new_process->args[i] = args[i];
     new_process->arg_size = arg_size_count;

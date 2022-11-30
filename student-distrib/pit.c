@@ -19,18 +19,9 @@ void pit_init() {
 
 void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
     cli();
-    // pcb_t* current_pcb = get_pcb((int32_t)(process_array[term_id_parser]));
     pcb_t* current_pcb = get_cur_proc();
 
-    // if(cur_process != current_pcb){
-    //     send_eoi(PIT_IRQ);
-    //     sti();
-    //     return; 
-    // }
-    // if(sched_flag != -1){
-    //     term_id_parser = sched_flag;
-    //     sched_flag = -1;
-    // }
+    
     
  
     if(current_pcb == NULL) {
@@ -43,16 +34,14 @@ void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
     asm volatile(
         "movl %%esp, %0       \n"
         "movl %%ebp, %1       \n"
-        : "=r" (current_pcb->saved_esp), "=r" (current_pcb->saved_ebp)
+        : "=r" (current_pcb->sched_esp), "=r" (current_pcb->sched_ebp)
     );
-    // current_pcb->saved_regs = s_frame;
     int32_t temp = (current_pcb->term_id + 1) % 3;
 
     if(process_array[temp] == -1) {                                 /* Launches 3 shells upon boot */
         switch_terms(temp);
         clear();
         send_eoi(PIT_IRQ);
-        // sti();
         sys_execute((uint8_t*)"shell");    
     }
 
@@ -66,8 +55,6 @@ void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
     /* Set up user page */
     setup_user_page(next_pcb->pid);
 
-    // memcpy(&s_frame, &(next_pcb->saved_regs), sizeof(pt_regs_int_t));
-    // cur_process = next_pcb;
     set_cur_proc(next_pcb);
 
     send_eoi(PIT_IRQ);
@@ -77,7 +64,7 @@ void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
         "movl %0, %%esp       \n"
         "movl %1, %%ebp       \n"
         :
-        : "r" (next_pcb->saved_esp), "r" (next_pcb->saved_ebp)
+        : "r" (next_pcb->sched_esp), "r" (next_pcb->sched_ebp)
         : "esp" , "ebp"
     );
     sti();
