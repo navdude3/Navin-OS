@@ -45,7 +45,7 @@ void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
         "movl %%ebp, %1       \n"
         : "=r" (current_pcb->saved_esp), "=r" (current_pcb->saved_ebp)
     );
-    current_pcb->saved_regs = s_frame;
+    // current_pcb->saved_regs = s_frame;
     int32_t temp = (current_pcb->term_id + 1) % 3;
 
     if(process_array[temp] == -1) {                                 /* Launches 3 shells upon boot */
@@ -66,7 +66,7 @@ void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
     /* Set up user page */
     setup_user_page(next_pcb->pid);
 
-    memcpy(&s_frame, &(next_pcb->saved_regs), sizeof(pt_regs_int_t));
+    // memcpy(&s_frame, &(next_pcb->saved_regs), sizeof(pt_regs_int_t));
     // cur_process = next_pcb;
     set_cur_proc(next_pcb);
 
