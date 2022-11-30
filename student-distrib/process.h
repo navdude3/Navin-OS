@@ -24,7 +24,7 @@ typedef struct __attribute__((packed)) pt_regs_fl{
 
 typedef struct __attribute__((packed)) pt_regs_int{
     
-    pt_regs_t regs;
+    pt_regs_fl_t regs;
     uint32_t ueip;
     uint32_t cs;
     uint32_t fl;
@@ -48,8 +48,10 @@ typedef struct{
     int8_t term_id;
 } pcb_t;
 
-pcb_t* cur_process;                     /* Current active process */             
-extern pcb_t* get_curr_pcb();           /* Returns pointer to current PCB */
+// pcb_t* cur_process;                     /* Current active process */             
+extern pcb_t* get_cur_proc();           /* Returns pointer to current PCB */
+// void set_cur_proc(int32_t pid);
+void set_cur_proc(pcb_t* pcb);
 extern pcb_t* get_pcb(int32_t pid);    /* Returns pointer for specified PCB */
 
 #endif

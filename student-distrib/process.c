@@ -2,15 +2,23 @@
 #include "loader.h"
 #include "terminal.h"
 
+static pcb_t* cur_process;                     /* Current active process */     
 /* 
- * get_curr_pcb
+ * get_cur_proc
  *   DESCRIPTION: Returns current process number
  *   INPUTS: None
  *   OUTPUTS: None
  *   RETURN VALUE: Current Process 
 */
-pcb_t* get_curr_pcb() {
+pcb_t* get_cur_proc() {
     return cur_process;    
+}
+
+// void set_cur_proc(int32_t pid){
+//     cur_process = get_pcb(pid);
+// }
+void set_cur_proc(pcb_t* new_proc){
+    cur_process = new_proc;
 }
 
 /* 

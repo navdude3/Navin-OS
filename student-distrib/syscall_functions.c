@@ -18,7 +18,7 @@
 int32_t sys_open (const uint8_t* filename) {
     dentry_t f_dentry;
     fd_entry_t* entry;
-    pcb_t* cur_process = get_curr_pcb();
+    pcb_t* cur_process = get_cur_proc();
 
     if(filename == NULL) return -1;
     
@@ -59,7 +59,7 @@ int32_t sys_open (const uint8_t* filename) {
  */
 int32_t sys_close(uint32_t fd){
     if(fd < 2 || fd > 10) return -1;   // cannot close stdin/out
-    pcb_t* cur_process = get_curr_pcb();
+    pcb_t* cur_process = get_cur_proc();
     fd_entry_t* fd_e = &cur_process->fd_array[fd];
     if(fd_e->flags.present == 0) return -1;
     if(fd_e->j_tbl->close(fd_e) < 0) return -1;
@@ -76,7 +76,7 @@ int32_t sys_close(uint32_t fd){
  */
 int32_t sys_read(uint32_t fd, uint8_t* buf, uint32_t length){
     if(fd == 1 || fd > 10 || buf == NULL) return -1;
-    pcb_t* cur_process = get_curr_pcb();
+    pcb_t* cur_process = get_cur_proc();
     fd_entry_t* fd_e = &cur_process->fd_array[fd];
     if(fd_e->flags.present == 0) return -1;
     return fd_e->j_tbl->read(fd_e, buf, length);
@@ -91,7 +91,7 @@ int32_t sys_read(uint32_t fd, uint8_t* buf, uint32_t length){
  */
 int32_t sys_write (uint32_t fd, uint8_t* buf, uint32_t length){
     if(fd < 1 || fd > 10 || buf == NULL) return -1;  
-    pcb_t* cur_process = get_curr_pcb();
+    pcb_t* cur_process = get_cur_proc();
     fd_entry_t* fd_e = &cur_process->fd_array[fd];
     if(fd_e->flags.present == 0) return -1;
     return fd_e->j_tbl->write(fd_e, buf, length);
@@ -106,8 +106,8 @@ int32_t sys_write (uint32_t fd, uint8_t* buf, uint32_t length){
  *   RETURN VALUE: 0 always 
  */
 int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {
-   if((buf == NULL) || (get_curr_pcb()->arg_size > nbytes)) return -1;          /* If buffer is null or size is larger than number of bytes, return -1*/
-   pcb_t* current = get_curr_pcb();
+   if((buf == NULL) || (get_cur_proc()->arg_size > nbytes)) return -1;          /* If buffer is null or size is larger than number of bytes, return -1*/
+   pcb_t* current = get_cur_proc();
    int i;
    for(i = 0; i < 128; i++) buf[i] = '\0';                                      /* Fills buffer will null terminators*/
    for(i = 0; i < current->arg_size; i++) buf[i] = current->args[i];            /* Places arguments at the beginning of buffer */
@@ -128,7 +128,7 @@ int32_t sys_vidmap(uint8_t** screen_start) {
 
     if ((uint32_t) screen_start < user_addr_base || (uint32_t) screen_start >= user_addr_base + PROGRAM_SIZE) return -1;
 
-    uint32_t term_id = get_curr_pcb()->term_id;
+    uint32_t term_id = get_cur_proc()->term_id;
 
     // uint32_t term_addr = (uint32_t) get_term(term_id);
     // if (cur_term_id == term_id){

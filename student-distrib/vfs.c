@@ -41,7 +41,7 @@ int32_t init_vfs(){
  */
 int32_t get_free_fd_entry_idx(){
     int idx;
-    pcb_t* cur_process = get_curr_pcb();
+    pcb_t* cur_process = get_cur_proc();
 
     for (idx = 2; idx < FD_ARRAY_SIZE; ++idx){
         if(cur_process->fd_array[idx].flags.present == 0){
@@ -62,7 +62,5 @@ int32_t get_free_fd_entry_idx(){
  */
 void free_fd_entry(fd_entry_t* fd_entry){
     fd_entry->flags.present = 0;
-    // pcb_t* cur_process = get_curr_pcb();
-    // cur_process->fd_array[idx].flags.present = 0;
 }
 

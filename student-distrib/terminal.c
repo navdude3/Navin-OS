@@ -2,14 +2,10 @@
 #include "loader.h"
 #include "process.h"
 #include "lib.h"
-//make the terminal buffer
-// static char term_buffer[BUFFER];
 
-//size of the buffer
-static int curr_size = 0;
 
 //acts as a lock for enter key
-volatile static int read_flag = 0; 
+volatile static int read_flag = -1; 
 
 fd_ops_t terminal_ops = (fd_ops_t){
     terminal_open,
@@ -57,14 +53,7 @@ void switch_terms(int8_t new_term_id){
     cur_term->scr_y = get_term_y();
     update_term_xy(new_term->scr_x, new_term->scr_y);
 
-    /* Save and restore term_buffer and curr_size */
-    cur_term->curr_size = curr_size;
-    curr_size = new_term->curr_size;
-    // int i;
-    // for(i = 0; i < BUFFER; ++i){
-    //     cur_term->term_buffer[i] = term_buffer[i];
-    //     term_buffer[i] = new_term->term_buffer[i];
-    // }
+    
 
     /* Save current screen and restore new screen*/
     usr_vidmap_table_base[cur_term_id] = ((uint32_t) cur_term | 0x7);
@@ -75,11 +64,8 @@ void switch_terms(int8_t new_term_id){
     flush_tlb();
     memcpy((void*) vid_mem, new_term->vid_page, FOUR_KB);
     
-    cur_process = get_pcb((int32_t)(process_array[new_term_id]));
 
     cur_term_id = new_term_id;
-   
-    
     // if(process_array[cur_term_id] == -1){
     //     clear();
     //     cli();
@@ -99,14 +85,13 @@ int32_t fill_buffer(char input_char){
     char* term_buffer = cur_term->term_buffer;
     if(input_char == '\n' || input_char == '\e'){
         term_buffer[cur_term->curr_size] = '\n';                          //set to 128 and always just check this location?
-        read_flag = 1;                                          //clear buffer in read_terminal not here in case not ready
-        //cur_process = get_pcb(process_array[cur_term_id]);
+        read_flag = cur_term_id;                                          //clear buffer in read_terminal not here in case not ready
     }
     else if(input_char == '\b'){
         if(cur_term->curr_size != 0){
             if(term_buffer[cur_term->curr_size] != '\n'){                 //cant cancel a read w backspace, incase terminal read is slow
                 term_buffer[cur_term->curr_size - 1] = ' ';
-                curr_size--;                                    //handle backspace sizing
+                cur_term->curr_size--;                                    //handle backspace sizing
             } 
         } else{
             return -1; // prevent backspace from flowing into already written parts
@@ -146,8 +131,7 @@ int32_t terminal_write(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t byte
     // }
     for(i = 0; i < bytes; i++){
         if(((char*)user_buffer)[i] != '\0'){                    // empty in C
-            //terminal_putc(((char*)user_buffer)[i], cur_term_id);                      //place the specific charachter to screen
-            putc(((char*)user_buffer)[i]);
+            putc(((char*)user_buffer)[i]);                      //place the specific charachter to screen
         }
     } 
     return bytes;
@@ -166,10 +150,10 @@ int32_t terminal_read(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes
     int contains_nl = 0;                                        //newline checker, starts at 0
 
     sti();
-    while(read_flag == 0);
+    while(read_flag != fd_entry->term_id);
 
     cli();                                                      // disable interrupts 
-    term_t* term = get_term(get_curr_pcb()->term_id);
+    term_t* term = get_term(get_cur_proc()->term_id);
     
     if(bytes <= 0) {                                            /* If nothing to be read, return immediately */
         sti();
@@ -211,7 +195,7 @@ int32_t terminal_read(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes
     }
 
     term->curr_size = 0;
-    read_flag = 0;
+    read_flag = -1;
     sti();                                                      //enable interrupts 
     
     return bytes; 

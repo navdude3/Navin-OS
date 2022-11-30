@@ -69,8 +69,11 @@ int32_t sys_execute(const uint8_t* command) {
     uint32_t new_pid;
     int arg_size_count;
 
-                                                                                      /* Immediately get ebp, get esp just before IRET */
-    pcb_t* old_process = get_curr_pcb();
+    pcb_t* cur_process = get_cur_proc();
+    asm volatile(
+        "movl %%ebp, %0" : "=r"(ebp) 
+    );                                                                                   /* Immediately get ebp, get esp just before IRET */
+    
 
     if(command == NULL) {
         sti();
@@ -134,12 +137,11 @@ int32_t sys_execute(const uint8_t* command) {
 
     /* 5. Create PCB */
     pcb_t* new_process = (pcb_t *) (USER_MEMORY_BASE - ((new_pid + 1) * PCB_SIZE));         //+1 because pcb resides on top of 8kb block
-    new_process->saved_esp = 0x8400000;
-    new_process->saved_ebp = 0x8400000;
+
 
     new_process->pid = new_pid;
 
-    if (cur_process == NULL || new_pid < 3){ /* Base program */
+    if(cur_process == NULL || new_pid < 3){ /* Base program */
         new_process->parent_pid = -1;               /*changed*/
         new_process->term_id = new_pid;
     }                                         
@@ -149,23 +151,15 @@ int32_t sys_execute(const uint8_t* command) {
     }                                     
     setup_fd_array(new_process);
 
-    if(old_process != NULL){
-        asm volatile(
-            "movl %%esp, %0" : "=r"(old_process->saved_esp) 
-        );   
-        asm volatile(
-            "movl %%ebp, %0" : "=r"(old_process->saved_ebp) 
-        ); 
-    }
     /* 6. Create it’s own context switch stack */
     tss.ss0 = KERNEL_DS;
     tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * new_pid);
 
     /* Save current ESP and EBP before context switch*/
+    asm volatile(
+        "movl %%esp, %0" : "=r"(esp) 
+    );   
 
-   
-
-    
     // if(cur_process){
     //     cur_process->saved_ebp = ebp;                                                       /* Saving EBP/ESP */
     //     cur_process->saved_esp = esp;
@@ -174,12 +168,9 @@ int32_t sys_execute(const uint8_t* command) {
     for(i = 0; i < 128; i++) new_process->args[i] = args[i];
     new_process->arg_size = arg_size_count;
     
-    cur_process = new_process;
+    set_cur_proc(new_process);
     pid_array[new_pid] = 1;
-    // changed
-    process_array[new_process->term_id] = new_pid;      
-
-    sched_flag = new_process->term_id;     
+    process_array[new_process->term_id] = new_pid;           
 
     sti();
     /* Context Switch */
@@ -210,6 +201,7 @@ int32_t sys_execute(const uint8_t* command) {
 */
 int32_t sys_halt(uint8_t status) {
     cli();
+    pcb_t* cur_process = get_cur_proc();
     if(cur_process == NULL) {return -1;}
     uint32_t esp, ebp;
     uint32_t statusval = (uint32_t) status;
@@ -245,7 +237,7 @@ int32_t sys_halt(uint8_t status) {
 
     /* Restore Paging */
     setup_user_page(parent_process->pid);
-    cur_process = parent_process;
+    set_cur_proc(parent_process);
     
     sti();
 
