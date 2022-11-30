@@ -100,6 +100,7 @@ int32_t fill_buffer(char input_char){
     if(input_char == '\n' || input_char == '\e'){
         term_buffer[cur_term->curr_size] = '\n';                          //set to 128 and always just check this location?
         read_flag = 1;                                          //clear buffer in read_terminal not here in case not ready
+        //cur_process = get_pcb(process_array[cur_term_id]);
     }
     else if(input_char == '\b'){
         if(cur_term->curr_size != 0){

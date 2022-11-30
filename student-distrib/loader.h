@@ -24,4 +24,6 @@ extern int32_t sys_startup(const uint8_t* command);
 
 int process_array[3];
 
+int sched_flag;
+
 

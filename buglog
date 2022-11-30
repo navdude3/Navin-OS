@@ -157,9 +157,10 @@ Symptom that drew attention: three shells would launch but the process_arrray = 
 Difficulty finding bug (time and changes made): changed how parent_pid was set and removed 
 
 
-Type of Error: 
-Symptom that drew attention: 
-Difficulty finding bug (time and changes made): cur_term_id vs schedulers id
+Type of Error: algorithmic
+Symptom that drew attention: programs wouldn't execute on the proper terminal
+Difficulty finding bug (time and changes made): cur_process was not being updated correctly because get_curr_pcb was being called instead of
+                                                get_pcb, so we were setting it equal to itself over and over again
 
 
 Type of Error: 

@@ -54,7 +54,7 @@ void setup_user_page(int pid){
  *   SIDE EFFECT: Executes user program to the screen 
 */
 int32_t sys_execute(const uint8_t* command) {
-    //cli();
+    cli();
     uint8_t fname[MAXSIZE];                                                              /* max filesize name */ 
     uint8_t args[MAX_ARG_SIZE];                                                               // store args here
     int i,j,k;
@@ -69,14 +69,18 @@ int32_t sys_execute(const uint8_t* command) {
     uint32_t new_pid;
     int arg_size_count;
 
-    asm volatile(
-        "movl %%ebp, %0" : "=r"(ebp) 
-    );                                                                                   /* Immediately get ebp, get esp just before IRET */
-    
+                                                                                      /* Immediately get ebp, get esp just before IRET */
+    pcb_t* old_process = get_curr_pcb();
 
-    if(command == NULL) return -1;
-    if(command[0] == '\0') return -1;                                                    /* File or command non-existent */
+    if(command == NULL) {
+        sti();
+        return -1;
+    }
 
+    if(command[0] == '\0') {                                                             /* File or command non-existent */
+        sti();
+        return -1;                                                   
+    }
 
    for(i = 0; i < MAX_PROCESS; i++){                                                     /* check which pids are open */ 
         if(pid_array[i] == 0){                                                           /* If not in use, assign new process to this pid*/
@@ -88,6 +92,7 @@ int32_t sys_execute(const uint8_t* command) {
             active_processes++;
         }
         if(active_processes == MAX_PROCESS){                                              /* Every PID is used */
+            sti();
             return 256;
         }
    }
@@ -105,10 +110,14 @@ int32_t sys_execute(const uint8_t* command) {
 
     /* 2. Executable check */
     if(read_dentry_by_name(fname, &dentry) != 0) {
+        sti();
         return -1;                               /* If failed to read, return -1 */
     }
     
-    if(0 != check_exec(&dentry)) return -1;
+    if(0 != check_exec(&dentry)){
+        sti();
+        return -1;
+    }
 
     /* 3. Set up program paging and flushes TLB */
     setup_user_page(new_pid);               
@@ -125,11 +134,12 @@ int32_t sys_execute(const uint8_t* command) {
 
     /* 5. Create PCB */
     pcb_t* new_process = (pcb_t *) (USER_MEMORY_BASE - ((new_pid + 1) * PCB_SIZE));         //+1 because pcb resides on top of 8kb block
-
+    new_process->saved_esp = 0x8400000;
+    new_process->saved_ebp = 0x8400000;
 
     new_process->pid = new_pid;
 
-    if(cur_process == NULL || new_pid < 3){ /* Base program */
+    if (cur_process == NULL || new_pid < 3){ /* Base program */
         new_process->parent_pid = -1;               /*changed*/
         new_process->term_id = new_pid;
     }                                         
@@ -139,19 +149,27 @@ int32_t sys_execute(const uint8_t* command) {
     }                                     
     setup_fd_array(new_process);
 
+    if(old_process != NULL){
+        asm volatile(
+            "movl %%esp, %0" : "=r"(old_process->saved_esp) 
+        );   
+        asm volatile(
+            "movl %%ebp, %0" : "=r"(old_process->saved_ebp) 
+        ); 
+    }
     /* 6. Create it’s own context switch stack */
     tss.ss0 = KERNEL_DS;
     tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * new_pid);
-    // cur_process->saved_esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * new_pid);
-    /* Save current ESP and EBP before context switch*/
-    asm volatile(
-        "movl %%esp, %0" : "=r"(esp) 
-    );   
 
-    if(cur_process){
-        cur_process->saved_ebp = ebp;                                                       /* Saving EBP/ESP */
-        cur_process->saved_esp = esp;
-    }
+    /* Save current ESP and EBP before context switch*/
+
+   
+
+    
+    // if(cur_process){
+    //     cur_process->saved_ebp = ebp;                                                       /* Saving EBP/ESP */
+    //     cur_process->saved_esp = esp;
+    // }
     
     for(i = 0; i < 128; i++) new_process->args[i] = args[i];
     new_process->arg_size = arg_size_count;
@@ -159,8 +177,11 @@ int32_t sys_execute(const uint8_t* command) {
     cur_process = new_process;
     pid_array[new_pid] = 1;
     // changed
-    process_array[new_process->term_id] = new_pid;           
+    process_array[new_process->term_id] = new_pid;      
 
+    sched_flag = new_process->term_id;     
+
+    sti();
     /* Context Switch */
     asm volatile(
         "pushl %0                           \n"
@@ -188,7 +209,7 @@ int32_t sys_execute(const uint8_t* command) {
  *   SIDE EFFECT: Halts program
 */
 int32_t sys_halt(uint8_t status) {
-    //cli();
+    cli();
     if(cur_process == NULL) {return -1;}
     uint32_t esp, ebp;
     uint32_t statusval = (uint32_t) status;
@@ -203,6 +224,7 @@ int32_t sys_halt(uint8_t status) {
     if(cur_process->parent_pid == -1) {
         pid_array[cur_process->pid] = 0;                        /* Sets pid to 0 */
         cur_process = NULL;
+        sti();
 	    sys_execute((uint8_t*) "shell");                        /* Reboots shell */
         return 0;
     }
@@ -225,7 +247,7 @@ int32_t sys_halt(uint8_t status) {
     setup_user_page(parent_process->pid);
     cur_process = parent_process;
     
-    //sti();
+    sti();
 
     /* Jump to Execute Return */
     asm volatile(

@@ -15,4 +15,4 @@
 #define FREQ        11932       /* Frequency for rate generator (1193182)/100 to interrupt every 10ms */
 
 void pit_init();
-extern void pit_link_handler(pt_regs_int_t s_frame);
+extern void pit_link_handler();

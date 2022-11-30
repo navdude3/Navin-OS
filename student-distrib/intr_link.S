@@ -22,6 +22,8 @@ rtc_linkage:
 
 pit_linkage:
     pushal                              /* Pushes all registers */
+    pushfl
     call pit_link_handler
+    popfl
     popal
     iret

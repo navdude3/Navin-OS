@@ -28,8 +28,8 @@ typedef struct __attribute__((packed)) pt_regs_int{
     uint32_t ueip;
     uint32_t cs;
     uint32_t fl;
-    uint32_t uesp;      // MIGHT BE GARBAGE
-    uint32_t ss;        // might also be garbage!
+    // uint32_t uesp;      // MIGHT BE GARBAGE
+    // uint32_t ss;        // might also be garbage!
     
 }pt_regs_int_t;
 
@@ -40,6 +40,8 @@ typedef struct{
     int32_t parent_pid;
     uint32_t saved_esp;
     uint32_t saved_ebp;
+    uint32_t sched_esp;
+    uint32_t sched_ebp;
     pt_regs_int_t saved_regs;
     char args[128];
     uint32_t arg_size;
@@ -49,6 +51,5 @@ typedef struct{
 pcb_t* cur_process;                     /* Current active process */             
 extern pcb_t* get_curr_pcb();           /* Returns pointer to current PCB */
 extern pcb_t* get_pcb(int32_t pid);    /* Returns pointer for specified PCB */
-extern void vid_remap(pcb_t* next_pcb);
 
 #endif
