@@ -51,9 +51,9 @@ void switch_terms(int8_t new_term_id){
     term_t* cur_term = get_cur_term();
 
     /* Save current cursor and restore new cursor */
-    cur_term->scr_x = get_term_x();
-    cur_term->scr_y = get_term_y();
-    update_term_xy(new_term->scr_x, new_term->scr_y);
+    cur_term->scr_x = get_term_x(cur_term);
+    cur_term->scr_y = get_term_y(cur_term);
+    //update_term_xy(new_term->scr_x, new_term->scr_y);
 
     
 
@@ -66,7 +66,7 @@ void switch_terms(int8_t new_term_id){
     flush_tlb();
     memcpy((void*) vid_mem, new_term->vid_page, FOUR_KB);
     
-
+    update_cursor(new_term->scr_x, new_term->scr_y);
     cur_term_id = new_term_id;
     // if(process_array[cur_term_id] == -1){
     //     clear();

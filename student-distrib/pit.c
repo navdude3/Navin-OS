@@ -21,9 +21,6 @@ void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
     cli();
     pcb_t* current_pcb = get_cur_proc();
 
-    
-    
- 
     if(current_pcb == NULL) {
         send_eoi(PIT_IRQ);
         sti();
@@ -44,7 +41,6 @@ void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
         send_eoi(PIT_IRQ);
         sys_execute((uint8_t*)"shell");    
     }
-
 
     pcb_t* next_pcb = get_pcb((int32_t)(process_array[temp]));
 

@@ -7,6 +7,7 @@
 
 #include "types.h"
 #include "paging.h"
+#include "terminal.h"
 
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
@@ -36,8 +37,8 @@ void update_cursor(int x, int y);
 
 void test_interrupts(void);
 
-int get_term_x(void);
-int get_term_y(void);
+int get_term_x(term_t* terminal);
+int get_term_y(term_t* terminal);
 
 void update_term_xy(int x, int y);
 
