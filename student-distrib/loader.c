@@ -63,8 +63,6 @@ int32_t sys_execute(const uint8_t* command) {
     int active_processes = 0;
     uint8_t eip_buffer[SIZE_OF_ADDR];                                                   /* Holds entry point to function (Bytes 24-27 of command)*/                                              
     uint32_t entry;
-    // uint8_t exe_check_buf[EXEC_IDENT_SIZE];                                             /* Holds first four bytes of command to check if executable */
-    // int8_t* exe_check_str = "\x7f""ELF";
     dentry_t dentry;   
     inode_t* inode;
     uint32_t size;
@@ -197,9 +195,9 @@ int32_t sys_halt(uint8_t status) {
 
     /* Close any open FDs */ 
     int i;
-    for(i = 0; i < 8; i++){
+    for(i = 0; i < 8; i++) 
         if(cur_process->fd_array[i].flags.present == 1) sys_close(i);
-    }
+    
     
     /* If parent pid = -1, this is the base program */
     if(cur_process->parent_pid == -1) {

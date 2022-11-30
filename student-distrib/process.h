@@ -49,5 +49,6 @@ typedef struct{
 pcb_t* cur_process;                     /* Current active process */             
 extern pcb_t* get_curr_pcb();           /* Returns pointer to current PCB */
 extern pcb_t* get_pcb(int32_t pid);    /* Returns pointer for specified PCB */
+extern void vid_remap(pcb_t* next_pcb);
 
 #endif

@@ -75,8 +75,11 @@ void switch_terms(int8_t new_term_id){
     flush_tlb();
     memcpy((void*) vid_mem, new_term->vid_page, FOUR_KB);
     
+    cur_process = get_pcb((int32_t)(process_array[new_term_id]));
 
     cur_term_id = new_term_id;
+   
+    
     // if(process_array[cur_term_id] == -1){
     //     clear();
     //     cli();
@@ -142,7 +145,8 @@ int32_t terminal_write(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t byte
     // }
     for(i = 0; i < bytes; i++){
         if(((char*)user_buffer)[i] != '\0'){                    // empty in C
-            putc(((char*)user_buffer)[i]);                      //place the specific charachter to screen
+            //terminal_putc(((char*)user_buffer)[i], cur_term_id);                      //place the specific charachter to screen
+            putc(((char*)user_buffer)[i]);
         }
     } 
     return bytes;

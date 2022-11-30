@@ -8,7 +8,6 @@ void init_paging(){
     ((uint32_t *) first_4_desc.addr)[0xB8] = (0xB8000 | 0x3);       /* 0x3 to set video memory as present for supervisor */
 
     /* Initialize first two entries in page directory */
-    // init_page_directory(cr3_desc, first_4_desc);
     ((uint32_t *) cr3_desc.addr)[0] = (first_4_desc.addr & 0xFFFFF000) | 0x3; 
     ((uint32_t *) cr3_desc.addr)[1] = 0x00400083;
 
@@ -43,7 +42,7 @@ int32_t init_page_table(uint32_t table_base_addr, uint32_t phys_base_addr){
     table_base_ptr = (uint32_t *) table_base_addr;
 
     for(i = 0; i < NUM_PTE; ++i){
-        table_base_ptr[i] = phys_base_addr + (i << 12);            /* Left shifting by 2 to find index. Leftshifting by 12 for start of address  */
+        table_base_ptr[i] = phys_base_addr + (i << 12);            /* Left shifting by 12 for start of address  */
     }
 
     return 0;

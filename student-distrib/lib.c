@@ -286,7 +286,96 @@ void putc(uint8_t c) {
     update_cursor(screen_x, screen_y);
 }
 
+// void terminal_putc(uint8_t c, int term_id){
+//     char* calculated_video_mem = (char *)(VIDMAP_TABLE_BASE + term_id*4096);//(video_mem + term_id*400000);
+//     int i;6
+//     int j;
+//     if(c == '\n' || c == '\r') {                   /* If character is new line */
+//         if(screen_y == (NUM_ROWS - 1)){ //replace row with row below it (scrolling)
+//             for(j = 1; j < NUM_ROWS; j++){
+//                 for(i = 0; i < NUM_COLS; i++){
+//                     *(uint8_t *)(calculated_video_mem + ((NUM_COLS * (j - 1)+ i) << 1)) = *(uint8_t *)(calculated_video_mem + ((NUM_COLS * j + i) << 1)); 
+//                     *(uint8_t *)(calculated_video_mem + ((NUM_COLS * (j - 1)+ i) << 1) + 1) = *(uint8_t *)(calculated_video_mem + ((NUM_COLS * j+ i) << 1) + 1);
+//                 }
+//             }
 
+//         }
+//         if(screen_y == NUM_ROWS - 1){           //wipe the bottom row
+//             screen_y = 24;                      //the bottom row index
+//             for(i = 0; i < NUM_COLS; i++){
+//                 *(uint8_t *)(calculated_video_mem + ((NUM_COLS * (screen_y) + i - 1) << 1)) = ' ';
+//                 *(uint8_t *)(calculated_video_mem + ((NUM_COLS * (screen_y) + i - 1) << 1) + 1) = ATTRIB;
+//             }
+//         }
+//         else{
+//             screen_y = (screen_y + 1) % NUM_ROWS;           //reset screen y position to row below
+//         }
+//         screen_x = 0;                                       //place to beginning of line
+//     } 
+//     else if(c == '\b'){ //fix page fault error
+//     if(screen_x == 0 && screen_y == 0){                     //handle edge case for beginning backspace
+//         screen_x = 0;
+//         screen_y = 0;  
+//     }
+//     else{
+//         if((*(uint8_t *)(calculated_video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1) + 1)) == 0x1){ //do it 4 times for a tab, check if the attrib contains x1, which indicates that a tab has been seen
+//             for(i = 0; i < 4; i++){
+//                 *(uint8_t *)(calculated_video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1)) = ' ';
+//                 *(uint8_t *)(calculated_video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1) + 1) = ATTRIB;     
+//                 if(screen_x == 0){
+//                     screen_y--;
+//                     screen_x = 79;                                                                            //backspace place back to previous end of row
+//                 }
+//                 else{
+//                     screen_x--;                                                                 //otherwise just subtract 1
+//                 }
+//             }
+//         }
+//         else{ //otherwise do it once
+//                 *(uint8_t *)(calculated_video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1)) = ' ';
+//                 *(uint8_t *)(calculated_video_mem + ((NUM_COLS * screen_y + screen_x - 1) << 1) + 1) = ATTRIB;
+//                 if(screen_x == 0 && screen_y == 0){
+//                                                         //do nothing at beginning
+//                 }
+//                 else if(screen_x == 0){
+//                     screen_x = 79;                      //reset to end of previous line
+//                     screen_y--;
+//                 }
+//                 else{
+//                     screen_x--;                         //otherwise move back 1 on row
+//                 }
+//             }
+//         }
+//     }
+//     else if(c == '\t'){ //use the attrib to check if its a tab
+//         for(i = 0; i < 4; i++){
+//             *(uint8_t *)(calculated_video_mem + ((NUM_COLS * screen_y + screen_x + 3) << 1)) = ' ';
+//             *(uint8_t *)(calculated_video_mem + ((NUM_COLS * screen_y + screen_x + 3) << 1) + 1) = 0x1;        //for tab change the attrib to x1 so we know a tab is there for a backspace
+//             screen_x += 1;              
+//             if(screen_x > 79){                                                              //overflow on row
+//                 screen_x = 0;
+//                 screen_y++;
+//             }
+//         }
+//     }
+//     else if(c == '\f'){             //reset cursor and screen
+//         clear();
+//         // screen_x = 0;
+//         // screen_y = 0;
+//     }
+//     else {
+//         *(uint8_t *)(calculated_video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;              //if no specific key is seen, just place the char on the screen
+//         *(uint8_t *)(calculated_video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+//         screen_x++;                                                                         //update column ptr
+//         if(screen_x >= NUM_COLS){
+//             // screen_y++;
+//             // screen_x = 0;
+//             putc('\n');
+//         }
+//         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;                           //update row ptr
+//     }
+//     update_cursor(screen_x, screen_y);
+// }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
  * Inputs: uint32_t value = number to convert

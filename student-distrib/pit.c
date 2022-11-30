@@ -37,6 +37,8 @@ void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
 
     if(process_array[temp] == -1) {                                 /* Launches 3 shells upon boot */
         term_id_parser = temp;
+        switch_terms(term_id_parser);
+        clear();
         send_eoi(PIT_IRQ);
         sti();
         sys_execute((uint8_t*)"shell");    
@@ -44,7 +46,8 @@ void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
 
     term_id_parser = temp;
     pcb_t* next_pcb = get_pcb((int32_t)(process_array[term_id_parser]));
-  
+    // vid_remap(next_pcb);
+
     /* Save tss info for next process */
     // tss.ss0 = KERNEL_DS;
     // tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * next_pcb->pid);
