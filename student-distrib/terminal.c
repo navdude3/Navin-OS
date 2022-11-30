@@ -32,6 +32,8 @@ void init_terms(){
         terminals[i].scr_y = 0;
         terminals[i].curr_size = 0;
         process_array[i] = -1;
+        vidmap_init_entry.val = ((uint32_t)&terminals[i] | 0x7); // init vidmap for terminal
+        set_ptentry(usr_vidmap_table_desc.addr, i, vidmap_init_entry);
     }
     cur_term_id = 0;
     vidmap_init_entry.val = (0xB8000 | 0x7);
@@ -131,7 +133,8 @@ int32_t terminal_write(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t byte
     // }
     for(i = 0; i < bytes; i++){
         if(((char*)user_buffer)[i] != '\0'){                    // empty in C
-            putc(((char*)user_buffer)[i]);                      //place the specific charachter to screen
+            // putc(((char*)user_buffer)[i]);                      //place the specific charachter to screen
+            terminal_putc(((char*)user_buffer)[i], fd_entry->term_id);
         }
     } 
     return bytes;
