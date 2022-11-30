@@ -4,6 +4,7 @@
 #include "loader.h"
 #include "terminal.h"
 #include "i8259.h"
+#include "process.h"
 
 /* From https://wiki.osdev.org/Programmable_Interval_Timer & http://www.osdever.net/bkerndev/Docs/pit.htm */
 
@@ -14,4 +15,4 @@
 #define FREQ        11932       /* Frequency for rate generator (1193182)/100 to interrupt every 10ms */
 
 void pit_init();
-void pit_link_handler();
+extern void pit_link_handler(pt_regs_int_t s_frame);

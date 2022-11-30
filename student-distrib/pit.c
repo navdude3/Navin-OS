@@ -14,7 +14,9 @@ void pit_init() {
     return;
 }
 
-void pit_link_handler() { /* aka scheduler */
+   
+
+void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
     cli();
     pcb_t* current_pcb = get_pcb((int32_t)(process_array[term_id_parser]));
  
@@ -30,15 +32,16 @@ void pit_link_handler() { /* aka scheduler */
         "movl %%ebp, %1       \n"
         : "=r" (current_pcb->saved_esp), "=r" (current_pcb->saved_ebp)
     );
-    
 
     int32_t temp = (term_id_parser + 1) % 3;
 
-    if(process_array[temp] == -1) {
+    if(process_array[temp] == -1) {                                 /* Launches 3 shells upon boot */
+        term_id_parser = temp;
         send_eoi(PIT_IRQ);
         sti();
-        return;       
+        sys_execute((uint8_t*)"shell");    
     }
+
     term_id_parser = temp;
     pcb_t* next_pcb = get_pcb((int32_t)(process_array[term_id_parser]));
   

@@ -54,6 +54,7 @@ void setup_user_page(int pid){
  *   SIDE EFFECT: Executes user program to the screen 
 */
 int32_t sys_execute(const uint8_t* command) {
+    //cli();
     uint8_t fname[MAXSIZE];                                                              /* max filesize name */ 
     uint8_t args[MAX_ARG_SIZE];                                                               // store args here
     int i,j,k;
@@ -130,9 +131,9 @@ int32_t sys_execute(const uint8_t* command) {
 
     new_process->pid = new_pid;
 
-    if(cur_process == NULL){ /* Base program */
-        new_process->parent_pid = -1;
-        new_process->term_id = cur_term_id; 
+    if(cur_process == NULL || new_pid < 3){ /* Base program */
+        new_process->parent_pid = -1;               /*changed*/
+        new_process->term_id = new_pid;
     }                                         
     else{ /* Setting parent process info */
         new_process->parent_pid = process_array[cur_term_id];    
@@ -159,7 +160,8 @@ int32_t sys_execute(const uint8_t* command) {
     
     cur_process = new_process;
     pid_array[new_pid] = 1;
-    process_array[cur_term_id] = new_pid;
+    // changed
+    process_array[new_process->term_id] = new_pid;           
 
     /* Context Switch */
     asm volatile(
@@ -188,6 +190,7 @@ int32_t sys_execute(const uint8_t* command) {
  *   SIDE EFFECT: Halts program
 */
 int32_t sys_halt(uint8_t status) {
+    //cli();
     if(cur_process == NULL) {return -1;}
     uint32_t esp, ebp;
     uint32_t statusval = (uint32_t) status;
@@ -224,8 +227,7 @@ int32_t sys_halt(uint8_t status) {
     setup_user_page(parent_process->pid);
     cur_process = parent_process;
     
-    
-    
+    //sti();
 
     /* Jump to Execute Return */
     asm volatile(

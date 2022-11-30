@@ -35,7 +35,6 @@ void init_terms(){
         terminals[i].scr_x = 0;
         terminals[i].scr_y = 0;
         terminals[i].curr_size = 0;
-        //sys_execute((uint8_t*)"shell");
         process_array[i] = -1;
     }
     cur_term_id = 0;
@@ -78,11 +77,11 @@ void switch_terms(int8_t new_term_id){
     
 
     cur_term_id = new_term_id;
-    if(process_array[cur_term_id] == -1){
-        clear();
-        cli();
-        sys_execute((uint8_t*)"shell");
-    }
+    // if(process_array[cur_term_id] == -1){
+    //     clear();
+    //     cli();
+    //     sys_execute((uint8_t*)"shell");
+    // }
 }
 
 /* 
@@ -238,4 +237,3 @@ int32_t terminal_open(fd_entry_t* fd_entry) {
     for(i = 0; i < BUFFER; i++) proc_term_buffer[i] = ' ';              //clean the buffer
     return 0;
 }
-
