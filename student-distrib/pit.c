@@ -9,8 +9,6 @@ void pit_init() {
     outb(MODE, MODE_REG);                       /* Sending mode to command register */
     outb((FREQ & 0xFF), CHANNEL);               /* Sends bottom 8 bits of reload value */
     outb((FREQ >> 8), CHANNEL);                 /* Sends top 8 bits of reload value */
-    // term_id_parser = -1;                         /* Initialize variable */
-    // sched_flag = -1;
     enable_irq(PIT_IRQ);                        /* End of interrupt on PIT*/
     return;
 }
