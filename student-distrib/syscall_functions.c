@@ -123,7 +123,7 @@ int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {
  */
 int32_t sys_vidmap(uint8_t** screen_start) {
     /* Fail if address is outside current process address space*/
-    pte_desc_t vidmap_entry;
+    // pte_desc_t vidmap_entry;
     uint32_t user_addr_base = PROGRAM_VMEM_BASE;
 
     if ((uint32_t) screen_start < user_addr_base || (uint32_t) screen_start >= user_addr_base + PROGRAM_SIZE) return -1;
@@ -140,7 +140,7 @@ int32_t sys_vidmap(uint8_t** screen_start) {
     // }
     // set_ptentry(usr_vidmap_table_desc.addr, term_id, vidmap_entry);
 
-    *screen_start = (VIDMAP_TABLE_BASE + term_id*4096);
+    *screen_start = (uint8_t*)(VIDMAP_TABLE_BASE + term_id*4096);
     return 0;
 }
 

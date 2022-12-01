@@ -23,7 +23,7 @@ term_t* get_cur_term(){
 
 void init_terms(){
     int i;
-    int j;
+    // int j;
     pte_desc_t vidmap_init_entry;
     //ask TA if we need to call shell on boot or on switch
     for(i = 0; i < 3; i++){

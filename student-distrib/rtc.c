@@ -76,7 +76,7 @@ int32_t rtc_close(fd_entry_t* fd_entry){
  */
 int32_t rtc_read(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
     flag[cur_term_id] = 1;
-    int32_t interval = MAX_FREQ / fd_entry->rtc_freq;
+    // int32_t interval = MAX_FREQ / fd_entry->rtc_freq;
     sti();
     while(flag[cur_term_id]);               // infinite loop until rtc_count is a multiple of desired interval
     return 0;

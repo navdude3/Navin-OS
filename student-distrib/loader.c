@@ -170,7 +170,7 @@ int32_t sys_execute(const uint8_t* command) {
     
     set_cur_proc(new_process);
     pid_array[new_pid] = 1;
-    process_array[new_process->term_id] = new_pid;           
+    process_array[(uint32_t)new_process->term_id] = new_pid;           
 
     sti();
     /* Context Switch */
@@ -227,7 +227,7 @@ int32_t sys_halt(uint8_t status) {
     
     /* Getting parent process info */
     pid_array[cur_process->pid] = 0;
-    process_array[cur_term_id] = cur_process->parent_pid;
+    process_array[(uint32_t) cur_process->term_id] = cur_process->parent_pid;
     pcb_t* parent_process = get_pcb(cur_process->parent_pid);
 
     /* Restore Parent Data */
