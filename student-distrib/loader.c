@@ -275,7 +275,10 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
             break;
         } 
         fname[i] = input[i];                /* Copy over name */
-        if(input[i] == '\0') return 0;
+        if(input[i] == '\0'){
+            args = 0;
+            return -1;
+        } 
 
     }
     int leading_ws_flag = 0;

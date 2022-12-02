@@ -263,8 +263,8 @@ void terminal_putc(uint8_t c, int term_id){
     }
     else if(c == '\f'){             //reset cursor and screen
         clear();
-        // term->scr_x = 0;
-        // term->scr_y = 0;
+        term->scr_x = 0;
+        term->scr_y = 0;
     }
     else {
         *(uint8_t *)(term_video_mem + ((NUM_COLS * term->scr_y + term->scr_x) << 1)) = c;              //if no specific key is seen, just place the char on the screen

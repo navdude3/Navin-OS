@@ -173,12 +173,12 @@ int32_t terminal_read(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes
         ((char*)user_buffer)[i] = term->term_buffer[i];       
         if(term->term_buffer[i] == '\n'){                             //look for newline to end buffer
              ((char*)user_buffer)[i] = term->term_buffer[i];
-            term->term_buffer[i] = ' ';
+            term->term_buffer[i] = '\0';
             break;
         }
         else{
             ((char*)user_buffer)[i] = term->term_buffer[i];
-            term->term_buffer[i] = ' '; 
+            term->term_buffer[i] = '\0'; 
         }
     }
 
@@ -226,6 +226,6 @@ int32_t terminal_close(fd_entry_t* fd_entry) {
 int32_t terminal_open(fd_entry_t* fd_entry) {
     int i;
     char* proc_term_buffer = get_term(fd_entry->term_id)->term_buffer;
-    for(i = 0; i < BUFFER; i++) proc_term_buffer[i] = ' ';              //clean the buffer
+    for(i = 0; i < BUFFER; i++) proc_term_buffer[i] = '\0';              //clean the buffer
     return 0;
 }
