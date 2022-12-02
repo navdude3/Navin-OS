@@ -265,6 +265,7 @@ int32_t sys_halt(uint8_t status) {
 */
 int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
     int i,j;
+    int flagger = 0;
 
     /* Parsing for command */
     for(i = 0; i < MAXSIZE; i++){
@@ -291,7 +292,8 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
             || input[j+i] == ' ' 
             || input[j+i] == '\0'){
                 args[arg_idx] = '\0';
-                return arg_idx;               /* Returns number of arguments */
+                break;
+                //return arg_idx;               /* Returns number of arguments */
             }
             args[arg_idx] = input[j + i];
             leading_ws_flag = 1;
@@ -299,6 +301,22 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
         }
         
     }
+
+    for(i = 0; i < MAX_ARG_SIZE; i++){
+        if(args[i] == ' ' || args[i] == '\0' || args[i] == ""){
+            continue;
+        }
+        else{
+            flagger = 1;
+            break;
+        }
+    }
+    if(i == 128 && flagger == 0){
+        args = 0;
+        return -1;
+    }
+    
+
     return arg_idx;
 }
 
