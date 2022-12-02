@@ -4,7 +4,13 @@
 
 // static int32_t term_id_parser; // no longer used
 
-
+/* 
+ * pit_init
+ *   DESCRIPTION: initializes our PIT for scheduling  
+ *   INPUTS: none
+ *   OUTPUTS: none, but PIT devices is enabled and PIT frequency is set and 
+ *   RETURN VALUE: none
+*/
 void pit_init() {
     outb(MODE, MODE_REG);                       /* Sending mode to command register */
     outb((FREQ & 0xFF), CHANNEL);               /* Sends bottom 8 bits of reload value */
@@ -14,7 +20,13 @@ void pit_init() {
 }
 
    
-
+/* 
+ * pit_link_handler
+ *   DESCRIPTION: main function for schedular to allow switching between process among 3 terminals  
+ *   INPUTS: s_frame - registers to be saved during interrupt
+ *   OUTPUTS: none, but registers saved and updated to switch to new processes
+ *   RETURN VALUE: none
+*/
 void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
     cli();
     pcb_t* current_pcb = get_cur_proc();

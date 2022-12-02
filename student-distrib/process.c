@@ -17,6 +17,14 @@ pcb_t* get_cur_proc() {
 // void set_cur_proc(int32_t pid){
 //     cur_process = get_pcb(pid);
 // }
+
+/* 
+ * set_cur_proc
+ *   DESCRIPTION: sets the cur_process based on the new process to switch to
+ *   INPUTS: new_process - the new PCB to set the process to
+ *   OUTPUTS: cur_process is set to the new process
+ *   RETURN VALUE: None 
+*/
 void set_cur_proc(pcb_t* new_proc){
     cur_process = new_proc;
 }

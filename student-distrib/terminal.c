@@ -14,13 +14,35 @@ fd_ops_t terminal_ops = (fd_ops_t){
     terminal_write
 };
 
+/* 
+ * get_term
+ *   DESCRIPTION: finds a terminal based on term_id  
+ *   INPUTS: term_id - index into the terminals array
+ *   OUTPUTS: 0, 1, 2
+ *   RETURN VALUE: the term_t struct from the respective term_id in the terminals array
+*/
 term_t* get_term(int8_t term_id){
     return &terminals[(unsigned int)term_id];
 }
+
+/* 
+ * get_cur_term
+ *   DESCRIPTION: finds the terminal we are currently in  
+ *   INPUTS: none, but calls get_term with the global variable cur_term_id
+ *   OUTPUTS: 0, 1, 2
+ *   RETURN VALUE: the term_t struct from the terminal we are currently in
+*/
 term_t* get_cur_term(){
     return get_term(cur_term_id);
 }
 
+/* 
+ * init_terms
+ *   DESCRIPTION: initializes the term structs for all 3 terminals in our OS  
+ *   INPUTS: none
+ *   OUTPUTS: initialized term_t structs and pages for 3 terminals
+ *   RETURN VALUE: none
+*/
 void init_terms(){
     int i;
     // int j;
@@ -42,6 +64,13 @@ void init_terms(){
     return;
 }
 
+/* 
+ * switch_terms
+ *   DESCRIPTION: switches the terminal based on the new_term_id  
+ *   INPUTS: new_term_id - id to determine which terminal to switch to
+ *   OUTPUTS: new page, screen, cursor for the new terminal being displayed
+ *   RETURN VALUE: none
+*/
 void switch_terms(int8_t new_term_id){
     if(new_term_id == cur_term_id) return;
 

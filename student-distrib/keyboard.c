@@ -74,8 +74,7 @@ void shift_check(int key) {
  *   RETURN VALUE: terminal to switch to 0 indexed
 */
 
-int terminal_check(int key){
-    if(ctrl == 1){    
+int terminal_check(int key){    
         if(key == F1_PRESS){
             return 0;
         }
@@ -85,7 +84,7 @@ int terminal_check(int key){
         else if(key == F3_PRESS){
             return 2;
         }
-    }
+        
     return -1;    
 }
 

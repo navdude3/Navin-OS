@@ -130,16 +130,6 @@ int32_t sys_vidmap(uint8_t** screen_start) {
 
     uint32_t term_id = get_cur_proc()->term_id;
 
-    // uint32_t term_addr = (uint32_t) get_term(term_id);
-    // if (cur_term_id == term_id){
-    //     vidmap_entry.val =  (0xB8000| 0x7); // 0x7 to set video memory as present for user
-    // } 
-    // else {
-    //     //uint32_t term_addr = (uint32_t) get_term(term_id);
-    //     vidmap_entry.val = term_addr | 0x7;
-    // }
-    // set_ptentry(usr_vidmap_table_desc.addr, term_id, vidmap_entry);
-
     *screen_start = (uint8_t*)(VIDMAP_TABLE_BASE + term_id*4096);
     return 0;
 }
