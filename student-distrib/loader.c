@@ -303,7 +303,7 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
     }
 
     for(i = 0; i < MAX_ARG_SIZE; i++){
-        if(args[i] == ' ' || args[i] == '\0' || args[i] == ""){
+        if(args[i] == (uint32_t)' ' || args[i] == (uint32_t)'\0' || args[i] == (uint32_t)""){
             continue;
         }
         else{
@@ -320,6 +320,13 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
     return arg_idx;
 }
 
+/* 
+ * check_exec
+ *   DESCRIPTION: checks if the file is executable or not
+ *   INPUTS: dentry_t* file_dentry
+ *   OUTPUTS: checker for if the file can be executed
+ *   RETURNS: Returns comparison between exe_check_buf and exe_check_str to see if executable
+*/
 int32_t check_exec(dentry_t* file_dentry){
     uint8_t exe_check_buf[EXEC_IDENT_SIZE];                                             /* Holds first four bytes of command to check if executable */
     int8_t* exe_check_str = "\x7f""ELF";
@@ -331,6 +338,13 @@ int32_t check_exec(dentry_t* file_dentry){
     return strncmp((int8_t *)exe_check_buf, exe_check_str, 4);
 }
 
+/* 
+ * setup_fd_array
+ *   DESCRIPTION: sets up the file descriptor fur the processwe are at 
+ *   INPUTS: pcb_t* proc
+ *   OUTPUTS: fd_entry is set for the current PCB
+ *   RETURNS: Returns 0 
+*/
 int32_t setup_fd_array(pcb_t* proc){
     int i;
 
