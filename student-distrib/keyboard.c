@@ -76,13 +76,13 @@ void shift_check(int key) {
 
 int terminal_check(int key){
     if(ctrl == 1){    
-        if(key == 0x02){
+        if(key == F1_PRESS){
             return 0;
         }
-        else if(key == 0x03){
+        else if(key == F2_PRESS){
             return 1;
         }
-        else if(key == 0x04){
+        else if(key == F3_PRESS){
             return 2;
         }
     }
