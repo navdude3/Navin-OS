@@ -11,6 +11,7 @@
 
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
+/* Prints character to appropriate terminal */
 void terminal_putc(uint8_t c, int term_id);
 
 int32_t puts(int8_t *s);
@@ -34,12 +35,11 @@ int32_t safe_strncpy(int8_t* dest, const int8_t* src, int32_t n);
 
 /* Cursor related functions. Adapted from https://wiki.osdev.org/Text_Mode_Cursor */
 void update_cursor(int x, int y);
-
 void test_interrupts(void);
-
 int get_term_x(term_t* terminal);
 int get_term_y(term_t* terminal);
 
+/* Updates xy values for each terminal */
 void update_term_xy(int x, int y);
 
 /* Port read functions */

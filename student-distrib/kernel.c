@@ -173,9 +173,9 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Init the Paging */
     init_paging();
-
+    /* Init three terminals */
     init_terms();
-
+    /* Init the PIT */
     pit_init();
 
     //sys_startup((uint8_t*)"shell");
@@ -196,11 +196,6 @@ void entry(unsigned long magic, unsigned long addr) {
 #endif
     /* Execute the first program ("shell") ... */
     sys_execute((uint8_t*)"shell");
-    // switch_terms(1);
-    // sys_execute((uint8_t*)"shell");
-    // switch_terms(2);
-    // sys_execute((uint8_t*)"shell");
-    // switch_terms(0);
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");
 }

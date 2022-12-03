@@ -18,6 +18,12 @@ jumptable:
 
 
 
+/* 
+ * syscall_linkage
+ *   DESCRIPTION: links to appropriate system call or, if incorect bounds, returns
+ *   INPUTS: syscall number
+ *   OUTPUTS: none
+ */
 syscall_linkage:
     cmpl $10, %eax                 # checking that argument is valud 
     ja oob_error

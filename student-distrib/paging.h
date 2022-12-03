@@ -9,6 +9,7 @@
 #define PAGE_DIR_SIZE       0x1000                                      // 4kb
 #define PAGE_ENTRY_SIZE     0x400000                                    // 4MB
 #define VIDMAP_TABLE_BASE   (0x8400000 + (6 * PAGE_ENTRY_SIZE))         // after vmem space for user programs
+#define VIDMEM              0xB8000
 
 /* Clears TLB */
 extern void flush_tlb();

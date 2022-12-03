@@ -7,6 +7,7 @@
 #define BUFFER      128
 #define FOUR_KB     4096
 #define MAX_TERMS   3
+#define USR_PRESENT_RW 0x7
 
 typedef struct term{
     char vid_page[4096]; // Video memory is 80*25*2 = 4000. This allows us to save pages when aligning

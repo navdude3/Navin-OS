@@ -187,14 +187,19 @@ void putc(uint8_t c) {
 }
 
 
+/* terminal_putc(uint8_t c, int term_id)
+ * Inputs: uint_8* c = character to print, int term_id = on which terminal
+ * Return Value: void
+ *  Function: Output a character to the appropriate terminal  */
+
 void terminal_putc(uint8_t c, int term_id){
-    char* term_video_mem = (char *)(VIDMAP_TABLE_BASE + term_id*4096);//(video_mem + term_id*400000);
+    char* term_video_mem = (char *)(VIDMAP_TABLE_BASE + term_id*4096);                  //(video_mem + term_id*400000);
     term_t* term = get_term(term_id);
     // char* term_video_mem = (char*) term;
     int i;
     int j;
-    if(c == '\n' || c == '\r') {                   /* If character is new line */
-        if(term->scr_y == (NUM_ROWS - 1)){ //replace row with row below it (scrolling)
+    if(c == '\n' || c == '\r') {                                                        /* If character is new line */
+        if(term->scr_y == (NUM_ROWS - 1)){                                              //replace row with row below it (scrolling)
             for(j = 1; j < NUM_ROWS; j++){
                 for(i = 0; i < NUM_COLS; i++){
                     *(uint8_t *)(term_video_mem + ((NUM_COLS * (j - 1)+ i) << 1)) = *(uint8_t *)(term_video_mem + ((NUM_COLS * j + i) << 1)); 
@@ -203,20 +208,20 @@ void terminal_putc(uint8_t c, int term_id){
             }
 
         }
-        if(term->scr_y == NUM_ROWS - 1){           //wipe the bottom row
-            term->scr_y = 24;                      //the bottom row index
+        if(term->scr_y == NUM_ROWS - 1){                                                //wipe the bottom row
+            term->scr_y = 24;                                                           //the bottom row index
             for(i = 0; i < NUM_COLS; i++){
                 *(uint8_t *)(term_video_mem + ((NUM_COLS * (term->scr_y) + i - 1) << 1)) = ' ';
                 *(uint8_t *)(term_video_mem + ((NUM_COLS * (term->scr_y) + i - 1) << 1) + 1) = ATTRIB;
             }
         }
         else{
-            term->scr_y = (term->scr_y + 1) % NUM_ROWS;           //reset screen y position to row below
+            term->scr_y = (term->scr_y + 1) % NUM_ROWS;                                 //reset screen y position to row below
         }
-        term->scr_x = 0;                                       //place to beginning of line
+        term->scr_x = 0;                                                                //place to beginning of line
     } 
-    else if(c == '\b'){ //fix page fault error
-    if(term->scr_x == 0 && term->scr_y == 0){                     //handle edge case for beginning backspace
+    else if(c == '\b'){                                                                 //fix page fault error
+    if(term->scr_x == 0 && term->scr_y == 0){                                           //handle edge case for beginning backspace
         term->scr_x = 0;
         term->scr_y = 0;  
     }
@@ -227,10 +232,10 @@ void terminal_putc(uint8_t c, int term_id){
                 *(uint8_t *)(term_video_mem + ((NUM_COLS * term->scr_y + term->scr_x - 1) << 1) + 1) = ATTRIB;     
                 if(term->scr_x == 0){
                     term->scr_y--;
-                    term->scr_x = 79;                                                                            //backspace place back to previous end of row
+                    term->scr_x = 79;                                                      //backspace place back to previous end of row
                 }
                 else{
-                    term->scr_x--;                                                                 //otherwise just subtract 1
+                    term->scr_x--;                                                          //otherwise just subtract 1
                 }
             }
         }
@@ -255,27 +260,25 @@ void terminal_putc(uint8_t c, int term_id){
             *(uint8_t *)(term_video_mem + ((NUM_COLS * term->scr_y + term->scr_x + 3) << 1)) = ' ';
             *(uint8_t *)(term_video_mem + ((NUM_COLS * term->scr_y + term->scr_x + 3) << 1) + 1) = 0x1;        //for tab change the attrib to x1 so we know a tab is there for a backspace
             term->scr_x += 1;              
-            if(term->scr_x > 79){                                                              //overflow on row
+            if(term->scr_x > 79){                                                                               //overflow on row
                 term->scr_x = 0;
                 term->scr_y++;
             }
         }
     }
-    else if(c == '\f'){             //reset cursor and screen
+    else if(c == '\f'){                                                                                           //reset cursor and screen
         clear();
         term->scr_x = 0;
         term->scr_y = 0;
     }
     else {
-        *(uint8_t *)(term_video_mem + ((NUM_COLS * term->scr_y + term->scr_x) << 1)) = c;              //if no specific key is seen, just place the char on the screen
+        *(uint8_t *)(term_video_mem + ((NUM_COLS * term->scr_y + term->scr_x) << 1)) = c;                       //if no specific key is seen, just place the char on the screen
         *(uint8_t *)(term_video_mem + ((NUM_COLS * term->scr_y + term->scr_x) << 1) + 1) = ATTRIB;
-        term->scr_x++;                                                                         //update column ptr
+        term->scr_x++;                                                                                          //update column ptr
         if(term->scr_x >= NUM_COLS){
-            // term->scr_y++;
-            // term->scr_x = 0;
             putc('\n');
         }
-        term->scr_y = (term->scr_y + (term->scr_x / NUM_COLS)) % NUM_ROWS;                           //update row ptr
+        term->scr_y = (term->scr_y + (term->scr_x / NUM_COLS)) % NUM_ROWS;                                      //update row ptr
     }
     // update_cursor(term->scr_x, term->scr_y);
     if (term_id == cur_term_id){

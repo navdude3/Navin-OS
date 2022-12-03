@@ -123,7 +123,6 @@ int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {
  */
 int32_t sys_vidmap(uint8_t** screen_start) {
     /* Fail if address is outside current process address space*/
-    // pte_desc_t vidmap_entry;
     uint32_t user_addr_base = PROGRAM_VMEM_BASE;
 
     if ((uint32_t) screen_start < user_addr_base || (uint32_t) screen_start >= user_addr_base + PROGRAM_SIZE) return -1;

@@ -16,21 +16,6 @@ int32_t init_vfs(){
     return 0;
 }
 
-// int32_t init_fd_array(fd_entry_t* fd_array){
-//     /* terminal driver assigned to fd 1*/
-//     int i;
-
-//     for (i = 0; i < 2; ++i){
-//         fd_entry_t* stdout_fd = &fd_array[i]; // i = 0 initializes stdin , i = 1 initializes stdout
-//         stdout_fd->file_position = 0;
-//         stdout_fd->flags.present = 1;
-//         stdout_fd->j_tbl = &terminal_ops; // both stdin and stdout use terminal driver
-//         stdout_fd->j_tbl->open((fd_entry_t*)"garbage"); // initialize terminal driver
-//     }
-    
-//     return 0;
-// }
-
 /* 
  * get_free_fd_entry_idx
  *   DESCRIPTION: Finds first available fd entry in global fd array

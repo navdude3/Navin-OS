@@ -2,8 +2,6 @@
 #include "process.h"
 
 
-// static int32_t term_id_parser; // no longer used
-
 /* 
  * pit_init
  *   DESCRIPTION: initializes our PIT for scheduling  
@@ -43,7 +41,8 @@ void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
         "movl %%ebp, %1       \n"
         : "=r" (current_pcb->sched_esp), "=r" (current_pcb->sched_ebp)
     );
-    int32_t temp = (current_pcb->term_id + 1) % 3;
+    
+    int32_t temp = (current_pcb->term_id + 1) % 3;                  /* Updating terminal */
 
     if(process_array[temp] == -1) {                                 /* Launches 3 shells upon boot */
         switch_terms(temp);
@@ -61,7 +60,7 @@ void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
     /* Set up user page */
     setup_user_page(next_pcb->pid);
 
-    set_cur_proc(next_pcb);
+    set_cur_proc(next_pcb);                                         /* Updates current process */
 
     send_eoi(PIT_IRQ);
 

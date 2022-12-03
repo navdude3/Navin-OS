@@ -45,20 +45,19 @@ term_t* get_cur_term(){
 */
 void init_terms(){
     int i;
-    // int j;
     pte_desc_t vidmap_init_entry;
-    //ask TA if we need to call shell on boot or on switch
-    for(i = 0; i < 3; i++){
+
+    for(i = 0; i < 3; i++){                                                                             /* Sets cur_term_id, cursor position, current size, and vidmap entry for all three terminals*/
         cur_term_id = i;
         terminals[i].scr_x = 0;
         terminals[i].scr_y = 0;
         terminals[i].curr_size = 0;
         process_array[i] = -1;
-        vidmap_init_entry.val = ((uint32_t)&terminals[i] | 0x7); // init vidmap for terminal
+        vidmap_init_entry.val = ((uint32_t)&terminals[i] | USR_PRESENT_RW); // init vidmap for terminal
         set_ptentry(usr_vidmap_table_desc.addr, i, vidmap_init_entry);
     }
     cur_term_id = 0;
-    vidmap_init_entry.val = (0xB8000 | 0x7);
+    vidmap_init_entry.val = (VIDMEM | USR_PRESENT_RW);
     set_ptentry(usr_vidmap_table_desc.addr, cur_term_id, vidmap_init_entry);
 
     return;
@@ -74,7 +73,7 @@ void init_terms(){
 void switch_terms(int8_t new_term_id){
     if(new_term_id == cur_term_id) return;
 
-    uint32_t vid_mem = 0xB8000;
+    uint32_t vid_mem = VIDMEM;
     uint32_t* usr_vidmap_table_base = (uint32_t *) usr_vidmap_table_desc.addr;
     term_t* new_term = get_term(new_term_id);
     term_t* cur_term = get_cur_term();
@@ -86,22 +85,18 @@ void switch_terms(int8_t new_term_id){
 
     
 
-    /* Save current screen and restore new screen*/
+    /* Save current screen */
     usr_vidmap_table_base[cur_term_id] = ((uint32_t) cur_term | 0x7);
     flush_tlb();
     memcpy(cur_term->vid_page, (void*) vid_mem, FOUR_KB);
-
+    /* Restore new screen */
     usr_vidmap_table_base[(unsigned int)new_term_id] = (vid_mem | 0x7);
     flush_tlb();
     memcpy((void*) vid_mem, new_term->vid_page, FOUR_KB);
-    
+    /* Update cursor and cur_term_id*/
     update_cursor(new_term->scr_x, new_term->scr_y);
     cur_term_id = new_term_id;
-    // if(process_array[cur_term_id] == -1){
-    //     clear();
-    //     cli();
-    //     sys_execute((uint8_t*)"shell");
-    // }
+
 }
 
 /* 
@@ -191,9 +186,6 @@ int32_t terminal_read(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes
         sti();
         return 0;
     }
-    // else if(bytes > BUFFER){                                       //overflow checking
-    //     bytes = BUFFER;
-    // }
 
     if (bytes > term->curr_size){
         bytes = term->curr_size; // do not read beyond end pointer of termbuffer

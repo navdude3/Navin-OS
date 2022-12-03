@@ -20,10 +20,8 @@ extern void setup_user_page(int pid);
 extern int32_t setup_pcb(void *addr);                        /* Addr is the bounds of user page we want to define */
 extern int32_t sys_execute(const uint8_t* command);          /* Loads and executes a new program */
 extern int32_t sys_halt(uint8_t status);                     /* Halts the current program */
-extern int32_t sys_startup(const uint8_t* command);
 
 int process_array[3];
 
-int sched_flag;
 
 

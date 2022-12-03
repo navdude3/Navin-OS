@@ -3,9 +3,15 @@
 
 int32_t init_page_table(uint32_t table_base_addr, uint32_t phys_base_addr);
 
+/* 
+ * init_paging
+ *   DESCRIPTION:   Initializes page table at the address passed mapping to the base physical address based in.
+ *   INPUTS:        None
+ *   RETURN VALUE:  None
+*/
 void init_paging(){
     init_page_table(first_4_desc.addr, 0x0); // initialize table for memory 0-4mb
-    ((uint32_t *) first_4_desc.addr)[0xB8] = (0xB8000 | 0x3);       /* 0x3 to set video memory as present for supervisor */
+    ((uint32_t *) first_4_desc.addr)[0xB8] = (VIDMEM | 0x3);       /* 0x3 to set video memory as present for supervisor */
 
     /* Initialize first two entries in page directory */
     ((uint32_t *) cr3_desc.addr)[0] = (first_4_desc.addr & 0xFFFFF000) | 0x3; 

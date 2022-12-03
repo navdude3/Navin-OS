@@ -48,10 +48,9 @@ typedef struct{
     int8_t term_id;
 } pcb_t;
 
-// pcb_t* cur_process;                     /* Current active process */             
-extern pcb_t* get_cur_proc();           /* Returns pointer to current PCB */
-// void set_cur_proc(int32_t pid);
-void set_cur_proc(pcb_t* pcb);
-extern pcb_t* get_pcb(int32_t pid);    /* Returns pointer for specified PCB */
+// pcb_t* cur_process;                      /* Current active process */             
+extern pcb_t* get_cur_proc();               /* Returns pointer to current PCB */
+void set_cur_proc(pcb_t* pcb);              /* Updates current process */
+extern pcb_t* get_pcb(int32_t pid);         /* Returns pointer for specified PCB */
 
 #endif

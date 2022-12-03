@@ -6,13 +6,11 @@
 #include "terminal.h"
 
 static int num_active_procs;                                                        /* Reads bytes from an executable file into this address */
-static int pid_array[6]; 
-                                                          /* Keeps track of which processes are open */
+static int pid_array[6];                                                            /* Keeps track of which processes are open */
 int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args);
 int32_t check_exec(dentry_t* file_dentry);
-
-
 int32_t setup_fd_array(pcb_t* proc);
+
 
 /* 
  * setup_user_page
@@ -35,7 +33,7 @@ void setup_user_page(int pid){
     user_page.pde_pcd = 0;
     user_page.pde_a = 0;
     user_page.pde_d = 0;
-    user_page.pde_ps = 1;           /* 4MB page */                                                /* Set to 4MB pages */
+    user_page.pde_ps = 1;                                                             /* Set to 4MB pages */
     user_page.pde_g = 0;
     user_page.pde_avail = 0;
     user_page.pde_pat = 0;
@@ -56,7 +54,7 @@ void setup_user_page(int pid){
 int32_t sys_execute(const uint8_t* command) {
     cli();
     uint8_t fname[MAXSIZE];                                                              /* max filesize name */ 
-    uint8_t args[MAX_ARG_SIZE];                                                               // store args here
+    uint8_t args[MAX_ARG_SIZE];                                                          // store args here
     int i,j,k;
     uint32_t esp;
     uint32_t ebp;
@@ -331,10 +329,7 @@ int32_t check_exec(dentry_t* file_dentry){
     uint8_t exe_check_buf[EXEC_IDENT_SIZE];                                             /* Holds first four bytes of command to check if executable */
     int8_t* exe_check_str = "\x7f""ELF";
 
-    read_data(file_dentry->inode_idx, 0, exe_check_buf, 4);                                     /* Writes first four bytes of data to buf */                                                  
-    // if(strncmp((int8_t *)exe_check_buf, exe_check_str, 4) != 0){                          /* Checks if ezxecutable, if not clear pid and return -1*/
-    //     return -1; 
-    // }
+    read_data(file_dentry->inode_idx, 0, exe_check_buf, 4);                                     /* Writes first four bytes of data to buf */                  
     return strncmp((int8_t *)exe_check_buf, exe_check_str, 4);
 }
 
