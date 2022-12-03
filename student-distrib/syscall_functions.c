@@ -109,7 +109,7 @@ int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {
    if((buf == NULL) || (get_cur_proc()->arg_size > nbytes)) return -1;          /* If buffer is null or size is larger than number of bytes, return -1*/
    pcb_t* current = get_cur_proc();
    int i;
-   for(i = 0; i < 128; i++) buf[i] = '\0';                                      /* Fills buffer will null terminators*/
+   for(i = 0; i < nbytes; i++) buf[i] = '\0';                                      /* Fills buffer will null terminators*/
    for(i = 0; i < current->arg_size; i++) buf[i] = current->args[i];            /* Places arguments at the beginning of buffer */
    return 0;
 }

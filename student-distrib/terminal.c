@@ -45,6 +45,7 @@ term_t* get_cur_term(){
 */
 void init_terms(){
     int i;
+    int j;
     pte_desc_t vidmap_init_entry;
 
     for(i = 0; i < 3; i++){                                                                             /* Sets cur_term_id, cursor position, current size, and vidmap entry for all three terminals*/
@@ -55,6 +56,10 @@ void init_terms(){
         process_array[i] = -1;
         vidmap_init_entry.val = ((uint32_t)&terminals[i] | USR_PRESENT_RW); // init vidmap for terminal
         set_ptentry(usr_vidmap_table_desc.addr, i, vidmap_init_entry);
+        for (j = 0; j < (FOUR_KB)/2; j++)   {
+            terminals[i].vid_page[(j << 1)] = ' ';
+            terminals[i].vid_page[(j << 1) + 1] = ATTRIB;
+        }
     }
     cur_term_id = 0;
     vidmap_init_entry.val = (VIDMEM | USR_PRESENT_RW);
@@ -96,7 +101,6 @@ void switch_terms(int8_t new_term_id){
     /* Update cursor and cur_term_id*/
     update_cursor(new_term->scr_x, new_term->scr_y);
     cur_term_id = new_term_id;
-
 }
 
 /* 

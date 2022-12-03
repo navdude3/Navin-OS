@@ -45,8 +45,8 @@ void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
     int32_t temp = (current_pcb->term_id + 1) % 3;                  /* Updating terminal */
 
     if(process_array[temp] == -1) {                                 /* Launches 3 shells upon boot */
-        switch_terms(temp);
-        clear();
+        // switch_terms(temp);
+        // clear();
         send_eoi(PIT_IRQ);
         sys_execute((uint8_t*)"shell");    
     }

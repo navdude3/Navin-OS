@@ -7,7 +7,7 @@
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
-#define ATTRIB      0x7
+
 #define MASK        0xFF
 #define VGA_ONE     0x3D4
 #define VGA_TWO     0x3D5

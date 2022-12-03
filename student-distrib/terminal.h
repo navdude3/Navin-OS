@@ -10,7 +10,7 @@
 #define USR_PRESENT_RW 0x7
 
 typedef struct term{
-    char vid_page[4096]; // Video memory is 80*25*2 = 4000. This allows us to save pages when aligning
+    char vid_page[FOUR_KB]; // Video memory is 80*25*2 = 4000. This allows us to save pages when aligning
     int  curr_size;
     char term_buffer[BUFFER];
     int scr_x; int scr_y;
