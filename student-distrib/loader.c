@@ -73,14 +73,9 @@ int32_t sys_execute(const uint8_t* command) {
     );                                                                                   /* Immediately get ebp, get esp just before IRET */
     
 
-    if(command == NULL) {
+    if(command == NULL || command[0] == '\0') {                                          /* File or command non-existent */
         sti();
         return -1;
-    }
-
-    if(command[0] == '\0') {                                                             /* File or command non-existent */
-        sti();
-        return -1;                                                   
     }
 
    for(i = 0; i < MAX_PROCESS; i++){                                                     /* check which pids are open */ 
@@ -151,7 +146,7 @@ int32_t sys_execute(const uint8_t* command) {
 
     /* 6. Create it’s own context switch stack */
     tss.ss0 = KERNEL_DS;
-    tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * new_pid);
+    tss.esp0 = USER_MEMORY_BASE - (KERNEL_AREA_SIZE * new_pid);                     /* Points to bottom of process' block */
 
     /* Save current ESP and EBP before context switch*/
     asm volatile(

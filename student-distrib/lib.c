@@ -232,7 +232,7 @@ void terminal_putc(uint8_t c, int term_id){
                 if(term->scr_x == 0){
                     term->scr_y--;
                     term->scr_x = 79;                                                      //backspace place back to previous end of row
-                }
+                }                                                                           // 79 = max x position (0 indexed)
                 else{
                     term->scr_x--;                                                          //otherwise just subtract 1
                 }

@@ -119,7 +119,7 @@ void set_rate(uint32_t freq){
     int rtc_rate;
 
     switch (freq){
-        case 2:     rtc_rate = 0x0F;
+        case 2:     rtc_rate = 0x0F;        
                     break;
         case 4:     rtc_rate = 0x0E;
                     break;

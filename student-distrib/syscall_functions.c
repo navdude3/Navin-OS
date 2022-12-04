@@ -20,14 +20,14 @@ int32_t sys_open (const uint8_t* filename) {
     fd_entry_t* entry;
     pcb_t* cur_process = get_cur_proc();
 
-    if(filename == NULL) return -1;
+    if(filename == NULL) return -1;                                             /* Checking for valid file */
     if(read_dentry_by_name(filename, &f_dentry) < 0) return -1;
     
     uint32_t fd = get_free_fd_entry_idx();
     if (fd < 0) return fd;
-    entry = &cur_process->fd_array[fd];
+    entry = &cur_process->fd_array[fd];                                         /* Getting entry point */
 
-    switch (f_dentry.file_type){
+    switch (f_dentry.file_type){                                                /* Determining which type of file, rtc, terminal, or file */
         case 0 :
             entry->j_tbl = &rtc_ops;
             break;
@@ -39,8 +39,7 @@ int32_t sys_open (const uint8_t* filename) {
             entry->inode_idx = f_dentry.inode_idx;
             break;
     }
-    entry->flags.type = f_dentry.file_type;
-    
+    entry->flags.type = f_dentry.file_type;                                     /* Storing type of file that is being opened */
     entry->j_tbl->open(entry);
     
     return fd;
