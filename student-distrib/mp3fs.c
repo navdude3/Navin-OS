@@ -27,12 +27,12 @@ fd_ops_t dir_ops = (fd_ops_t){
 */
 void mp3fs_init (module_t* mod){
     uint32_t* ptr = (uint32_t*) mod->mod_start;
-    boot_blk = (boot_block_t*) ptr;
+    boot_blk = (boot_block_t*) ptr; // boot block is first in filesystem
     ptr += BLK_PTR_INC;
-    init_inode = (inode_t*) ptr;
-    ptr += (BLK_PTR_INC*boot_blk->num_inodes);
+    init_inode = (inode_t*) ptr;    // inodes begin after boot block
+    ptr += (BLK_PTR_INC*boot_blk->num_inodes); // find beginning of data blocks by offsetting number of inodes
     init_dblock = (dblock_t*) ptr;
-    fs_end_pt = (uint32_t*) mod->mod_end;
+    fs_end_pt = (uint32_t*) mod->mod_end; //pointer to end of file system
 
     
     return;
@@ -79,24 +79,24 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry){
  *   RETURN VALUE: number of bytes written to buffer, 0 if EOF is reacehd, -1 if any error in reading file data (buffer might still have been written into at this point)
 */
 int32_t read_data(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length){
-    inode_t* inode_entry = &init_inode[inode];
-    uint32_t dblk_idx,dblk_off, cnt, file_size;
-    file_size = inode_entry->file_size;
-    if(offset >= file_size) return 0;
-    dblk_idx = (offset/BLK_SIZE);
-    dblk_off = offset%BLK_SIZE;
-    dblock_t* blk = &(init_dblock[inode_entry->dblock_idxs[dblk_idx]]);
+    inode_t* inode_entry = &init_inode[inode];      // grab inode block 
+    uint32_t dblk_idx, dblk_off, cnt, file_size;     
+    file_size = inode_entry->file_size;             
+    if(offset >= file_size) return 0;               // offset goes past end of file, so we are at the "end"
+    dblk_idx = (offset/BLK_SIZE);                   // calculate datablock index within inode datablock list
+    dblk_off = offset%BLK_SIZE;                     // find the starting index within the data block to be read
+    dblock_t* blk = &(init_dblock[inode_entry->dblock_idxs[dblk_idx]]);     // grab data block by finding global index within the inode's datablock list (double indirection)
     if(inode_entry->dblock_idxs[dblk_idx] >= boot_blk->num_dblocks) return -1; //bad block
     cnt = 0;
 
     while(cnt < length && offset < file_size){
-        if (dblk_off == BLK_SIZE){
+        if (dblk_off == BLK_SIZE){ // reached end of current data block, need to find the next data block to read
             ++dblk_idx;
             dblk_off = 0;
-            blk = &(init_dblock[inode_entry->dblock_idxs[dblk_idx]]);
-            if((uint32_t*) blk >= fs_end_pt) return -1;    
+            blk = &(init_dblock[inode_entry->dblock_idxs[dblk_idx]]); // update to next data block
+            if((uint32_t*) blk >= fs_end_pt) return -1;    // check if new address is beyond the end of the file system
         }
-        buf[cnt] = blk->data[dblk_off];
+        buf[cnt] = blk->data[dblk_off]; // grab byte in datablock offset
         ++cnt;
         ++offset; ++dblk_off;
     }
@@ -134,7 +134,7 @@ int32_t f_close (fd_entry_t* fd_entry){
 */
 int32_t f_read (fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
     uint32_t bytes_read = read_data(fd_entry->inode_idx, fd_entry->file_position, buf, length);
-    fd_entry->file_position += bytes_read;
+    fd_entry->file_position += bytes_read; // update file position based on number of bytes read in read_data
     return bytes_read;
 }
 
@@ -176,11 +176,10 @@ int32_t d_close (fd_entry_t* fd_entry){
  *   RETURN VALUE: returns 0 if reached end of directory entries, otherwise number of bytes written to buf
 */
 int32_t d_read(fd_entry_t* fd_entry, uint8_t *buf, uint32_t length){
-    uint32_t* d_offset = (uint32_t*) &(fd_entry->file_position);
-    if (*d_offset >= boot_blk->num_dirs) return 0;
-    // if (length < sizeof(dentry_t)) return -1;
-    if (length > FNAME_LIMIT) length = FNAME_LIMIT;
-    strncpy((int8_t *)buf, (int8_t *) &boot_blk->d_entries[*d_offset], length);
+    uint32_t* d_offset = (uint32_t*) &(fd_entry->file_position);    // Find which directory entry to read
+    if (*d_offset >= boot_blk->num_dirs) return 0;                  // reached end of directory
+    if (length > FNAME_LIMIT) length = FNAME_LIMIT;                 
+    strncpy((int8_t *)buf, (int8_t *) &boot_blk->d_entries[*d_offset], length); // copy filename (located in file's directory entry)
     (*d_offset)++;
     return length;
 }

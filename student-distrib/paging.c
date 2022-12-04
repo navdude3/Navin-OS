@@ -14,12 +14,12 @@ void init_paging(){
     ((uint32_t *) first_4_desc.addr)[0xB8] = (VIDMEM | 0x3);       /* 0x3 to set video memory as present for supervisor */
 
     /* Initialize first two entries in page directory */
-    ((uint32_t *) cr3_desc.addr)[0] = (first_4_desc.addr & 0xFFFFF000) | 0x3; 
-    ((uint32_t *) cr3_desc.addr)[1] = 0x00400083;
+    ((uint32_t *) cr3_desc.addr)[0] = (first_4_desc.addr & 0xFFFFF000) | 0x3; // set ptr to page table for 0-4mb  (r/w, present)
+    ((uint32_t *) cr3_desc.addr)[1] = 0x00400083; // set kernel memory page (4mb page, supervisor only)
 
     /* Initialize video map table and directory entry */
-    init_page_table(usr_vidmap_table_desc.addr, VIDMAP_TABLE_BASE);
-    ((uint32_t *) cr3_desc.addr)[(VIDMAP_TABLE_BASE >> 22)] = (usr_vidmap_table_desc.addr | 0x00000007);
+    init_page_table(usr_vidmap_table_desc.addr, VIDMAP_TABLE_BASE); 
+    ((uint32_t *) cr3_desc.addr)[(VIDMAP_TABLE_BASE >> 22)] = (usr_vidmap_table_desc.addr | 0x00000007); // (user, r/w, present)
 
     set_paging_params(cr3_desc.addr);
 }
