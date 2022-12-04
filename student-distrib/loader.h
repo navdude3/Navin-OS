@@ -14,7 +14,8 @@
 #define EXEC_IDENT_SIZE     4
 #define SIZE_OF_ADDR        4
 #define MAX_ARG_SIZE        128 
-
+#define MAX_NUM             256
+#define OFFSET              22
 
 extern void setup_user_page(int pid);                       
 extern int32_t setup_pcb(void *addr);                        /* Addr is the bounds of user page we want to define */

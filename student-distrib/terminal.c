@@ -54,7 +54,7 @@ void init_terms(){
         terminals[i].scr_y = 0;
         terminals[i].curr_size = 0;
         process_array[i] = -1;
-        vidmap_init_entry.val = ((uint32_t)&terminals[i] | USR_PRESENT_RW); // init vidmap for terminal
+        vidmap_init_entry.val = ((uint32_t)&terminals[i] | USR_PRESENT_RW);                             // init vidmap for terminal
         set_ptentry(usr_vidmap_table_desc.addr, i, vidmap_init_entry);
         for (j = 0; j < (FOUR_KB)/2; j++)   {
             terminals[i].vid_page[(j << 1)] = ' ';
@@ -64,7 +64,6 @@ void init_terms(){
     cur_term_id = 0;
     vidmap_init_entry.val = (VIDMEM | USR_PRESENT_RW);
     set_ptentry(usr_vidmap_table_desc.addr, cur_term_id, vidmap_init_entry);
-
     return;
 }
 
@@ -85,19 +84,18 @@ void switch_terms(int8_t new_term_id){
 
     /* Save current cursor and restore new cursor */
     cur_term->scr_x = get_term_x(cur_term);
-    cur_term->scr_y = get_term_y(cur_term);
-    //update_term_xy(new_term->scr_x, new_term->scr_y);
-
-    
+    cur_term->scr_y = get_term_y(cur_term);    
 
     /* Save current screen */
     usr_vidmap_table_base[cur_term_id] = ((uint32_t) cur_term | 0x7);
     flush_tlb();
     memcpy(cur_term->vid_page, (void*) vid_mem, FOUR_KB);
+
     /* Restore new screen */
     usr_vidmap_table_base[(unsigned int)new_term_id] = (vid_mem | 0x7);
     flush_tlb();
     memcpy((void*) vid_mem, new_term->vid_page, FOUR_KB);
+
     /* Update cursor and cur_term_id*/
     update_cursor(new_term->scr_x, new_term->scr_y);
     cur_term_id = new_term_id;
@@ -124,9 +122,9 @@ int32_t fill_buffer(char input_char){
                 cur_term->curr_size--;                                    //handle backspace sizing
             } 
         } else{
-            return -1; // prevent backspace from flowing into already written parts
+            return -1;                                                    // prevent backspace from flowing into already written parts
         }
-    } else if (input_char == '\f'){
+    } else if (input_char == '\f'){                                       // if clearing the screen, reset curr_size
         cur_term->curr_size = 0;
     }
     else if(cur_term->curr_size < BUFFER - 1){                            //otherwise fill in the buffer with requested data
@@ -134,7 +132,7 @@ int32_t fill_buffer(char input_char){
         cur_term->curr_size++;
     }
     else { 
-        return -1;                                              // could not insert character
+        return -1;                                                        // could not insert character
     }
     return 0;
 }
@@ -146,6 +144,7 @@ int32_t fill_buffer(char input_char){
 ヽ༼ຈل͜ຈ༽ﾉ 
 */
 
+
 /* 
  * terminal_write
  *   DESCRIPTION: writes from the user buffer to the screen with putc 
@@ -153,16 +152,12 @@ int32_t fill_buffer(char input_char){
  *   OUTPUTS: modifies the screen with putc
  *   RETURN VALUE: number of bytes wrote
 */
-int32_t terminal_write(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes){  //doesnt really need locking since only end of buffer can be modified
+int32_t terminal_write(fd_entry_t* fd_entry, uint8_t* user_buffer, uint32_t bytes){   // doesnt really need locking since only end of buffer can be modified
     int i;
-    if(bytes <= 0) return 0;                                    /* If nothing to be written, return immediately */
-    // else if(bytes > BUFFER){                                    //overflow checking
-    //     bytes = BUFFER;        
-    // }
+    if(bytes <= 0) return 0;                                                          /* If nothing to be written, return immediately */
     for(i = 0; i < bytes; i++){
-        if(((char*)user_buffer)[i] != '\0'){                    // empty in C
-            // putc(((char*)user_buffer)[i]);                      //place the specific charachter to screen
-            terminal_putc(((char*)user_buffer)[i], fd_entry->term_id);
+        if(((char*)user_buffer)[i] != '\0'){                                         // empty in C                  
+            terminal_putc(((char*)user_buffer)[i], fd_entry->term_id);               // place the specific charachter to screen
         }
     } 
     return bytes;

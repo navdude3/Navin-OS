@@ -195,7 +195,6 @@ void putc(uint8_t c) {
 void terminal_putc(uint8_t c, int term_id){
     char* term_video_mem = (char *)(VIDMAP_TABLE_BASE + term_id*4096);                  //(video_mem + term_id*400000);
     term_t* term = get_term(term_id);
-    // char* term_video_mem = (char*) term;
     int i;
     int j;
     if(c == '\n' || c == '\r') {                                                        /* If character is new line */
@@ -280,7 +279,6 @@ void terminal_putc(uint8_t c, int term_id){
         }
         term->scr_y = (term->scr_y + (term->scr_x / NUM_COLS)) % NUM_ROWS;                                      //update row ptr
     }
-    // update_cursor(term->scr_x, term->scr_y);
     if (term_id == cur_term_id){
         update_cursor(term->scr_x, term->scr_y);
     }

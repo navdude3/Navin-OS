@@ -44,13 +44,13 @@ void pit_link_handler(pt_regs_int_t s_frame) { /* aka scheduler */
     
     int32_t temp = (current_pcb->term_id + 1) % 3;                  /* Updating terminal */
 
+    /* Shell has not been launched in that terminal */
     if(process_array[temp] == -1) {                                 /* Launches 3 shells upon boot */
-        // switch_terms(temp);
-        // clear();
         send_eoi(PIT_IRQ);
         sys_execute((uint8_t*)"shell");    
     }
 
+    /* Gets PCB of process running on next terminal */
     pcb_t* next_pcb = get_pcb((int32_t)(process_array[temp]));
 
     /* Save tss info for next process */

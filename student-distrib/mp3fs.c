@@ -110,7 +110,7 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length
  *   INPUTS: fname- filename that is to be opened. Note that the system open call has a wrapper that handles the actual file lookup, so we don't use fname here. Strictly for adhering to abstraction interface
  *   RETURN VALUE: 0
 */
-int32_t f_open              (fd_entry_t* fd_entry){
+int32_t f_open (fd_entry_t* fd_entry){
     fd_entry->file_position = 0;
     return 0;
 }
@@ -190,6 +190,6 @@ int32_t d_read(fd_entry_t* fd_entry, uint8_t *buf, uint32_t length){
  *   DESCRIPTION: Does not do anything, file system is read-only
  *   RETURN VALUE: -1 because write is an error case
 */
-int32_t d_write             (fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
+int32_t d_write (fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
     return -1;
 }

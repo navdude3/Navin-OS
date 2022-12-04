@@ -9,6 +9,8 @@
 
 #include "types.h"
 
+#define MAX_PORT              8
+#define SLAVE_IRQ_NUM         2
 /* Ports that each PIC sits on */
 #define MASTER_8259_PORT    0x20
 #define SLAVE_8259_PORT     0xA0

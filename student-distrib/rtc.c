@@ -2,8 +2,8 @@
 #include "process.h"
 
 /* info from wiki.osdev.org/RTC */
- static int flag[3];
-//static int rtc_int_count = 512;
+
+static int flag[3];
 static int freqs[MAX_PROCESS + 1]; // 0-5 for processes, last one for scheduler
 
 fd_ops_t rtc_ops = (fd_ops_t){
@@ -76,7 +76,6 @@ int32_t rtc_close(fd_entry_t* fd_entry){
  */
 int32_t rtc_read(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
     flag[cur_term_id] = 1;
-    // int32_t interval = MAX_FREQ / fd_entry->rtc_freq;
     sti();
     while(flag[cur_term_id]);               // infinite loop until rtc_count is a multiple of desired interval
     return 0;
@@ -93,22 +92,18 @@ int32_t rtc_read(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
 int32_t rtc_write(fd_entry_t* fd_entry, uint8_t* buf, uint32_t length){
     if((buf == NULL ) || (length != sizeof(uint32_t))) return -1;
     
-    int freq = *(int *) buf;                // set the frequency based on the buffer number
+    int freq = *(int *) buf;                            // set the frequency based on the buffer number
     int temp = freq;
 
     if(freq < MIN_FREQ || freq > MAX_FREQ) return -1;
     
-    while(temp != 1) {
+    while(temp != 1) {                                  // check to make sure function is a power of 2
         if(temp % MIN_FREQ == 1) return -1;
-        temp = temp / MIN_FREQ;             // check to make sure function is a power of 2
+        temp = temp / MIN_FREQ;             
     }                                
-    
-    // rtc_int_count = MAX_FREQ / freq;        // update the interrupt count
-    // freqs[cur_process->pid] = freq;
 
     fd_entry->rtc_freq = freq;
     set_rate(fd_entry->rtc_freq);                         // set the rtc_rate to the new frequency
-    
     return 0;
 }
 
@@ -163,10 +158,10 @@ void set_rate(uint32_t freq){
 */
 void rtc_link_handler(){
     cli();
-    ++rtc_count;              //count to static variable every interrupt call
+    ++rtc_count;                                    //count to static variable every interrupt call
     flag[cur_term_id] = 0;
-    outb(0x8C, 0x70);	                    // choose register C
-    inb(0x71);		                        // remove contents
-    send_eoi(8);                            // send eoi to irq 8, (slave pic irq 0)
+    outb(REG_C_DATA, REG_PORT);	                    // choose register C
+    inb(RW_PORT);		                            // remove contents
+    send_eoi(RTC_IRQ);                              // send eoi to irq 8, (slave pic irq 0)
     sti();
 }

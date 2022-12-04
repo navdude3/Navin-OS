@@ -72,7 +72,7 @@ void shift_check(int key) {
  *   DESCRIPTION: checker to see which terminal should be switched
  *   INPUTS: key
  *   OUTPUTS: none
- *   RETURN VALUE: terminal to switch to 0 indexed
+ *   RETURN VALUE: terminal to switch to 0 indexed or -1 if not switching
 */
 
 int terminal_check(int key){    
@@ -119,8 +119,8 @@ void keyboard_link_handler(){
             if(capital_letters == 0) output = let_num[i]; 
             else if(caps_en == 1) output = cap_let_num[i];
             else output = shift_let_num[i];                                                                        // check if the scancode should be from capital, lowercase or shifted letters 
-            if (caps_en == 1 && shift_en == 1 && ((i < 10)|| (i>=36))) output = shift_let_num[i];
-            if(ctrl == 1 && key ==  0x26){                                                                         //control l checking, send specific escape character if so
+            if (caps_en == 1 && shift_en == 1 && ((i < SHIFT_MIN)|| (i>=SHIFT_MAX))) output = shift_let_num[i];
+            if(ctrl == 1 && key ==  L){                                                                           //control l checking, send specific escape character if so
                 output = '\f';
             }
         }

@@ -44,7 +44,7 @@ void i8259_init(void) {
     outb(master_mask, MASTER_8259_DATA);
     outb(slave_mask, SLAVE_8259_DATA);
     
-    enable_irq(2); // enable the slave PIC
+    enable_irq(SLAVE_IRQ_NUM); // enable the slave PIC
 }
 
 /* 
@@ -59,11 +59,11 @@ void enable_irq(uint32_t irq_num) {
     uint16_t port;
     uint8_t value;
  
-    if(irq_num < 8) {
+    if(irq_num < MAX_PORT) {
         port = MASTER_8259_DATA;  // set the port to the master if the irq is less than 8
     } else {
-        port = SLAVE_8259_DATA;   // set the port to the slave if the irq is less than 8
-        irq_num -= 8;             // subtract by offset of 8 to get correct starting place for slave PIC
+        port = SLAVE_8259_DATA;   // set the port to the slave if the irq is more than 8
+        irq_num -= MAX_PORT;             // subtract by offset of 8 to get correct starting place for slave PIC
     }
 
     value = inb(port) & ~(1 << irq_num);   // set the corresponding bit to 0
@@ -82,11 +82,11 @@ void disable_irq(uint32_t irq_num) {
     uint16_t port;
     uint8_t value;
  
-    if(irq_num < 8) {
+    if(irq_num < MAX_PORT) {
         port = MASTER_8259_DATA; // set the port to the master if the irq is less than 8
     } else {
         port = SLAVE_8259_DATA;  // set the port to the slave if the irq is less than 8
-        irq_num -= 8;            // subtract by offset of 8 to get correct starting place for slave PIC
+        irq_num -= MAX_PORT;            // subtract by offset of 8 to get correct starting place for slave PIC
     }
     
     value = inb(port) | (1 << irq_num);  // set the corresponding bit to 1
@@ -103,11 +103,11 @@ void disable_irq(uint32_t irq_num) {
  */
 void send_eoi(uint32_t irq_num) {
 
-    if(irq_num >= 8){
-        outb((EOI | (irq_num-8)), SLAVE_8259_PORT);   //clear on secondary pic if greater then 7
-        outb((EOI | 0x2), MASTER_8259_PORT);          //clear on primary as well
+    if(irq_num >= MAX_PORT){
+        outb((EOI | (irq_num-MAX_PORT)), SLAVE_8259_PORT);      //clear on secondary pic if greater then 7
+        outb((EOI | 0x2), MASTER_8259_PORT);                    //clear on primary as well
     } else {
-        outb((EOI | irq_num), MASTER_8259_PORT);      //else, only clear primary
+        outb((EOI | irq_num), MASTER_8259_PORT);                 //else, only clear primary
     }
 }
 

@@ -42,7 +42,7 @@ void idt_init(){
     }
     idt[32].reserved3 = 1;                      /* Enabling trap gate for PIT */
     idt[33].reserved3 = 1;                      /* Enabling trap gate for keyboard */
-    idt[128].dpl = 3;                           /* Setting DPL for SYS CALLS*/
+    idt[128].dpl = 3;                           /* Setting DPL for SYS CALLS */
 
     //x21 is keyboard port
     /* Setting the corresponding IDT entry with the appropriate exception */

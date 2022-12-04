@@ -1,6 +1,7 @@
 #include "lib.h"
 #include "types.h"
 
+#define FOURKB      4096
 /* Function headers for all system calls */
 extern int32_t sys_halt(uint8_t status);
 extern int32_t sys_execute(const uint8_t* command);

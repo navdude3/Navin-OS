@@ -16,7 +16,9 @@
 #define F1_PRESS           0x3B        //F1 pressed
 #define F2_PRESS           0x3C        //F2 pressed
 #define F3_PRESS           0x3D        //F3 pressed
-
+#define L                  0x26        //L pressed
+#define SHIFT_MIN          10
+#define SHIFT_MAX          36
 
 /* Initialization function */
 extern void keyboard_init();

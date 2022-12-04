@@ -22,7 +22,7 @@ int32_t setup_fd_array(pcb_t* proc);
 void setup_user_page(int pid){
     pde_desc_t user_page;
 
-    int start_mem_index = PROGRAM_VMEM_BASE >> 22;                                  /* Page Directory Bits = 10 MSB */
+    int start_mem_index = PROGRAM_VMEM_BASE >> OFFSET;                              /* Page Directory Bits = 10 MSB */
     
     uint32_t user_addr = (pid * PROGRAM_SIZE) + USER_MEMORY_BASE;
 
@@ -38,7 +38,7 @@ void setup_user_page(int pid){
     user_page.pde_avail = 0;
     user_page.pde_pat = 0;
     user_page.pde_reserved = 0;
-    user_page.pde_pba = (user_addr >> 22);
+    user_page.pde_pba = (user_addr >> OFFSET);
     
     set_pdentry(start_mem_index, user_page);
 }       
@@ -94,7 +94,7 @@ int32_t sys_execute(const uint8_t* command) {
         }
         if(active_processes == MAX_PROCESS){                                              /* Every PID is used */
             sti();
-            return 256;
+            return MAX_NUM;
         }
    }
 
@@ -139,8 +139,8 @@ int32_t sys_execute(const uint8_t* command) {
 
     new_process->pid = new_pid;
 
-    if(cur_process == NULL || new_pid < 3){ /* Base program */
-        new_process->parent_pid = -1;               /*changed*/
+    if(cur_process == NULL || new_pid < 3){         /* Base program */
+        new_process->parent_pid = -1;              
         new_process->term_id = new_pid;
     }                                         
     else{ /* Setting parent process info */
@@ -163,7 +163,7 @@ int32_t sys_execute(const uint8_t* command) {
         cur_process->saved_esp = esp;
     }
     
-    for(i = 0; i < 128; i++) new_process->args[i] = args[i];
+    for(i = 0; i < MAX_ARG_SIZE; i++) new_process->args[i] = args[i];
     new_process->arg_size = arg_size_count;
     
     set_cur_proc(new_process);
@@ -201,6 +201,7 @@ int32_t sys_halt(uint8_t status) {
     cli();
     pcb_t* cur_process = get_cur_proc();
     if(cur_process == NULL) {return -1;}
+
     uint32_t esp, ebp;
     uint32_t statusval = (uint32_t) status;
 
@@ -218,6 +219,7 @@ int32_t sys_halt(uint8_t status) {
 	    sys_execute((uint8_t*) "shell");                        /* Reboots shell */
         return 0;
     }
+
     /* Teardown vidmap entry */
     pte_desc_t vidmap;
     vidmap.val = 0x0;
@@ -282,6 +284,7 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
     }
     int leading_ws_flag = 0;
     int arg_idx = 0;
+
     /* Parsing for arguments */
     for(j = 0; j+i < MAX_ARG_SIZE; ++j){    /* Checks rest of string (after command) for arguments*/
         if(leading_ws_flag == 0 && input[j+i] == ' ') continue;
@@ -291,7 +294,6 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
             || input[j+i] == '\0'){
                 args[arg_idx] = '\0';
                 break;
-                //return arg_idx;               /* Returns number of arguments */
             }
             args[arg_idx] = input[j + i];
             leading_ws_flag = 1;
@@ -300,6 +302,7 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
         
     }
 
+    /* Iterating through string to check for null terminator or space */
     for(i = 0; i < MAX_ARG_SIZE; i++){
         if(args[i] == (uint32_t)' ' || args[i] == (uint32_t)'\0' || args[i] == (uint32_t)""){
             continue;
@@ -309,7 +312,8 @@ int32_t parse_fname_args(const uint8_t* input, uint8_t* fname, uint8_t* args){
             break;
         }
     }
-    if(i == 128 && flagger == 0){
+    /* End of strinig reached with no arguments */
+    if(i == MAX_ARG_SIZE && flagger == 0){
         args = 0;
         return -1;
     }
@@ -344,12 +348,12 @@ int32_t setup_fd_array(pcb_t* proc){
     int i;
 
     for (i = 0; i < 2; ++i){
-        fd_entry_t* stdout_fd = &proc->fd_array[i]; // i = 0 initializes stdin , i = 1 initializes stdout
+        fd_entry_t* stdout_fd = &proc->fd_array[i];         // i = 0 initializes stdin , i = 1 initializes stdout
         stdout_fd->file_position = 0;
         stdout_fd->flags.present = 1;
-        stdout_fd->j_tbl = &terminal_ops; // both stdin and stdout use terminal driver
+        stdout_fd->j_tbl = &terminal_ops;                   // both stdin and stdout use terminal driver
         stdout_fd->term_id = proc->term_id;
-        stdout_fd->j_tbl->open(stdout_fd); // initialize terminal driver
+        stdout_fd->j_tbl->open(stdout_fd);                  // initialize terminal driver
     }
     return 0;
 }

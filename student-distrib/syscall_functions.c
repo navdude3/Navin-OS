@@ -21,16 +21,13 @@ int32_t sys_open (const uint8_t* filename) {
     pcb_t* cur_process = get_cur_proc();
 
     if(filename == NULL) return -1;
+    if(read_dentry_by_name(filename, &f_dentry) < 0) return -1;
     
-    if(read_dentry_by_name(filename, &f_dentry) < 0){
-        return -1;
-    } 
     uint32_t fd = get_free_fd_entry_idx();
     if (fd < 0) return fd;
     entry = &cur_process->fd_array[fd];
 
     switch (f_dentry.file_type){
-        // ADD CASE 0 ONCE FD OPERATIONS IMPLEMENTED FOR RTC
         case 0 :
             entry->j_tbl = &rtc_ops;
             break;
@@ -58,10 +55,10 @@ int32_t sys_open (const uint8_t* filename) {
  *   SIDE EFFECTS: calls file type's close() function, marks entry as not present (might need to implement race condition handling)
  */
 int32_t sys_close(uint32_t fd){
-    if(fd < 2 || fd > 10) return -1;   // cannot close stdin/out
+    if(fd < 2 || fd > 10) return -1;                    // cannot close stdin/out -> fd 0/1
     pcb_t* cur_process = get_cur_proc();
     fd_entry_t* fd_e = &cur_process->fd_array[fd];
-    if(fd_e->flags.present == 0) return -1;
+    if(fd_e->flags.present == 0) return -1;             /* Not open */
     if(fd_e->j_tbl->close(fd_e) < 0) return -1;
     free_fd_entry(fd_e);
     return 0;
@@ -75,10 +72,10 @@ int32_t sys_close(uint32_t fd){
  *   RETURN VALUE: return value of file type's read function
  */
 int32_t sys_read(uint32_t fd, uint8_t* buf, uint32_t length){
-    if(fd == 1 || fd > 10 || buf == NULL) return -1;
+    if(fd == 1 || fd > 10 || buf == NULL) return -1;                /* Invalid fd number or empty buffer */
     pcb_t* cur_process = get_cur_proc();
     fd_entry_t* fd_e = &cur_process->fd_array[fd];
-    if(fd_e->flags.present == 0) return -1;
+    if(fd_e->flags.present == 0) return -1;                         /* Entry not present */
     return fd_e->j_tbl->read(fd_e, buf, length);
 }
 
@@ -90,10 +87,10 @@ int32_t sys_read(uint32_t fd, uint8_t* buf, uint32_t length){
  *   RETURN VALUE: return value of file type's write function
  */
 int32_t sys_write (uint32_t fd, uint8_t* buf, uint32_t length){
-    if(fd < 1 || fd > 10 || buf == NULL) return -1;  
+    if(fd < 1 || fd > 10 || buf == NULL) return -1;                 /* Invalid fd number or empty buffer */
     pcb_t* cur_process = get_cur_proc();
     fd_entry_t* fd_e = &cur_process->fd_array[fd];
-    if(fd_e->flags.present == 0) return -1;
+    if(fd_e->flags.present == 0) return -1;                         /* Entry not present */
     return fd_e->j_tbl->write(fd_e, buf, length);
 }
 
@@ -109,7 +106,7 @@ int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {
    if((buf == NULL) || (get_cur_proc()->arg_size > nbytes)) return -1;          /* If buffer is null or size is larger than number of bytes, return -1*/
    pcb_t* current = get_cur_proc();
    int i;
-   for(i = 0; i < nbytes; i++) buf[i] = '\0';                                      /* Fills buffer will null terminators*/
+   for(i = 0; i < nbytes; i++) buf[i] = '\0';                                   /* Fills buffer will null terminators */
    for(i = 0; i < current->arg_size; i++) buf[i] = current->args[i];            /* Places arguments at the beginning of buffer */
    return 0;
 }
@@ -122,32 +119,30 @@ int32_t sys_getargs(uint8_t* buf, uint32_t nbytes) {
  *   RETURN VALUE: 0 if successful, -1 if screen_start is not within user memory space 
  */
 int32_t sys_vidmap(uint8_t** screen_start) {
-    /* Fail if address is outside current process address space*/
     uint32_t user_addr_base = PROGRAM_VMEM_BASE;
-
+    /* Fail if address is outside current process address space*/
     if ((uint32_t) screen_start < user_addr_base || (uint32_t) screen_start >= user_addr_base + PROGRAM_SIZE) return -1;
 
     uint32_t term_id = get_cur_proc()->term_id;
-
-    *screen_start = (uint8_t*)(VIDMAP_TABLE_BASE + term_id*4096);
+    *screen_start = (uint8_t*)(VIDMAP_TABLE_BASE + term_id*FOURKB);
     return 0;
 }
 
 /* 
  * sys_set_handler
- *   DESCRIPTION: Not implemented for this CP
- *   INPUTS: uint32_t signum, void* handler_address
- *   OUTPUTS: None for now
- *   RETURN VALUE: 0 always for now
+ *   DESCRIPTION: Not implemented
+ *   INPUTS: None
+ *   OUTPUTS: None
+ *   RETURN VALUE: -1 always
  */
 int32_t sys_set_handler(uint32_t signum, void* handler_address) {return -1;}
 
 /* 
  * sys_sigreturn
- *   DESCRIPTION: Not implemented for this CP
+ *   DESCRIPTION: Not implemented
  *   INPUTS: None
- *   OUTPUTS: None for now
- *   RETURN VALUE: 0 always for now
+ *   OUTPUTS: None
+ *   RETURN VALUE: -1 always
  */
 int32_t sys_sigreturn(void) {return -1;}
 

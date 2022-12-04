@@ -6,8 +6,6 @@
 #include "syscall_handler.h"
 #include "syscall_functions.h"
 
-/* Start of PIC Entries */
-#define START_PIC_VEC 0x20  
 
 /* Function that sets the IDT entries */
 extern void idt_init();
